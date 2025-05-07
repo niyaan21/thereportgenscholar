@@ -2,12 +2,13 @@
 'use client';
 
 import React, { useState, useEffect, useTransition } from 'react';
-import { useActionState } from 'react'; // Corrected in previous step from useFormState
+import { useActionState } from 'react'; 
 import QueryForm from '@/components/scholar-ai/QueryForm';
 import FormulatedQueries from '@/components/scholar-ai/FormulatedQueries';
 import ResearchSummary from '@/components/scholar-ai/ResearchSummary';
 import ResearchReportDisplay from '@/components/scholar-ai/ResearchReportDisplay';
 import { Button } from '@/components/ui/button';
+import { ToastAction } from "@/components/ui/toast";
 import { ArrowLeft, RotateCcw, FileText, Settings, Moon, Sun, Palette, Image as ImageIcon, Loader2, BookOpen, Brain, Maximize, Search, Filter, BarChartBig, Telescope, Beaker, Sparkles, Bot, CornerDownLeft, Edit, CheckSquare, Zap, Eye, Lightbulb, FileArchive, Atom, ClipboardCopy, Share2, Download, Sigma, BarChartHorizontal, TrendingUpIcon, ScaleIcon, FlaskConical, LightbulbIcon as LightbulbLucideIcon, InfoIcon, AlertCircleIcon, CheckCircle2Icon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import {
@@ -97,7 +98,7 @@ export default function ScholarAIPage() {
       if (imageActionState.success && imageActionState.imageDataUri) {
         setGeneratedImageUrl(imageActionState.imageDataUri);
         toast({ title: "🖼️ Visual Concept Generated!", description: imageActionState.message, variant: 'default', 
-          action: <ToastAction altText="View Image">View</ToastAction> // Example action
+          action: <ToastAction altText="View Image">View</ToastAction> 
         });
       } else if (!imageActionState.success) { 
         toast({ title: "🚫 Image Generation Failed", description: imageActionState.message, variant: 'destructive' });
@@ -178,24 +179,23 @@ export default function ScholarAIPage() {
     });
   };
   
-  const handleGenerateImageForTopic = (topic: string) => { // topic parameter is the originalResearchQuestion
-    const formData = new FormData();
-    // Use the researchQuestion state directly, as it holds the original question.
-    // The `topic` argument is confirmed to be the original research question from ResearchSummary.
-    formData.append('topic', researchQuestion); 
-    imageFormAction(formData);
+  const handleGenerateImageForTopic = () => { 
+    startTransition(() => {
+      const formData = new FormData();
+      formData.append('topic', researchQuestion); 
+      imageFormAction(formData);
+    });
   };
 
   const handleGenerateFullReport = () => {
-    const formData = new FormData();
-    // researchQuestion state holds the original query from the first step.
-    formData.append('researchQuestion', researchQuestion);
-    
-    // If a summary has been generated, append it. The AI flow can use it for context.
-    if (researchSummary) {
-      formData.append('summary', researchSummary);
-    }
-    reportFormAction(formData);
+    startTransition(() => {
+      const formData = new FormData();
+      formData.append('researchQuestion', researchQuestion);
+      if (researchSummary) {
+        formData.append('summary', researchSummary);
+      }
+      reportFormAction(formData);
+    });
   };
 
 
@@ -413,4 +413,3 @@ export default function ScholarAIPage() {
     </div>
   );
 }
-
