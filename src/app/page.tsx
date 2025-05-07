@@ -1,13 +1,14 @@
 // src/app/page.tsx
 'use client';
 
-import React, { useState, useEffect, useTransition, useActionState as useReactActionState } from 'react';
+import React, { useState, useEffect, useTransition } from 'react';
+import { useActionState as useReactActionState } from 'react';
 import QueryForm from '@/components/scholar-ai/QueryForm';
 import FormulatedQueries from '@/components/scholar-ai/FormulatedQueries';
 import ResearchSummary from '@/components/scholar-ai/ResearchSummary';
 import ResearchReportDisplay from '@/components/scholar-ai/ResearchReportDisplay';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, RotateCcw, FileText, Settings, Moon, Sun, Palette, Image as ImageIcon, Loader2, BookOpen, Brain, Maximize, Search, Filter, BarChartBig, Telescope, Beaker, Sparkles } from 'lucide-react';
+import { ArrowLeft, RotateCcw, FileText, Settings, Moon, Sun, Palette, Image as ImageIcon, Loader2, BookOpen, Brain, Maximize, Search, Filter, BarChartBig, Telescope, Beaker, Sparkles, Bot, CornerDownLeft, Edit, CheckSquare, Zap } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import {
   DropdownMenu,
@@ -26,6 +27,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import NextImage from 'next/image';
+import { motion, AnimatePresence } from 'framer-motion';
 
 
 type AppState = 'initial' | 'queries_formulated' | 'summary_generated' | 'report_generated';
@@ -91,23 +93,23 @@ export default function ScholarAIPage() {
   }, [theme]);
 
   useEffect(() => {
-    if (imageActionState.message && (imageActionState.success || imageActionState.errors)) { 
+    if (imageActionState.message) { 
       if (imageActionState.success && imageActionState.imageDataUri) {
         setGeneratedImageUrl(imageActionState.imageDataUri);
         toast({ title: "🖼️ Visual Concept Generated!", description: imageActionState.message, variant: 'default' });
-      } else if (!imageActionState.success) {
+      } else if (!imageActionState.success) { 
         toast({ title: "🚫 Image Generation Failed", description: imageActionState.message, variant: 'destructive' });
       }
     }
   }, [imageActionState, toast]);
 
   useEffect(() => {
-    if (reportActionState.message && (reportActionState.success || reportActionState.errors)) { 
+    if (reportActionState.message) { 
       if (reportActionState.success && reportActionState.researchReport) {
         setResearchReport(reportActionState.researchReport);
         setAppState('report_generated');
         toast({ title: "📜 Research Report Generated!", description: reportActionState.message, variant: 'default', duration: 7000 });
-      } else if (!reportActionState.success) {
+      } else if (!reportActionState.success) { 
         toast({ title: "🚫 Report Generation Failed", description: reportActionState.message, variant: 'destructive', duration: 9000 });
       }
     }
@@ -153,9 +155,6 @@ export default function ScholarAIPage() {
     startTransition(() => {
       if (appState === 'report_generated') {
         setAppState('summary_generated');
-        // Keep researchReport temporarily if user wants to toggle back? Or clear?
-        // For now, let's clear it to make "back" consistent with starting fresh from summary.
-        // setResearchReport(null); 
       } else if (appState === 'summary_generated') {
         setAppState('queries_formulated');
         setResearchSummary('');
@@ -170,7 +169,6 @@ export default function ScholarAIPage() {
   
   const handleGenerateImageForTopic = (topic: string) => {
     const formData = new FormData();
-    // Always use the original research question for image generation topic
     formData.append('topic', researchQuestion || topic); 
     imageFormAction(formData);
   };
@@ -179,10 +177,9 @@ export default function ScholarAIPage() {
     if (researchQuestion) {
       const formData = new FormData();
       formData.append('researchQuestion', researchQuestion);
-      // As per new requirement, generate report based *only* on the initial question.
-      // Do NOT append researchSummary.
-      // The generateResearchReport flow handles an optional summary. If not provided,
-      // it will generate the report based solely on the researchQuestion.
+      // The Genkit flow 'generateResearchReport' handles an optional summary.
+      // By not appending 'summary' to formData, it will be undefined in the action,
+      // and the flow will generate the report based solely on the researchQuestion.
       reportFormAction(formData);
     } else {
       toast({ title: "Missing Information", description: "Cannot generate a report without a research question.", variant: 'destructive'});
@@ -191,12 +188,22 @@ export default function ScholarAIPage() {
 
   const isLoading = isPending || isProcessingQuery || isProcessingSummary || isImageGenerating || isReportGenerating;
   
+  const pageVariants = {
+    initial: { opacity: 0, y: 20 },
+    enter: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeInOut" } },
+    exit: { opacity: 0, y: -20, transition: { duration: 0.3, ease: "easeInOut" } },
+  };
+
   const renderCurrentStep = () => {
-    switch (appState) {
-      case 'initial':
-        return (
-          <div
+    return (
+      <AnimatePresence mode="wait">
+        {appState === 'initial' && (
+          <motion.div
             key="initial"
+            initial="initial"
+            animate="enter"
+            exit="exit"
+            variants={pageVariants}
             className="space-y-8"
           >
             <QueryForm 
@@ -204,20 +211,28 @@ export default function ScholarAIPage() {
               isBusy={isProcessingQuery} 
               setIsBusy={setIsProcessingQuery}
             />
-          </div>
-        );
-      case 'queries_formulated':
-        return (
-          <div
+          </motion.div>
+        )}
+        {appState === 'queries_formulated' && (
+          <motion.div
             key="queries_formulated"
+            initial="initial"
+            animate="enter"
+            exit="exit"
+            variants={pageVariants}
             className="space-y-8"
           >
-            <Card className="overflow-hidden shadow-xl border-accent/30 bg-card rounded-xl transform hover:scale-[1.01] transition-transform duration-300 ease-out">
+            <Card className="overflow-hidden shadow-xl border-accent/30 bg-card rounded-xl">
               <CardHeader className="bg-gradient-to-br from-accent/10 via-card to-accent/5 p-6 border-b border-accent/20">
                 <div className="flex items-center space-x-4">
-                  <div className="p-3 bg-accent/20 text-accent rounded-full shadow-lg border border-accent/40">
+                  <motion.div 
+                    className="p-3 bg-accent/20 text-accent rounded-full shadow-lg border border-accent/40"
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.1 }}
+                  >
                     <FileText className="h-6 w-6" />
-                  </div>
+                  </motion.div>
                   <div>
                     <CardTitle className="text-xl font-semibold text-accent-foreground">
                       Your Research Focus
@@ -236,12 +251,15 @@ export default function ScholarAIPage() {
               isBusy={isProcessingSummary}
               setIsBusy={setIsProcessingSummary}
             />
-          </div>
-        );
-      case 'summary_generated':
-        return (
-          <div
+          </motion.div>
+        )}
+        {appState === 'summary_generated' && (
+          <motion.div
             key="summary_generated"
+            initial="initial"
+            animate="enter"
+            exit="exit"
+            variants={pageVariants}
             className="space-y-8"
           >
             <ResearchSummary
@@ -275,12 +293,15 @@ export default function ScholarAIPage() {
                   <RotateCcw className="mr-2 h-5 w-5 group-hover:rotate-[30deg] transition-transform" /> Start New Research
                 </Button>
             </CardFooter>
-          </div>
-        );
-      case 'report_generated':
-        return (
-          <div
+          </motion.div>
+        )}
+        {appState === 'report_generated' && (
+          <motion.div
             key="report_generated"
+            initial="initial"
+            animate="enter"
+            exit="exit"
+            variants={pageVariants}
             className="space-y-8"
           >
             <ResearchReportDisplay 
@@ -300,11 +321,10 @@ export default function ScholarAIPage() {
                 <RotateCcw className="mr-2 h-5 w-5 group-hover:rotate-[30deg] transition-transform" /> Start New Research
               </Button>
             </CardFooter>
-          </div>
-        );
-      default:
-        return null;
-    }
+          </motion.div>
+        )}
+      </AnimatePresence>
+    );
   };
 
 
@@ -315,9 +335,13 @@ export default function ScholarAIPage() {
       >
         <div className="container mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-3 group cursor-pointer" onClick={appState !== 'initial' ? handleStartNewResearch : undefined}>
-            <div className="p-2 bg-primary rounded-lg shadow-md transform group-hover:scale-110 group-hover:shadow-primary/40 transition-all duration-300 ease-out">
+            <motion.div 
+              className="p-2 bg-primary rounded-lg shadow-md transform group-hover:scale-110 group-hover:shadow-primary/40 transition-all duration-300 ease-out"
+              whileHover={{ scale: 1.1, rotate: 5 }}
+              whileTap={{ scale: 0.95 }}
+            >
               <Beaker className="h-7 w-7 text-primary-foreground" />
-            </div>
+            </motion.div>
             <div>
               <h1 className="text-xl md:text-2xl font-bold tracking-tight text-primary group-hover:text-accent transition-colors">
                 ScholarAI
@@ -330,12 +354,12 @@ export default function ScholarAIPage() {
                 <Button 
                   onClick={handleGoBack} 
                   variant="ghost" 
-                  size="sm"
-                  className="text-muted-foreground hover:bg-accent/10 hover:text-accent-foreground disabled:opacity-50 group"
+                  size="icon"
+                  className="text-muted-foreground hover:bg-accent/10 hover:text-accent-foreground disabled:opacity-50 group h-9 w-9 rounded-full"
                   disabled={isLoading}
                   aria-label="Go back to previous step"
                 >
-                  <ArrowLeft className="mr-1.5 h-4 w-4 group-hover:-translate-x-0.5 transition-transform" /> Back
+                  <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
                 </Button>
             )}
             <DropdownMenu>
