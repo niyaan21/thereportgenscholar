@@ -2,6 +2,7 @@
 'use client';
 
 import { useFormState, useFormStatus } from 'react-dom';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { handleSynthesizeResearchAction, type SynthesizeResearchActionState } from '@/app/actions';
 import React, { useEffect } from 'react';
@@ -21,6 +22,40 @@ const initialSynthesizeState: SynthesizeResearchActionState = {
   message: '',
   researchSummary: null,
   errors: null,
+};
+
+const cardHoverVariants = {
+  rest: {
+    scale: 1,
+    boxShadow: "0px 5px 15px rgba(0, 0, 0, 0.08)",
+    transition: { duration: 0.3, type: "tween", ease: "easeOut" }
+  },
+  hover: {
+    scale: 1.03,
+    rotateY: 1.5, 
+    boxShadow: "0px 12px 24px rgba(0, 0, 0, 0.12)",
+    transition: { duration: 0.3, type: "spring", stiffness: 300, damping: 15 }
+  }
+};
+
+const listContainerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.07,
+      delayChildren: 0.1,
+    }
+  }
+};
+
+const listItemVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { type: "spring", stiffness: 120 }
+  }
 };
 
 function SynthesizeButton() {
@@ -49,26 +84,43 @@ export default function FormulatedQueries({ queries, onResearchSynthesized, isBu
   }, [state, toast, onResearchSynthesized]);
 
   return (
-    <Card className="w-full shadow-lg">
-      <CardHeader>
-        <CardTitle className="text-xl">Formulated Search Queries</CardTitle>
-        <CardDescription>ScholarAI has generated these queries to guide the research. Click "Synthesize Research" to proceed.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {queries.map((query, index) => (
-          <div key={index} className="flex items-center space-x-2">
-            <Search className="h-5 w-5 text-primary" />
-            <Badge variant="secondary" className="text-sm py-1 px-3">{query}</Badge>
-          </div>
-        ))}
-      </CardContent>
-      <CardFooter className="flex justify-end">
-        <form action={formAction}>
-          {/* Hidden input to pass queries if needed by backend, though current mock doesn't use it */}
-          <input type="hidden" name="queries" value={JSON.stringify(queries)} />
-          <SynthesizeButton />
-        </form>
-      </CardFooter>
-    </Card>
+    <motion.div
+      variants={cardHoverVariants}
+      initial="rest"
+      whileHover="hover"
+      animate="rest"
+    >
+      <Card className="w-full shadow-lg">
+        <CardHeader>
+          <CardTitle className="text-xl">Formulated Search Queries</CardTitle>
+          <CardDescription>ScholarAI has generated these queries to guide the research. Click "Synthesize Research" to proceed.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <motion.div 
+            className="space-y-3"
+            variants={listContainerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            {queries.map((query, index) => (
+              <motion.div 
+                key={index} 
+                className="flex items-center space-x-2"
+                variants={listItemVariants}
+              >
+                <Search className="h-5 w-5 text-primary flex-shrink-0" />
+                <Badge variant="secondary" className="text-sm py-1 px-3 whitespace-normal break-all">{query}</Badge>
+              </motion.div>
+            ))}
+          </motion.div>
+        </CardContent>
+        <CardFooter className="flex justify-end pt-4">
+          <form action={formAction}>
+            <input type="hidden" name="queries" value={JSON.stringify(queries)} />
+            <SynthesizeButton />
+          </form>
+        </CardFooter>
+      </Card>
+    </motion.div>
   );
 }
