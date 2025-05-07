@@ -101,7 +101,11 @@ export default function ScholarAIPage() {
           action: <ToastAction altText="View Image">View</ToastAction> 
         });
       } else if (!imageActionState.success) { 
-        toast({ title: "🚫 Image Generation Failed", description: imageActionState.message, variant: 'destructive' });
+        let fullErrorMessage = imageActionState.message;
+        if (imageActionState.errors?.topic) {
+            fullErrorMessage += ` Details: ${imageActionState.errors.topic.join(' ')}`;
+        }
+        toast({ title: "🚫 Image Generation Failed", description: fullErrorMessage, variant: 'destructive' });
       }
     }
   }, [imageActionState, toast]);
@@ -179,15 +183,31 @@ export default function ScholarAIPage() {
     });
   };
   
-  const handleGenerateImageForTopic = () => { 
+  const handleGenerateImageForTopic = (topicForImage: string) => { 
+    if (!topicForImage || topicForImage.length < 5) { // Corresponds to generateImageSchema min length for topic
+      toast({
+        title: "🚫 Cannot Generate Image",
+        description: "The research topic provided is too short or empty. Please ensure a valid topic (min. 5 characters).",
+        variant: "destructive",
+      });
+      return;
+    }
     startTransition(() => {
       const formData = new FormData();
-      formData.append('topic', researchQuestion); 
+      formData.append('topic', topicForImage); 
       imageFormAction(formData);
     });
   };
 
   const handleGenerateFullReport = () => {
+     if (!researchQuestion || researchQuestion.length < 10) { // Corresponds to generateReportSchema min length
+      toast({
+        title: "🚫 Cannot Generate Report",
+        description: "The research question is too short or missing. Please ensure the original research question is valid (min. 10 characters).",
+        variant: "destructive",
+      });
+      return;
+    }
     startTransition(() => {
       const formData = new FormData();
       formData.append('researchQuestion', researchQuestion);
@@ -320,6 +340,7 @@ export default function ScholarAIPage() {
           animate="enter"
           exit="exit"
           variants={pageVariants}
+          className="w-full"
         >
           {content}
         </motion.div>

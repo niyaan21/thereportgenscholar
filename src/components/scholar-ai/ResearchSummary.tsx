@@ -37,7 +37,7 @@ export default function ResearchSummary({
   const summaryParagraphs = summary.split(/\n\s*\n/).filter(p => p.trim() !== "");
 
   const handleImageGeneration = () => {
-    const topic = originalQuestion || summary.substring(0, 200);
+    const topic = originalQuestion || summary.substring(0, 200); // Prefer original question as topic
     if (topic) {
       onGenerateImage(topic);
     }
@@ -148,7 +148,7 @@ export default function ResearchSummary({
                       <Maximize className="h-4 w-4" />
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-3xl p-0">
+                  <DialogContent className="max-w-3xl p-0 bg-transparent border-none shadow-none">
                      <NextImage 
                         src={generatedImageUrl} 
                         alt="AI-generated conceptual visualization - fullscreen" 
