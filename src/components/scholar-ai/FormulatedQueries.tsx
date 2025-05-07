@@ -2,8 +2,8 @@
 'use client';
 
 import React from 'react';
-import { useActionState } from 'react'; // Ensure useActionState is from 'react'
-import { useFormStatus } from 'react-dom'; // Ensure useFormStatus is from 'react-dom'
+import { useActionState } from 'react'; 
+import { useFormStatus } from 'react-dom'; 
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { handleSynthesizeResearchAction, type SynthesizeResearchActionState } from '@/app/actions';
@@ -14,14 +14,15 @@ import { Badge } from '@/components/ui/badge';
 
 interface FormulatedQueriesProps {
   queries: string[];
-  onResearchSynthesized: (summary: string) => void;
-  isBusy: boolean; // Prop to indicate if parent is busy
+  onResearchSynthesized: (summary: string, summarizedTitles: string[]) => void; // Updated prop
+  isBusy: boolean; 
 }
 
 const initialSynthesizeState: SynthesizeResearchActionState = {
   success: false,
   message: '',
   researchSummary: null,
+  summarizedPaperTitles: null, // Initialized
   errors: null,
 };
 
@@ -130,17 +131,20 @@ export default function FormulatedQueries({ queries, onResearchSynthesized, isBu
   const { toast } = useToast();
   const icons = [Search, Filter, BarChartBig, Telescope, Brain, Sparkles]; 
   
-  // Combine parentIsBusy with formIsPending for the disabled state
   const isEffectivelyBusy = parentIsBusy || formIsPending;
 
 
   React.useEffect(() => {
      if (state.message) {
-      if (state.success && state.researchSummary) {
+      if (state.success && state.researchSummary && state.summarizedPaperTitles) {
         toast({ title: "💡 Profound Insights Uncovered!", description: state.message, variant: 'default', duration: 7000 });
-        onResearchSynthesized(state.researchSummary);
+        onResearchSynthesized(state.researchSummary, state.summarizedPaperTitles); // Pass titles
       } else if (!state.success) {
-        toast({ title: "🛠️ Synthesis Stumbled!", description: state.message, variant: 'destructive', duration: 9000 });
+        let description = state.message;
+        if (state.errors?.queries) {
+            description += ` ${state.errors.queries.join(' ')}`;
+        }
+        toast({ title: "🛠️ Synthesis Stumbled!", description: description, variant: 'destructive', duration: 9000 });
       }
     }
   }, [state, toast, onResearchSynthesized]);
@@ -207,7 +211,6 @@ export default function FormulatedQueries({ queries, onResearchSynthesized, isBu
             className="w-full sm:w-auto"
           >
             <input type="hidden" name="queries" value={JSON.stringify(queries)} />
-            {/* Pass isEffectivelyBusy to disable button if parent or form is busy */}
             <SynthesizeButton /> 
           </motion.form>
         </CardFooter>

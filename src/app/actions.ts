@@ -52,49 +52,64 @@ export async function handleFormulateQueryAction(
   }
 }
 
-const mockPapers = [
-  { title: "The Future of AI in Academic Research", abstract: "This paper explores the growing role of artificial intelligence in shaping research methodologies and discovery processes across various academic disciplines. It highlights key advancements and potential challenges." },
-  { title: "Advanced Language Models for Query Understanding", abstract: "We present a novel approach to query formulation using advanced large language models, demonstrating significant improvements in search result relevance. Our method focuses on semantic understanding and contextual awareness." },
-  { title: "Synthesizing Knowledge: A Survey of Text Summarization Techniques", abstract: "A comprehensive survey of automated text summarization techniques, including extractive and abstractive methods, and their applications in research. We compare various models and their performance on benchmark datasets." },
-  { title: "Ethical Considerations in AI-Driven Research", abstract: "This paper discusses the ethical implications of using AI in research, including issues of bias, transparency, and accountability. It proposes a framework for responsible AI development and deployment in academic settings." }
-];
-
 export interface SynthesizeResearchActionState {
   success: boolean;
   message: string;
   researchSummary: string | null;
-  errors: any | null; // Keep generic for now
+  summarizedPaperTitles: string[] | null; // Added to pass titles to UI
+  errors: any | null; 
 }
 
 export async function handleSynthesizeResearchAction(
   prevState: SynthesizeResearchActionState,
   formData: FormData
 ): Promise<SynthesizeResearchActionState> {
-  // In a real app, queries from formData might be used to fetch actual papers.
-  // For now, we use mock data.
-  // const queriesJson = formData.get('queries') as string;
-  // let queries: string[] = [];
-  // if (queriesJson) {
-  //   try {
-  //     queries = JSON.parse(queriesJson);
-  //   } catch (e) {
-  //     console.error("Failed to parse queries for synthesis:", e);
-  //     return {
-  //       success: false,
-  //       message: "Invalid query data provided for synthesis.",
-  //       researchSummary: null,
-  //       errors: { queries: ["Failed to parse query data."] }
-  //     };
-  //   }
-  // }
-  
+  const queriesJson = formData.get('queries') as string;
+  let formulatedQueries: string[] = [];
+
+  if (queriesJson) {
+    try {
+      formulatedQueries = JSON.parse(queriesJson);
+      if (!Array.isArray(formulatedQueries) || !formulatedQueries.every(q => typeof q === 'string')) {
+        throw new Error("Invalid queries format.");
+      }
+    } catch (e) {
+      console.error("Failed to parse queries for synthesis:", e);
+      return {
+        success: false,
+        message: "Invalid query data provided for synthesis. Please ensure queries are correctly formatted.",
+        researchSummary: null,
+        summarizedPaperTitles: null,
+        errors: { queries: ["Failed to parse query data."] }
+      };
+    }
+  }
+
+  if (formulatedQueries.length === 0) {
+    return {
+      success: false,
+      message: "No queries provided for synthesis.",
+      researchSummary: null,
+      summarizedPaperTitles: null,
+      errors: { queries: ["No queries found to synthesize."] }
+    };
+  }
+
+  // Construct papers input from formulated queries
+  // This makes the summarization based on the AI-generated query topics.
+  const papersForSummary = formulatedQueries.map((query, index) => ({
+    title: `Insight Area ${index + 1}: ${query.substring(0, 100)}${query.length > 100 ? '...' : ''}`, // Keep titles concise
+    abstract: `This section pertains to the query: "${query}". The AI will synthesize information based on its knowledge regarding this topic.`,
+  }));
+
   try {
-    const input: SummarizeResearchPapersInput = { papers: mockPapers };
+    const input: SummarizeResearchPapersInput = { papers: papersForSummary };
     const result = await summarizeResearchPapers(input);
     return {
       success: true,
-      message: "Research synthesized successfully.",
+      message: "Research synthesized successfully using formulated queries.",
       researchSummary: result.summary,
+      summarizedPaperTitles: papersForSummary.map(p => p.title),
       errors: null,
     };
   } catch (error) {
@@ -103,6 +118,7 @@ export async function handleSynthesizeResearchAction(
       success: false,
       message: "Failed to synthesize research. An unexpected error occurred.",
       researchSummary: null,
+      summarizedPaperTitles: null,
       errors: null,
     };
   }
