@@ -1,7 +1,7 @@
 // src/components/scholar-ai/QueryForm.tsx
 'use client';
 
-import React, { useActionState } from 'react';
+import React, { useActionState as useReactActionState } from 'react'; // Updated import
 import { useFormStatus } from 'react-dom';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -30,25 +30,21 @@ function SubmitButton() {
     <Button
       type="submit"
       disabled={pending}
-      className="w-full sm:w-auto mt-2 text-lg py-3 px-8 shadow-lg hover:shadow-xl transition-all duration-300 group bg-gradient-to-r from-primary to-primary/80 hover:from-primary/80 hover:to-primary text-primary-foreground active:scale-95 rounded-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 relative overflow-hidden"
+      className="w-full sm:w-auto mt-2 text-base py-2.5 px-6 shadow-md hover:shadow-lg bg-primary text-primary-foreground rounded-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       aria-label="Formulate Queries"
     >
-      <span className="absolute inset-0 bg-gradient-to-r from-accent/10 to-transparent opacity-0 group-hover:opacity-30 transition-opacity duration-500 rounded-lg"></span>
-      <span className="relative z-10 flex items-center justify-center">
-        {pending ? (
-          <Loader2 className="mr-3 h-6 w-6 animate-spin" />
-        ) : (
-          <Send className="mr-3 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1 group-hover:scale-110" />
-        )}
-        Formulate Queries
-      </span>
-       <Sparkle className="absolute top-1 right-1 h-4 w-4 text-accent/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-ping" />
+      {pending ? (
+        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+      ) : (
+        <Send className="mr-2 h-4 w-4" />
+      )}
+      Formulate Queries
     </Button>
   );
 }
 
 export default function QueryForm({ onQueriesFormulated, isBusy, setIsBusy }: QueryFormProps) {
-  const [state, formAction] = useActionState(handleFormulateQueryAction, initialState);
+  const [state, formAction] = useReactActionState(handleFormulateQueryAction, initialState); // Updated to useReactActionState
   const { toast } = useToast();
   const formRef = React.useRef<HTMLFormElement>(null);
   const [currentQuestion, setCurrentQuestion] = React.useState('');
@@ -83,68 +79,62 @@ export default function QueryForm({ onQueriesFormulated, isBusy, setIsBusy }: Qu
 
 
   return (
-      <Card className="w-full shadow-2xl border-2 border-primary/10 rounded-xl overflow-hidden bg-card transition-all duration-500 hover:scale-[1.01] hover:shadow-primary/20">
-        <CardHeader className="p-6 sm:p-8 bg-gradient-to-br from-primary/5 via-transparent to-transparent rounded-t-lg relative">
-           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5 mix-blend-overlay"></div>
-           <div className="flex items-start sm:items-center space-x-4 relative z-10">
-             <div className="p-3 bg-accent/10 rounded-full shadow-inner border border-accent/20">
-                <Brain className="h-8 w-8 sm:h-10 sm:w-10 text-accent drop-shadow-lg"/>
+      <Card className="w-full shadow-lg border-primary/10 rounded-lg overflow-hidden bg-card">
+        <CardHeader className="p-6 bg-primary/5 border-b border-primary/10">
+           <div className="flex items-center space-x-3">
+             <div className="p-2 bg-accent/10 rounded-full shadow-sm border border-accent/20">
+                <Brain className="h-6 w-6 text-accent"/>
              </div>
             <div>
-              <CardTitle className="text-2xl sm:text-3xl font-bold text-primary tracking-tight drop-shadow-sm">
+              <CardTitle className="text-xl font-semibold text-primary tracking-tight">
                 Initiate Your Inquiry
               </CardTitle>
-              <CardDescription className="text-muted-foreground text-sm sm:text-base mt-1 leading-relaxed">
-                Pose your complex research question. ScholarAI will deconstruct it into actionable search vectors.
+              <CardDescription className="text-muted-foreground text-sm mt-0.5">
+                Pose your complex research question. ScholarAI will deconstruct it.
               </CardDescription>
             </div>
           </div>
         </CardHeader>
-        <CardContent className="p-6 sm:p-8">
+        <CardContent className="p-6">
           <form
             action={formAction}
             ref={formRef}
-            className="space-y-6"
+            className="space-y-4"
             onSubmit={handleFormSubmit}
           >
-            <div className="relative group/textarea">
-              <Label htmlFor="researchQuestion" className="block text-md sm:text-lg font-semibold mb-2.5 text-foreground flex items-center group-focus-within/textarea:text-accent transition-colors duration-300">
-                <Lightbulb className="h-5 w-5 sm:h-6 sm:w-6 mr-2.5 text-yellow-400 group-hover/textarea:animate-pulse"/>
+            <div>
+              <Label htmlFor="researchQuestion" className="block text-sm font-medium mb-1.5 text-foreground flex items-center">
+                <Lightbulb className="h-4 w-4 mr-2 text-yellow-500"/>
                 Your Core Research Postulate
               </Label>
               <Textarea
                 id="researchQuestion"
                 name="researchQuestion"
-                rows={7}
+                rows={5}
                 placeholder="e.g., Analyze the impact of renewable energy adoption on global carbon emissions and economic growth in developing nations over the past decade..."
-                className="w-full border-input focus:border-accent focus:ring-2 focus:ring-accent/50 transition-all duration-300 rounded-lg shadow-sm text-base bg-background/80 placeholder:text-muted-foreground/70 p-4 focus:shadow-md hover:shadow-accent/10"
+                className="w-full border-input focus:border-accent focus:ring-1 focus:ring-accent/50 rounded-md shadow-sm text-sm bg-background/70 placeholder:text-muted-foreground/60 p-3"
                 required
                 minLength={10}
                 maxLength={1000}
                 disabled={isBusy}
                 aria-describedby="question-error"
-                aria-live="polite"
               />
-              <div className="absolute -bottom-2 -right-2 opacity-0 group-hover/textarea:opacity-100 group-focus-within/textarea:opacity-100 transition-opacity duration-300 pointer-events-none">
-                <SearchCheck className="h-10 w-10 text-accent/20 -rotate-12" />
-              </div>
               {state.errors?.researchQuestion && (
                 <p
                   id="question-error"
-                  className="mt-2.5 text-sm text-destructive font-medium bg-destructive/10 p-3 rounded-md border border-destructive/30 shadow-sm"
+                  className="mt-1.5 text-xs text-destructive bg-destructive/10 p-2 rounded-md border border-destructive/20"
                   role="alert"
                 >
                   {state.errors.researchQuestion.join(' ')}
                 </p>
               )}
             </div>
-            <CardFooter className="flex justify-end p-0 pt-2">
-              <div className="w-full sm:w-auto">
-                 <SubmitButton />
-              </div>
+            <CardFooter className="flex justify-end p-0 pt-1">
+              <SubmitButton />
             </CardFooter>
           </form>
         </CardContent>
       </Card>
   );
 }
+

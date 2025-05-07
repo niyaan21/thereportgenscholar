@@ -3,6 +3,7 @@
 
 import { formulateResearchQuery, type FormulateResearchQueryInput } from '@/ai/flows/formulate-research-query';
 import { summarizeResearchPapers, type SummarizeResearchPapersInput } from '@/ai/flows/summarize-research-papers';
+import { generateResearchImage, type GenerateResearchImageInput } from '@/ai/flows/generate-research-image';
 import { z } from 'zod';
 
 const formulateQuerySchema = z.object({
@@ -56,7 +57,7 @@ export interface SynthesizeResearchActionState {
   success: boolean;
   message: string;
   researchSummary: string | null;
-  summarizedPaperTitles: string[] | null; // Added to pass titles to UI
+  summarizedPaperTitles: string[] | null; 
   errors: any | null; 
 }
 
@@ -95,10 +96,8 @@ export async function handleSynthesizeResearchAction(
     };
   }
 
-  // Construct papers input from formulated queries
-  // This makes the summarization based on the AI-generated query topics.
   const papersForSummary = formulatedQueries.map((query, index) => ({
-    title: `Insight Area ${index + 1}: ${query.substring(0, 100)}${query.length > 100 ? '...' : ''}`, // Keep titles concise
+    title: `Insight Area ${index + 1}: ${query.substring(0, 100)}${query.length > 100 ? '...' : ''}`,
     abstract: `This section pertains to the query: "${query}". The AI will synthesize information based on its knowledge regarding this topic.`,
   }));
 
@@ -119,6 +118,55 @@ export async function handleSynthesizeResearchAction(
       message: "Failed to synthesize research. An unexpected error occurred.",
       researchSummary: null,
       summarizedPaperTitles: null,
+      errors: null,
+    };
+  }
+}
+
+
+export interface GenerateImageActionState {
+  success: boolean;
+  message: string;
+  imageDataUri: string | null;
+  errors: { topic?: string[] } | null;
+}
+
+const generateImageSchema = z.object({
+  topic: z.string().min(5, "Topic must be at least 5 characters long.").max(200, "Topic must be at most 200 characters long."),
+});
+
+export async function handleGenerateImageAction(
+  prevState: GenerateImageActionState,
+  formData: FormData
+): Promise<GenerateImageActionState> {
+  const topic = formData.get('topic') as string;
+
+  const validation = generateImageSchema.safeParse({ topic });
+  if (!validation.success) {
+    return {
+      success: false,
+      message: "Invalid topic for image generation.",
+      imageDataUri: null,
+      errors: validation.error.flatten().fieldErrors,
+    };
+  }
+
+  try {
+    const input: GenerateResearchImageInput = { topic: validation.data.topic };
+    const result = await generateResearchImage(input);
+    return {
+      success: true,
+      message: "Image generated successfully.",
+      imageDataUri: result.imageDataUri,
+      errors: null,
+    };
+  } catch (error) {
+    console.error("Error generating image:", error);
+    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
+    return {
+      success: false,
+      message: `Failed to generate image: ${errorMessage}`,
+      imageDataUri: null,
       errors: null,
     };
   }

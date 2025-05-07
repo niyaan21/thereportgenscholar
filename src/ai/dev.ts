@@ -3,3 +3,4 @@ config();
 
 import '@/ai/flows/formulate-research-query.ts';
 import '@/ai/flows/summarize-research-papers.ts';
+import '@/ai/flows/generate-research-image.ts';
