@@ -14,6 +14,10 @@ import {
   Cell,
   Scatter,
   ZAxis,
+  BarChart as RechartsBarChartPrimitive, // Renamed import
+  LineChart as RechartsLineChartPrimitive, // Renamed import
+  PieChart as RechartsPieChartPrimitive, // Renamed import
+  ScatterChart as RechartsScatterChartPrimitive, // Renamed import
 } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from '@/components/ui/chart';
@@ -72,7 +76,7 @@ export default function PlaceholderChart({ chartType, title, description }: Plac
     case 'bar':
       ChartComponent = (
         <ResponsiveContainer width="100%" height={250}>
-          <RechartsBarChart data={commonSampleData}>
+          <RechartsBarChartPrimitive data={commonSampleData}>
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="month"
@@ -86,14 +90,14 @@ export default function PlaceholderChart({ chartType, title, description }: Plac
             <RechartsLegend content={<ChartLegendContent />} />
             <Bar dataKey="desktop" fill="var(--color-desktop)" radius={4} />
             <Bar dataKey="mobile" fill="var(--color-mobile)" radius={4} />
-          </RechartsBarChart>
+          </RechartsBarChartPrimitive>
         </ResponsiveContainer>
       );
       break;
     case 'line':
       ChartComponent = (
         <ResponsiveContainer width="100%" height={250}>
-          <RechartsLineChart data={commonSampleData}>
+          <RechartsLineChartPrimitive data={commonSampleData}>
             <CartesianGrid horizontal={true} vertical={false} />
             <XAxis
               dataKey="month"
@@ -107,14 +111,14 @@ export default function PlaceholderChart({ chartType, title, description }: Plac
             <RechartsLegend content={<ChartLegendContent />} />
             <Line type="monotone" dataKey="desktop" stroke="var(--color-desktop)" strokeWidth={2} dot={true} />
             <Line type="monotone" dataKey="mobile" stroke="var(--color-mobile)" strokeWidth={2} dot={true} />
-          </RechartsLineChart>
+          </RechartsLineChartPrimitive>
         </ResponsiveContainer>
       );
       break;
     case 'pie':
       ChartComponent = (
         <ResponsiveContainer width="100%" height={250}>
-          <RechartsPieChart>
+          <RechartsPieChartPrimitive>
             <ChartTooltip content={<ChartTooltipContent nameKey="visitors" hideLabel />} />
             <Pie data={pieSampleData} dataKey="visitors" nameKey="browser" cy="50%" innerRadius={60} outerRadius={80} strokeWidth={5}>
               {pieSampleData.map((entry, index) => (
@@ -122,14 +126,14 @@ export default function PlaceholderChart({ chartType, title, description }: Plac
               ))}
             </Pie>
              <RechartsLegend content={<ChartLegendContent />} />
-          </RechartsPieChart>
+          </RechartsPieChartPrimitive>
         </ResponsiveContainer>
       );
       break;
     case 'scatter':
       ChartComponent = (
         <ResponsiveContainer width="100%" height={250}>
-          <RechartsScatterChart
+          <RechartsScatterChartPrimitive
             margin={{
               top: 20, right: 20, bottom: 20, left: 20,
             }}
@@ -141,17 +145,13 @@ export default function PlaceholderChart({ chartType, title, description }: Plac
             <ChartTooltip cursor={{ strokeDasharray: '3 3' }} content={<ChartTooltipContent />} />
             <RechartsLegend content={<ChartLegendContent />} />
             <Scatter name="Sample Dataset" data={scatterSampleData} fill="var(--color-value)" />
-          </RechartsScatterChart>
+          </RechartsScatterChartPrimitive>
         </ResponsiveContainer>
       );
       break;
     default:
       ChartComponent = <p className="text-sm text-muted-foreground">Unsupported chart type: {chartType}</p>;
   }
-
-  // Renaming imported components to avoid conflict with recharts own components
-  const { BarChart: RechartsBarChart, LineChart: RechartsLineChart, PieChart: RechartsPieChart, ScatterChart: RechartsScatterChart } = RechartsPrimitive;
-
 
   return (
     <Card className="border-dashed border-accent/30 bg-accent/5 mt-2 shadow-sm">
@@ -167,8 +167,3 @@ export default function PlaceholderChart({ chartType, title, description }: Plac
     </Card>
   );
 }
-
-// Re-exporting RechartsPrimitive components with different names if needed elsewhere, or just use them locally.
-const { BarChart: RechartsPrimitiveBarChart, LineChart: RechartsPrimitiveLineChart } = RechartsPrimitive;
-
-```

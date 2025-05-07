@@ -365,4 +365,3 @@ export {
   // Export RechartsPrimitive components directly for use in specific chart components
   RechartsPrimitive,
 }
-```
