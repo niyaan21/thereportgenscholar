@@ -7,7 +7,7 @@ import FormulatedQueries from '@/components/scholar-ai/FormulatedQueries';
 import ResearchSummary from '@/components/scholar-ai/ResearchSummary';
 import ResearchReportDisplay from '@/components/scholar-ai/ResearchReportDisplay';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, RotateCcw, FileText, Settings, Moon, Sun, Palette, Image as ImageIcon, Loader2, BookOpen, Brain, Maximize, Search, Filter, BarChartBig, Telescope } from 'lucide-react';
+import { ArrowLeft, RotateCcw, FileText, Settings, Moon, Sun, Palette, Image as ImageIcon, Loader2, BookOpen, Brain, Maximize, Search, Filter, BarChartBig, Telescope, Beaker, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import {
   DropdownMenu,
@@ -20,7 +20,6 @@ import {
 import { handleGenerateImageAction, type GenerateImageActionState, handleGenerateReportAction, type GenerateReportActionState } from '@/app/actions';
 import type { GenerateResearchReportOutput } from '@/ai/flows/generate-research-report';
 import { useToast } from '@/hooks/use-toast';
-import { motion, AnimatePresence } from "framer-motion"
 import {
   Dialog,
   DialogContent,
@@ -154,7 +153,9 @@ export default function ScholarAIPage() {
     startTransition(() => {
       if (appState === 'report_generated') {
         setAppState('summary_generated');
-        setResearchReport(null);
+        // Keep researchReport temporarily if user wants to toggle back? Or clear?
+        // For now, let's clear it to make "back" consistent with starting fresh from summary.
+        // setResearchReport(null); 
       } else if (appState === 'summary_generated') {
         setAppState('queries_formulated');
         setResearchSummary('');
@@ -169,7 +170,8 @@ export default function ScholarAIPage() {
   
   const handleGenerateImageForTopic = (topic: string) => {
     const formData = new FormData();
-    formData.append('topic', topic);
+    // Always use the original research question for image generation topic
+    formData.append('topic', researchQuestion || topic); 
     imageFormAction(formData);
   };
 
@@ -177,9 +179,10 @@ export default function ScholarAIPage() {
     if (researchQuestion) {
       const formData = new FormData();
       formData.append('researchQuestion', researchQuestion);
-      if (researchSummary) {
-        formData.append('summary', researchSummary);
-      }
+      // As per new requirement, generate report based *only* on the initial question.
+      // Do NOT append researchSummary.
+      // The generateResearchReport flow handles an optional summary. If not provided,
+      // it will generate the report based solely on the researchQuestion.
       reportFormAction(formData);
     } else {
       toast({ title: "Missing Information", description: "Cannot generate a report without a research question.", variant: 'destructive'});
@@ -188,29 +191,12 @@ export default function ScholarAIPage() {
 
   const isLoading = isPending || isProcessingQuery || isProcessingSummary || isImageGenerating || isReportGenerating;
   
-  const pageVariants = {
-    initial: { opacity: 0, y: 20 },
-    in: { opacity: 1, y: 0 },
-    out: { opacity: 0, y: -20 }
-  };
-
-  const pageTransition = {
-    type: "tween",
-    ease: "anticipate",
-    duration: 0.5
-  };
-
   const renderCurrentStep = () => {
     switch (appState) {
       case 'initial':
         return (
-          <motion.div
+          <div
             key="initial"
-            initial="initial"
-            animate="in"
-            exit="out"
-            variants={pageVariants}
-            transition={pageTransition}
             className="space-y-8"
           >
             <QueryForm 
@@ -218,35 +204,30 @@ export default function ScholarAIPage() {
               isBusy={isProcessingQuery} 
               setIsBusy={setIsProcessingQuery}
             />
-          </motion.div>
+          </div>
         );
       case 'queries_formulated':
         return (
-          <motion.div
+          <div
             key="queries_formulated"
-            initial="initial"
-            animate="in"
-            exit="out"
-            variants={pageVariants}
-            transition={pageTransition}
             className="space-y-8"
           >
-            <Card className="overflow-hidden shadow-lg border-accent/30 bg-card rounded-xl">
-              <CardHeader className="bg-gradient-to-br from-accent/10 via-card to-accent/5 p-5 border-b border-accent/20">
-                <div className="flex items-center space-x-3.5">
-                  <div className="p-2.5 bg-accent/15 rounded-full shadow-sm border border-accent/30">
-                    <FileText className="h-5 w-5 text-accent" />
+            <Card className="overflow-hidden shadow-xl border-accent/30 bg-card rounded-xl transform hover:scale-[1.01] transition-transform duration-300 ease-out">
+              <CardHeader className="bg-gradient-to-br from-accent/10 via-card to-accent/5 p-6 border-b border-accent/20">
+                <div className="flex items-center space-x-4">
+                  <div className="p-3 bg-accent/20 text-accent rounded-full shadow-lg border border-accent/40">
+                    <FileText className="h-6 w-6" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg font-semibold text-accent-foreground">
+                    <CardTitle className="text-xl font-semibold text-accent-foreground">
                       Your Research Focus
                     </CardTitle>
-                    <CardDescription className="text-sm text-muted-foreground">The central question guiding this research.</CardDescription>
+                    <CardDescription className="text-sm text-muted-foreground mt-0.5">The central question guiding this research endeavor.</CardDescription>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="p-5">
-                <p className="text-foreground/90 text-base leading-relaxed">{researchQuestion}</p>
+              <CardContent className="p-6">
+                <p className="text-foreground/90 text-base leading-relaxed selection:bg-accent/20">{researchQuestion}</p>
               </CardContent>
             </Card>
             <FormulatedQueries
@@ -255,17 +236,12 @@ export default function ScholarAIPage() {
               isBusy={isProcessingSummary}
               setIsBusy={setIsProcessingSummary}
             />
-          </motion.div>
+          </div>
         );
       case 'summary_generated':
         return (
-          <motion.div
+          <div
             key="summary_generated"
-            initial="initial"
-            animate="in"
-            exit="out"
-            variants={pageVariants}
-            transition={pageTransition}
             className="space-y-8"
           >
             <ResearchSummary
@@ -276,40 +252,35 @@ export default function ScholarAIPage() {
               generatedImageUrl={generatedImageUrl}
               isGeneratingImage={isImageGenerating}
             />
-            <CardFooter className="flex flex-col sm:flex-row justify-center items-center gap-4 p-0 pt-4">
+            <CardFooter className="flex flex-col sm:flex-row justify-center items-center gap-4 p-0 pt-6">
                 <Button
                   onClick={handleGenerateFullReport}
                   variant="default"
                   size="lg"
-                  className="w-full sm:w-auto shadow-lg hover:shadow-xl bg-primary text-primary-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  className="w-full sm:w-auto shadow-lg hover:shadow-primary/30 transform hover:scale-105 transition-all duration-200 bg-primary text-primary-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 group"
                   disabled={isLoading || isReportGenerating}
                   aria-label="Generate Full Research Report"
                 >
-                  {isReportGenerating ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <BookOpen className="mr-2 h-5 w-5" />}
+                  {isReportGenerating ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <BookOpen className="mr-2 h-5 w-5 group-hover:animate-pulse" />}
                   Generate Full Report
                 </Button>
                 <Button
                   onClick={handleStartNewResearch}
                   variant="outline"
                   size="lg"
-                  className="w-full sm:w-auto shadow-md hover:shadow-lg border-input hover:bg-accent/10"
+                  className="w-full sm:w-auto shadow-md hover:shadow-accent/20 transform hover:scale-105 transition-all duration-200 border-input hover:bg-accent/10 group"
                   disabled={isLoading}
                   aria-label="Start a new research session"
                 >
-                  <RotateCcw className="mr-2 h-5 w-5" /> Start New Research
+                  <RotateCcw className="mr-2 h-5 w-5 group-hover:rotate-[30deg] transition-transform" /> Start New Research
                 </Button>
             </CardFooter>
-          </motion.div>
+          </div>
         );
       case 'report_generated':
         return (
-          <motion.div
+          <div
             key="report_generated"
-            initial="initial"
-            animate="in"
-            exit="out"
-            variants={pageVariants}
-            transition={pageTransition}
             className="space-y-8"
           >
             <ResearchReportDisplay 
@@ -317,19 +288,19 @@ export default function ScholarAIPage() {
               originalQuestion={researchQuestion}
               generatedImageUrl={generatedImageUrl}
             />
-            <CardFooter className="flex justify-center p-0 pt-4">
+            <CardFooter className="flex justify-center p-0 pt-6">
               <Button
                 onClick={handleStartNewResearch}
                 variant="default"
                 size="lg"
-                className="shadow-lg hover:shadow-xl bg-primary text-primary-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="shadow-lg hover:shadow-primary/30 transform hover:scale-105 transition-all duration-200 bg-primary text-primary-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 group"
                 disabled={isLoading}
                 aria-label="Start a new research session"
               >
-                <RotateCcw className="mr-2 h-5 w-5" /> Start New Research
+                <RotateCcw className="mr-2 h-5 w-5 group-hover:rotate-[30deg] transition-transform" /> Start New Research
               </Button>
             </CardFooter>
-          </motion.div>
+          </div>
         );
       default:
         return null;
@@ -338,20 +309,20 @@ export default function ScholarAIPage() {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background flex flex-col overflow-x-hidden antialiased">
+    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/10 to-background flex flex-col overflow-x-hidden antialiased selection:bg-accent/30 selection:text-accent-foreground">
       <header
-        className="py-3.5 px-4 md:px-6 bg-card text-card-foreground shadow-lg sticky top-0 z-50 border-b border-border/50 backdrop-blur-md bg-opacity-80"
+        className="py-4 px-4 md:px-6 bg-card/90 text-card-foreground shadow-lg sticky top-0 z-50 border-b border-border/60 backdrop-blur-lg"
       >
         <div className="container mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="p-1.5 bg-primary rounded-md shadow-inner">
-              <Brain className="h-6 w-6 text-primary-foreground" />
+          <div className="flex items-center space-x-3 group cursor-pointer" onClick={appState !== 'initial' ? handleStartNewResearch : undefined}>
+            <div className="p-2 bg-primary rounded-lg shadow-md transform group-hover:scale-110 group-hover:shadow-primary/40 transition-all duration-300 ease-out">
+              <Beaker className="h-7 w-7 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-xl md:text-2xl font-bold tracking-tight text-primary">
+              <h1 className="text-xl md:text-2xl font-bold tracking-tight text-primary group-hover:text-accent transition-colors">
                 ScholarAI
               </h1>
-              <p className="text-xs text-muted-foreground -mt-1">Intelligent Research Augmentation</p>
+              <p className="text-xs text-muted-foreground -mt-0.5">Intelligent Research Augmentation</p>
             </div>
           </div>
            <div className="flex items-center space-x-2">
@@ -360,32 +331,32 @@ export default function ScholarAIPage() {
                   onClick={handleGoBack} 
                   variant="ghost" 
                   size="sm"
-                  className="text-muted-foreground hover:bg-accent/10 hover:text-accent-foreground disabled:opacity-50"
+                  className="text-muted-foreground hover:bg-accent/10 hover:text-accent-foreground disabled:opacity-50 group"
                   disabled={isLoading}
                   aria-label="Go back to previous step"
                 >
-                  <ArrowLeft className="mr-1.5 h-4 w-4" /> Back
+                  <ArrowLeft className="mr-1.5 h-4 w-4 group-hover:-translate-x-0.5 transition-transform" /> Back
                 </Button>
             )}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-muted-foreground hover:bg-accent/10 hover:text-accent-foreground h-8 w-8" aria-label="Theme settings">
-                  <Palette className="h-4 w-4" />
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:bg-accent/10 hover:text-accent-foreground h-9 w-9 rounded-full group" aria-label="Theme settings">
+                  <Palette className="h-4 w-4 group-hover:animate-pulse" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-40 border-border bg-popover shadow-xl rounded-lg">
                 <DropdownMenuLabel className="font-semibold text-popover-foreground px-2 py-1.5">Theme</DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-border/50" />
-                <DropdownMenuItem onClick={() => setTheme('light')} className="cursor-pointer hover:bg-accent/10 focus:bg-accent/20 text-sm px-2 py-1.5">
-                  <Sun className="mr-2 h-4 w-4 text-muted-foreground" />
+                <DropdownMenuItem onClick={() => setTheme('light')} className="cursor-pointer hover:bg-accent/10 focus:bg-accent/20 text-sm px-2 py-1.5 group">
+                  <Sun className="mr-2 h-4 w-4 text-muted-foreground group-hover:text-yellow-500 transition-colors" />
                   <span>Light</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme('dark')} className="cursor-pointer hover:bg-accent/10 focus:bg-accent/20 text-sm px-2 py-1.5">
-                  <Moon className="mr-2 h-4 w-4 text-muted-foreground" />
+                <DropdownMenuItem onClick={() => setTheme('dark')} className="cursor-pointer hover:bg-accent/10 focus:bg-accent/20 text-sm px-2 py-1.5 group">
+                  <Moon className="mr-2 h-4 w-4 text-muted-foreground group-hover:text-blue-400 transition-colors" />
                   <span>Dark</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme('system')} className="cursor-pointer hover:bg-accent/10 focus:bg-accent/20 text-sm px-2 py-1.5">
-                  <Settings className="mr-2 h-4 w-4 text-muted-foreground" />
+                <DropdownMenuItem onClick={() => setTheme('system')} className="cursor-pointer hover:bg-accent/10 focus:bg-accent/20 text-sm px-2 py-1.5 group">
+                  <Settings className="mr-2 h-4 w-4 text-muted-foreground group-hover:animate-spin" />
                   <span>System</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -394,21 +365,21 @@ export default function ScholarAIPage() {
         </div>
       </header>
 
-      <main className="flex-grow container mx-auto px-3 sm:px-4 py-8">
+      <main className="flex-grow container mx-auto px-3 sm:px-4 py-8 md:py-12">
         <div className="max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
-          <AnimatePresence mode="wait">
             {renderCurrentStep()}
-          </AnimatePresence>
         </div>
       </main>
 
-      <footer className="py-6 px-4 md:px-6 border-t border-border/30 bg-card/50 mt-12">
+      <footer className="py-8 px-4 md:px-6 border-t border-border/40 bg-card/60 mt-16">
         <div className="container mx-auto text-center text-sm text-muted-foreground">
           <p>
-            &copy; {currentYear ?? <span className="inline-block w-10 h-4 bg-muted/30 rounded-sm animate-pulse"></span>} ScholarAI.
+            &copy; {currentYear ?? <span className="inline-block w-10 h-4 bg-muted/40 rounded-sm animate-pulse"></span>} ScholarAI. 
+            <Sparkles className="inline h-4 w-4 text-accent mx-1"/>
+            Powered by Generative AI.
           </p>
-          <p className="mt-1.5 text-xs">
-            AI-Powered Insights for the Modern Researcher. Your intelligent partner in discovery.
+          <p className="mt-2 text-xs">
+            Your intelligent partner in discovery. Elevating research with augmented intelligence.
           </p>
         </div>
       </footer>
