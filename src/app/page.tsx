@@ -157,38 +157,7 @@ export default function ScholarAIPage() {
                 exit="exit"
                 className="space-y-8"
               >
-                <motion.div 
-                  className="text-center mb-10 p-8 bg-card rounded-xl shadow-2xl border border-border/50"
-                  initial={{ opacity: 0, y:30,  scale: 0.95, rotateX: 10 }}
-                  animate={{ opacity: 1, y:0, scale: 1, rotateX: 0 }}
-                  transition={{ delay: 0.2, duration: 0.8, ease: "circOut" }}
-                  whileHover={{ scale: 1.02, rotateY: 3, boxShadow: "0px 15px 40px rgba(0, 48, 73, 0.15)"}}
-                  style={{ transformStyle: "preserve-3d" }}
-                >
-                   <motion.div
-                    initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ delay: 0.3, duration: 0.6, ease: "easeOut" }}
-                   >
-                    <Image 
-                        src="https://picsum.photos/seed/scholarai-main/700/350" 
-                        alt="AI Research Concept - network of ideas" 
-                        width={700} 
-                        height={350}
-                        className="rounded-lg shadow-xl mb-8 mx-auto border-4 border-secondary"
-                        data-ai-hint="AI research"
-                        priority
-                    />
-                   </motion.div>
-                  <motion.h2 
-                    variants={heroCardContentVariants}
-                    className="text-4xl font-semibold text-primary mb-4">Unlock Deeper Insights with AI</motion.h2>
-                  <motion.p 
-                    variants={heroCardContentVariants}
-                    className="text-xl text-muted-foreground leading-relaxed">
-                    ScholarAI helps you navigate complex research topics by formulating targeted search queries and synthesizing information into clear, actionable summaries.
-                  </motion.p>
-                </motion.div>
+                {/* Removed the "Unlock Deeper Insights" hero card */}
                 <QueryForm onQueriesFormulated={handleQueriesFormulated} isBusy={isProcessing} />
               </motion.div>
             )}
@@ -275,3 +244,4 @@ export default function ScholarAIPage() {
     </div>
   );
 }
+
