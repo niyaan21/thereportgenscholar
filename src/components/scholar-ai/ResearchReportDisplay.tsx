@@ -12,6 +12,9 @@ import PlaceholderChart from './PlaceholderChart';
 import {
   Dialog,
   DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
@@ -128,6 +131,12 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
                         />
                       </DialogTrigger>
                       <DialogContent className="max-w-3xl p-0 bg-transparent border-none shadow-none">
+                        <DialogHeader>
+                          <DialogTitle className="sr-only">Conceptual Visualization - Full Screen</DialogTitle>
+                          <DialogDescription className="sr-only">
+                            A larger view of the AI-generated conceptual visualization for the research report.
+                          </DialogDescription>
+                        </DialogHeader>
                         <NextImage 
                             src={generatedImageUrl} 
                             alt="Conceptual visualization for the research report - fullscreen" 

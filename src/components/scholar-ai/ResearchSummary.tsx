@@ -6,7 +6,6 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '../ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import * as DialogPrimitive from "@radix-ui/react-dialog"
 import {
   Dialog,
   DialogContent,
@@ -14,7 +13,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogClose,
 } from "@/components/ui/dialog"
 
 interface ResearchSummaryProps {
@@ -37,9 +35,16 @@ export default function ResearchSummary({
   const summaryParagraphs = summary.split(/\n\s*\n/).filter(p => p.trim() !== "");
 
   const handleImageGeneration = () => {
-    const topic = originalQuestion || summary.substring(0, 200); // Prefer original question as topic
-    if (topic) {
-      onGenerateImage(topic);
+    // Use originalQuestion if available and valid, otherwise use a snippet of the summary
+    let topicForImage = originalQuestion;
+    if (!topicForImage || topicForImage.length < 5) {
+      topicForImage = summary.substring(0, 200);
+    }
+     if (topicForImage && topicForImage.length >= 5) { // Ensure topic is valid
+      onGenerateImage(topicForImage);
+    } else {
+      // Optionally, show a toast message if no valid topic can be derived
+      console.warn("Cannot generate image: No valid topic could be determined.");
     }
   };
 
@@ -149,6 +154,12 @@ export default function ResearchSummary({
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-3xl p-0 bg-transparent border-none shadow-none">
+                     <DialogHeader>
+                        <DialogTitle className="sr-only">Conceptual Visualization - Full Screen</DialogTitle>
+                        <DialogDescription className="sr-only">
+                          A larger view of the AI-generated conceptual visualization.
+                        </DialogDescription>
+                      </DialogHeader>
                      <NextImage 
                         src={generatedImageUrl} 
                         alt="AI-generated conceptual visualization - fullscreen" 
