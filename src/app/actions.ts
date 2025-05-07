@@ -4,6 +4,7 @@
 import { formulateResearchQuery, type FormulateResearchQueryInput } from '@/ai/flows/formulate-research-query';
 import { summarizeResearchPapers, type SummarizeResearchPapersInput } from '@/ai/flows/summarize-research-papers';
 import { generateResearchImage, type GenerateResearchImageInput } from '@/ai/flows/generate-research-image';
+import { generateResearchReport, type GenerateResearchReportInput, type GenerateResearchReportOutput } from '@/ai/flows/generate-research-report';
 import { z } from 'zod';
 
 const formulateQuerySchema = z.object({
@@ -167,6 +168,59 @@ export async function handleGenerateImageAction(
       success: false,
       message: `Failed to generate image: ${errorMessage}`,
       imageDataUri: null,
+      errors: null,
+    };
+  }
+}
+
+const generateReportSchema = z.object({
+  researchQuestion: z.string().min(10, "Research question must be at least 10 characters long.").max(500, "Research question must be at most 500 characters long."),
+  summary: z.string().optional(),
+});
+
+export interface GenerateReportActionState {
+  success: boolean;
+  message: string;
+  researchReport: GenerateResearchReportOutput | null;
+  errors: { researchQuestion?: string[], summary?: string[] } | null;
+}
+
+export async function handleGenerateReportAction(
+  prevState: GenerateReportActionState,
+  formData: FormData
+): Promise<GenerateReportActionState> {
+  const researchQuestion = formData.get('researchQuestion') as string;
+  const summary = formData.get('summary') as string | undefined;
+
+  const validation = generateReportSchema.safeParse({ researchQuestion, summary });
+  if (!validation.success) {
+    return {
+      success: false,
+      message: "Invalid input for report generation.",
+      researchReport: null,
+      errors: validation.error.flatten().fieldErrors,
+    };
+  }
+
+  try {
+    const input: GenerateResearchReportInput = { 
+      researchQuestion: validation.data.researchQuestion,
+      summary: validation.data.summary
+    };
+    const result = await generateResearchReport(input);
+    return {
+      success: true,
+      message: "Research report generated successfully.",
+      researchReport: result,
+      errors: null,
+    };
+  } catch (error) {
+    console.error("Error generating research report:", error);
+    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
+    return {
+      success: false,
+      message: `Failed to generate research report: ${errorMessage}`,
+      researchReport: null,
       errors: null,
     };
   }

@@ -5,8 +5,9 @@ import React, { useState, useEffect, useTransition, useActionState as useReactAc
 import QueryForm from '@/components/scholar-ai/QueryForm';
 import FormulatedQueries from '@/components/scholar-ai/FormulatedQueries';
 import ResearchSummary from '@/components/scholar-ai/ResearchSummary';
+import ResearchReportDisplay from '@/components/scholar-ai/ResearchReportDisplay';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, RotateCcw, FileText, Zap, Settings, Moon, Sun, Palette, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { ArrowLeft, RotateCcw, FileText, Zap, Settings, Moon, Sun, Palette, Image as ImageIcon, Loader2, BookOpen } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   DropdownMenu,
@@ -16,16 +17,24 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { handleGenerateImageAction, type GenerateImageActionState } from '@/app/actions';
+import { handleGenerateImageAction, type GenerateImageActionState, handleGenerateReportAction, type GenerateReportActionState } from '@/app/actions';
+import type { GenerateResearchReportOutput } from '@/ai/flows/generate-research-report';
 import { useToast } from '@/hooks/use-toast';
 
 
-type AppState = 'initial' | 'queries_formulated' | 'summary_generated';
+type AppState = 'initial' | 'queries_formulated' | 'summary_generated' | 'report_generated';
 
 const initialImageActionState: GenerateImageActionState = {
   success: false,
   message: '',
   imageDataUri: null,
+  errors: null,
+};
+
+const initialReportActionState: GenerateReportActionState = {
+  success: false,
+  message: '',
+  researchReport: null,
   errors: null,
 };
 
@@ -36,6 +45,7 @@ export default function ScholarAIPage() {
   const [formulatedQueries, setFormulatedQueries] = useState<string[]>([]);
   const [researchSummary, setResearchSummary] = useState<string>('');
   const [summarizedPaperTitles, setSummarizedPaperTitles] = useState<string[]>([]);
+  const [researchReport, setResearchReport] = useState<GenerateResearchReportOutput | null>(null);
   
   const [isProcessingQuery, setIsProcessingQuery] = useState<boolean>(false);
   const [isProcessingSummary, setIsProcessingSummary] = useState<boolean>(false);
@@ -45,6 +55,7 @@ export default function ScholarAIPage() {
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system');
 
   const [imageActionState, imageFormAction, isImageGenerating] = useReactActionState(handleGenerateImageAction, initialImageActionState);
+  const [reportActionState, reportFormAction, isReportGenerating] = useReactActionState(handleGenerateReportAction, initialReportActionState);
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
   const { toast } = useToast();
 
@@ -84,13 +95,26 @@ export default function ScholarAIPage() {
     }
   }, [imageActionState, toast]);
 
+  useEffect(() => {
+    if (reportActionState.message) {
+      if (reportActionState.success && reportActionState.researchReport) {
+        setResearchReport(reportActionState.researchReport);
+        setAppState('report_generated');
+        toast({ title: "📜 Research Report Generated!", description: reportActionState.message, variant: 'default', duration: 7000 });
+      } else if (!reportActionState.success) {
+        toast({ title: "🚫 Report Generation Failed", description: reportActionState.message, variant: 'destructive', duration: 9000 });
+      }
+    }
+  }, [reportActionState, toast]);
+
 
   const handleQueriesFormulated = (queries: string[], question: string) => {
     startTransition(() => {
       setResearchQuestion(question);
       setFormulatedQueries(queries);
       setAppState('queries_formulated');
-      setGeneratedImageUrl(null); // Reset image when new queries are formulated
+      setGeneratedImageUrl(null); 
+      setResearchReport(null);
     });
     setIsProcessingQuery(false);
   };
@@ -100,7 +124,8 @@ export default function ScholarAIPage() {
       setResearchSummary(summary);
       setSummarizedPaperTitles(titles);
       setAppState('summary_generated');
-      setGeneratedImageUrl(null); // Reset image when new summary is generated
+      // Keep existing image if one was generated for the summary
+      setResearchReport(null);
     });
     setIsProcessingSummary(false);
   };
@@ -113,6 +138,7 @@ export default function ScholarAIPage() {
       setResearchSummary('');
       setSummarizedPaperTitles([]);
       setGeneratedImageUrl(null);
+      setResearchReport(null);
     });
     setIsProcessingQuery(false);
     setIsProcessingSummary(false);
@@ -120,11 +146,15 @@ export default function ScholarAIPage() {
 
   const handleGoBack = () => {
     startTransition(() => {
-      if (appState === 'summary_generated') {
+      if (appState === 'report_generated') {
+        setAppState('summary_generated');
+        setResearchReport(null); // Clear report but keep summary and image
+      } else if (appState === 'summary_generated') {
         setAppState('queries_formulated');
         setResearchSummary('');
         setSummarizedPaperTitles([]);
-        setGeneratedImageUrl(null); 
+        // Potentially clear image if it's tied only to summary, or keep if generic enough
+        // setGeneratedImageUrl(null); 
       } else if (appState === 'queries_formulated') {
         setAppState('initial');
         setResearchQuestion('');
@@ -133,13 +163,26 @@ export default function ScholarAIPage() {
     });
   };
   
-  const handleGenerateImage = (topic: string) => {
+  const handleGenerateImageForTopic = (topic: string) => {
     const formData = new FormData();
     formData.append('topic', topic);
     imageFormAction(formData);
   };
 
-  const isLoading = isPending || isProcessingQuery || isProcessingSummary || isImageGenerating;
+  const handleGenerateFullReport = () => {
+    if (researchQuestion) {
+      const formData = new FormData();
+      formData.append('researchQuestion', researchQuestion);
+      if (researchSummary) {
+        formData.append('summary', researchSummary);
+      }
+      reportFormAction(formData);
+    } else {
+      toast({ title: "Missing Information", description: "Cannot generate a report without a research question.", variant: 'destructive'});
+    }
+  };
+
+  const isLoading = isPending || isProcessingQuery || isProcessingSummary || isImageGenerating || isReportGenerating;
 
   return (
     <div className="min-h-screen bg-background flex flex-col overflow-x-hidden antialiased">
@@ -237,11 +280,44 @@ export default function ScholarAIPage() {
                     summary={researchSummary}
                     originalQuestion={researchQuestion}
                     summarizedPaperTitles={summarizedPaperTitles}
-                    onGenerateImage={handleGenerateImage}
+                    onGenerateImage={handleGenerateImageForTopic}
                     generatedImageUrl={generatedImageUrl}
                     isGeneratingImage={isImageGenerating}
                 />
-                <div className="flex justify-center pt-2">
+                 <div className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-2">
+                  <Button
+                    onClick={handleGenerateFullReport}
+                    variant="outline"
+                    size="lg"
+                    className="shadow-md hover:shadow-lg disabled:opacity-50 border-accent text-accent hover:bg-accent/10 w-full sm:w-auto"
+                    disabled={isLoading || isReportGenerating}
+                    aria-label="Generate Full Research Report"
+                  >
+                    {isReportGenerating ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <BookOpen className="mr-2 h-5 w-5" />}
+                    Generate Full Report
+                  </Button>
+                  <Button
+                    onClick={handleStartNewResearch}
+                    variant="default"
+                    size="lg"
+                    className="shadow-md hover:shadow-lg disabled:opacity-50 bg-primary text-primary-foreground w-full sm:w-auto"
+                    disabled={isLoading}
+                    aria-label="Start a new research session"
+                  >
+                    <RotateCcw className="mr-2 h-5 w-5" /> Start New Research
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {appState === 'report_generated' && researchReport && (
+               <div className="space-y-6">
+                <ResearchReportDisplay 
+                  report={researchReport} 
+                  originalQuestion={researchQuestion}
+                  generatedImageUrl={generatedImageUrl}
+                />
+                 <div className="flex justify-center pt-2">
                   <Button
                     onClick={handleStartNewResearch}
                     variant="default"
