@@ -1,3 +1,116 @@
-export default function Home() {
-  return <></>;
+// src/app/page.tsx
+'use client';
+
+import React, { useState } from 'react';
+import QueryForm from '@/components/scholar-ai/QueryForm';
+import FormulatedQueries from '@/components/scholar-ai/FormulatedQueries';
+import ResearchSummary from '@/components/scholar-ai/ResearchSummary';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { BookOpen } from 'lucide-react';
+import Image from 'next/image';
+
+type AppState = 'initial' | 'queries_formulated' | 'summary_generated';
+
+export default function ScholarAIPage() {
+  const [appState, setAppState] = useState<AppState>('initial');
+  const [researchQuestion, setResearchQuestion] = useState<string>(''); // Not currently used but good for future
+  const [formulatedQueries, setFormulatedQueries] = useState<string[]>([]);
+  const [researchSummary, setResearchSummary] = useState<string>('');
+  const [isProcessing, setIsProcessing] = useState<boolean>(false); // Global processing lock
+
+
+  const handleQueriesFormulated = (queries: string[]) => {
+    setFormulatedQueries(queries);
+    setAppState('queries_formulated');
+    setIsProcessing(false); // Unlock after query formulation
+  };
+
+  const handleResearchSynthesized = (summary: string) => {
+    setResearchSummary(summary);
+    setAppState('summary_generated');
+    setIsProcessing(false); // Unlock after synthesis
+  };
+
+  const handleStartNewResearch = () => {
+    setAppState('initial');
+    setResearchQuestion('');
+    setFormulatedQueries([]);
+    setResearchSummary('');
+    setIsProcessing(false);
+  };
+  
+  // This will lock forms when an action is being processed
+  const handleFormSubmit = () => {
+    setIsProcessing(true);
+  };
+
+
+  return (
+    <div className="min-h-screen bg-background flex flex-col">
+      <header className="py-6 px-4 md:px-8 bg-primary text-primary-foreground shadow-md">
+        <div className="container mx-auto flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <BookOpen className="h-10 w-10" />
+            <h1 className="text-3xl font-bold tracking-tight">ScholarAI</h1>
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-grow container mx-auto px-4 py-8 md:py-12">
+        <div className="max-w-3xl mx-auto space-y-8">
+          {appState === 'initial' && (
+            <>
+              <div className="text-center mb-8 p-6 bg-card rounded-lg shadow-sm border">
+                 <Image 
+                    src="https://picsum.photos/seed/scholarai/600/300" 
+                    alt="AI Research Concept" 
+                    width={600} 
+                    height={300}
+                    className="rounded-md shadow-lg mb-6 mx-auto"
+                    data-ai-hint="AI research"
+                 />
+                <h2 className="text-3xl font-semibold text-primary mb-3">Unlock Deeper Insights with AI</h2>
+                <p className="text-lg text-muted-foreground">
+                  ScholarAI helps you navigate complex research topics by formulating targeted search queries and synthesizing information into clear, actionable summaries.
+                </p>
+              </div>
+              <QueryForm onQueriesFormulated={handleQueriesFormulated} isBusy={isProcessing} />
+            </>
+          )}
+
+          {appState === 'queries_formulated' && formulatedQueries.length > 0 && (
+            <FormulatedQueries
+              queries={formulatedQueries}
+              onResearchSynthesized={handleResearchSynthesized}
+              isBusy={isProcessing}
+            />
+          )}
+
+          {appState === 'summary_generated' && researchSummary && (
+            <>
+              <ResearchSummary summary={researchSummary} />
+              <Button onClick={handleStartNewResearch} variant="outline" className="w-full sm:w-auto">
+                Start New Research
+              </Button>
+            </>
+          )}
+          
+          {(appState === 'queries_formulated' || appState === 'summary_generated') && appState !== 'initial' && (
+             <Button onClick={handleStartNewResearch} variant="ghost" className="w-full sm:w-auto text-primary hover:bg-primary/10">
+                Reset and Start Over
+             </Button>
+          )}
+
+        </div>
+      </main>
+
+      <footer className="py-6 px-4 md:px-8 border-t bg-secondary/50">
+        <div className="container mx-auto text-center text-sm text-muted-foreground">
+          <p>&copy; {new Date().getFullYear()} ScholarAI. Powered by Advanced AI.</p>
+          <p>Your Intelligent Research Companion.</p>
+        </div>
+      </footer>
+    </div>
+  );
 }
