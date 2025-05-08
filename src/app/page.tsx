@@ -101,6 +101,25 @@ export default function ScholarAIPage() {
   
   const { toast } = useToast();
 
+  const handleQueriesFormulatedCallback = useCallback((queries: string[], question: string) => {
+    startTransition(() => {
+      setResearchQuestion(question); 
+      setFormulatedQueries(queries);
+      setAppState('queries_formulated');
+      setGeneratedImageUrl(null); 
+      setQueryFormInputValue(''); 
+    });
+  }, []);
+
+  const handleResearchSynthesizedCallback = useCallback((summary: string, titles: string[]) => {
+    startTransition(() => {
+      setResearchSummary(summary);
+      setSummarizedPaperTitles(titles);
+      setAppState('summary_generated');
+    });
+  }, []);
+
+
   useEffect(() => {
     setCurrentYear(new Date().getFullYear());
     const localTheme = localStorage.getItem('theme') as typeof theme | null;
@@ -204,24 +223,6 @@ export default function ScholarAIPage() {
       }
     }
   }, [reportActionState, isReportGenerating, toast]);
-
-  const handleQueriesFormulatedCallback = useCallback((queries: string[], question: string) => {
-    startTransition(() => {
-      setResearchQuestion(question); 
-      setFormulatedQueries(queries);
-      setAppState('queries_formulated');
-      setGeneratedImageUrl(null); 
-      setQueryFormInputValue(''); 
-    });
-  }, []);
-
-  const handleResearchSynthesizedCallback = useCallback((summary: string, titles: string[]) => {
-    startTransition(() => {
-      setResearchSummary(summary);
-      setSummarizedPaperTitles(titles);
-      setAppState('summary_generated');
-    });
-  }, []);
 
   const handleStartNewResearch = () => {
     startTransition(() => {
@@ -506,7 +507,7 @@ export default function ScholarAIPage() {
     </div>
     <DialogContent className="max-w-3xl md:max-w-4xl lg:max-w-5xl p-2 sm:p-3 bg-transparent border-none shadow-none !rounded-xl">
         <DialogHeader>
-            <DialogTitle className="sr-only">Image Preview</DialogTitle>
+            <DialogTitle>Image Preview</DialogTitle>
             <DialogDescription className="sr-only">Full-size view of the generated image.</DialogDescription>
         </DialogHeader>
         {generatedImageUrl && (
