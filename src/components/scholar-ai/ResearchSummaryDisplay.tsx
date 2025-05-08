@@ -2,7 +2,7 @@
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { BookOpenCheck, FileText, Lightbulb, Quote, Brain, CheckCircle, BarChart3, SparklesIcon, Image as ImageIcon, Loader2, MaximizeIcon, Eye, ExternalLink } from 'lucide-react';
+import { BookOpenCheck, FileText, Lightbulb, Quote, Brain, CheckCircle, BarChart3, SparklesIcon, Image as ImageIcon, Loader2, MaximizeIcon, Eye, ExternalLink, Zap } from 'lucide-react';
 import NextImage from 'next/image'; 
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
@@ -23,7 +23,7 @@ export interface ResearchSummaryDisplayProps {
   summary: string;
   originalQuestion: string;
   summarizedPaperTitles: string[];
-  onGenerateImage: (topic: string) => void;
+  onGenerateImage: () => void; // Changed to not take topic, will use originalQuestion from props
   generatedImageUrl: string | null;
   isGeneratingImage: boolean;
 }
@@ -39,21 +39,12 @@ export default function ResearchSummaryDisplay({
   const summaryParagraphs = summary.split(/\n\s*\n|\n(?=\s*•|\n\s*\d+\.)/).filter(p => p.trim() !== "");
 
   const handleImageGeneration = () => {
-    let topicForImage = originalQuestion;
-    if (!topicForImage || topicForImage.trim().length < 5) { // Ensure topic is not just whitespace
-      topicForImage = summary.substring(0, 200).trim(); 
-    }
-     if (topicForImage && topicForImage.trim().length >= 5) { 
-      onGenerateImage(topicForImage);
-    } else {
-      console.warn("Cannot generate image: No valid topic could be determined.");
-      // A toast notification for this case is handled in page.tsx or the action itself
-    }
+      onGenerateImage(); // Call the passed handler which now uses researchQuestion from parent state
   };
 
   const sectionVariants = {
     hidden: { opacity: 0, y: 20, scale: 0.98 },
-    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.45, ease: "easeOut", delay: 0.1 } }
+    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.45, ease: "easeOut", delay: 0.15 } }
   };
 
   return (
@@ -65,9 +56,14 @@ export default function ResearchSummaryDisplay({
         <Card className="w-full shadow-2xl card-glow-border border-primary/25 rounded-2xl overflow-hidden bg-card transform hover:shadow-primary/20 transition-all duration-400">
           <CardHeader className="p-7 md:p-8 bg-gradient-to-br from-primary/15 via-transparent to-primary/5 border-b border-primary/25">
             <div className="flex items-center space-x-4 md:space-x-5">
-              <div className="p-4 bg-gradient-to-br from-accent to-accent/70 rounded-2xl shadow-xl border-2 border-accent/50 text-accent-foreground">
+              <motion.div 
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.25 }}
+                className="p-4 bg-gradient-to-br from-accent to-accent/70 rounded-2xl shadow-xl border-2 border-accent/50 text-accent-foreground"
+              >
                   <BookOpenCheck className="h-8 w-8 md:h-9 md:w-9" />
-              </div>
+              </motion.div>
               <div>
                   <CardTitle className="text-2xl md:text-3xl font-extrabold text-primary tracking-tight">Illuminated Research Overview</CardTitle>
                   <CardDescription className="text-muted-foreground text-base mt-1.5 max-w-lg">
@@ -146,8 +142,8 @@ export default function ResearchSummaryDisplay({
                    <p className="text-base text-muted-foreground mb-5 max-w-md">
                     Need a visual spark? Generate an AI-powered image representing the core concepts of your research.
                   </p>
-                  <Button onClick={handleImageGeneration} variant="outline" size="lg" className="shadow-md hover:shadow-lg border-input hover:border-accent hover:text-accent-foreground text-base py-3 px-7 rounded-lg" disabled={isGeneratingImage}>
-                    <SparklesIcon className="mr-2.5 h-5 w-5" />
+                  <Button onClick={handleImageGeneration} variant="outline" size="lg" className="shadow-md hover:shadow-lg border-input hover:border-accent hover:text-accent-foreground text-base py-3 px-7 rounded-lg group" disabled={isGeneratingImage}>
+                    <SparklesIcon className="mr-2.5 h-5 w-5 group-hover:animate-ping" />
                     Generate Visual Concept
                   </Button>
                 </div>
@@ -173,8 +169,8 @@ export default function ResearchSummaryDisplay({
                       <p className="text-sm text-muted-foreground">
                         AI-crafted visual. <DialogTrigger asChild><Button variant="link" className="p-0 h-auto text-xs text-accent hover:text-accent-foreground">View Fullscreen</Button></DialogTrigger>
                       </p>
-                      <Button onClick={handleImageGeneration} variant="link" size="sm" className="text-accent text-sm p-0 h-auto hover:text-accent-foreground" disabled={isGeneratingImage}>
-                          Regenerate
+                      <Button onClick={handleImageGeneration} variant="link" size="sm" className="text-accent text-sm p-0 h-auto hover:text-accent-foreground group" disabled={isGeneratingImage}>
+                          <SparklesIcon className="mr-1.5 h-4 w-4 group-hover:animate-ping"/> Regenerate
                       </Button>
                   </div>
                 </div>
@@ -186,7 +182,7 @@ export default function ResearchSummaryDisplay({
                     alt="AI-generated conceptual visualization - regenerating" 
                     width={700} 
                     height={400}
-                    className="rounded-lg object-contain mx-auto blur-sm max-h-[calc(100%-2rem)]" // Ensure image fits
+                    className="rounded-lg object-contain mx-auto blur-sm max-h-[calc(100%-2rem)]" 
                     data-ai-hint="abstract concept"
                   />
                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 rounded-lg">

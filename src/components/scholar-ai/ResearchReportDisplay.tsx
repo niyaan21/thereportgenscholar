@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { FileText, BookOpen, ListChecks, MessageSquareQuote, SearchCode, Lightbulb, AlertTriangle, ThumbsUp, Telescope, Edit3, BarChartHorizontalBig, Users, ShieldCheck, BookCopy, BookMarked, TrendingUp, FileJson, GanttChartSquare, PieChartIcon, LineChartIcon, BarChartIcon, ScatterChartIcon, Brain, LightbulbIcon, MaximizeIcon, Settings, FileQuestion, Activity, Library, UsersRound, ShieldAlert, ClipboardList, Milestone, Scale, GitBranch, DownloadCloud, Share2Icon } from 'lucide-react';
+import { FileText, BookOpen, ListChecks, MessageSquareQuote, SearchCode, Lightbulb, AlertTriangle, ThumbsUp, Telescope, Edit3, BarChartHorizontalBig, Users, ShieldCheck, BookCopy, BookMarked, TrendingUp, FileJson, GanttChartSquare, PieChartIcon, LineChartIcon, BarChartIcon, ScatterChartIcon, Brain, LightbulbIcon, MaximizeIcon, Settings, FileQuestion, Activity, Library, UsersRound, ShieldAlert, ClipboardList, Milestone, Scale, GitBranch, DownloadCloud, Share2Icon, BookText } from 'lucide-react';
 import NextImage from 'next/image';
 import { cn } from '@/lib/utils';
 import PlaceholderChart from './PlaceholderChart';
@@ -84,7 +84,7 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
     return items.map(item => item.replace(/\s+/g, '-').toLowerCase());
   }
 
-  const sectionIconSize = 22; // Slightly larger icons
+  const sectionIconSize = 22; 
   const sectionIcons = {
     executiveSummary: <Telescope size={sectionIconSize}/>,
     introduction: <BookOpen size={sectionIconSize}/>,
@@ -98,7 +98,7 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
     futureWork: <LightbulbIcon size={sectionIconSize}/>,
     ethicalConsiderations: <Scale size={sectionIconSize}/>,
     references: <ClipboardList size={sectionIconSize}/>,
-    appendices: <FileText size={sectionIconSize}/>,
+    appendices: <BookText size={sectionIconSize}/>, // Changed from FileText
     glossary: <BookMarked size={sectionIconSize}/>,
     conceptualOverview: <Brain size={sectionIconSize}/>,
   };
@@ -142,8 +142,8 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
             </CardDescription>
           </div>
            <div className="flex-shrink-0 flex space-x-2.5 mt-4 sm:mt-0 self-start sm:self-center">
-             <Button variant="outline" size="sm" onClick={handleDownloadReport} className="bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-lg px-3.5 py-2 text-sm">
-                <DownloadCloud size={18} className="mr-2" /> Download JSON
+             <Button variant="outline" size="sm" onClick={handleDownloadReport} className="bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-lg px-3.5 py-2 text-sm group">
+                <DownloadCloud size={18} className="mr-2 group-hover:animate-bounce" /> Download JSON
              </Button>
            </div>
         </div>
@@ -161,9 +161,9 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
                                 src={generatedImageUrl}
                                 alt="Conceptual visualization for the research report"
                                 width={600} 
-                                height={450} // Adjusted for better aspect ratio
+                                height={450} 
                                 className="rounded-lg object-contain shadow-xl max-h-[400px] transition-transform duration-300 ease-out group-hover:scale-105"
-                                data-ai-hint="research concept"
+                                data-ai-hint="research data"
                             />
                             <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                                 <MaximizeIcon className="h-10 w-10 text-white/80" />

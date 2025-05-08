@@ -7,26 +7,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 // handleFormulateQueryAction and FormulateQueryActionState are managed by parent
-import { Loader2, Send, Lightbulb, Brain, Wand2 } from 'lucide-react'; // Changed BrainWave to Brain
+import { Loader2, Send, Lightbulb, Brain, Wand2, Search } from 'lucide-react'; 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 
 export interface QueryFormProps {
-  formAction: (payload: FormData) => void; // Passed from parent's useActionState
-  isBusy: boolean; // Directly from parent's useActionState isPending
-  value: string; // For controlled Textarea
-  onChange: (value: string) => void; // For controlled Textarea
-  // errors: { researchQuestion?: string[] } | null; // To display validation errors from parent state
+  formAction: (payload: FormData) => void; 
+  isBusy: boolean; 
+  value: string; 
+  onChange: (value: string) => void; 
 }
-
-// This initial state is now defined and managed in the parent (page.tsx)
-// export const initialFormulateQueryActionState: FormulateQueryActionState = {
-//   success: false,
-//   message: '',
-//   formulatedQueries: null,
-//   originalQuestion: '',
-//   errors: null,
-// };
 
 function SubmitButtonQueryForm() {
   const { pending } = useFormStatus();
@@ -40,7 +31,7 @@ function SubmitButtonQueryForm() {
       {pending ? (
         <Loader2 className="mr-2.5 h-5 w-5 animate-spin" />
       ) : (
-        <Wand2 className="mr-2.5 h-5 w-5 group-hover:animate-pulse transition-transform duration-200" />
+        <Search className="mr-2.5 h-5 w-5 group-hover:animate-pulse transition-transform duration-200" />
       )}
       Explore Insights
     </Button>
@@ -48,22 +39,29 @@ function SubmitButtonQueryForm() {
 }
 
 export default function QueryForm({ formAction, isBusy, value, onChange }: QueryFormProps) {
-  // No internal useActionState or toast logic here. Parent (page.tsx) handles it.
-  // const formRef = React.useRef<HTMLFormElement>(null); // Keep if direct form reset is ever needed, but controlled input is better.
 
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    // setIsBusy(true) is implicitly handled by parent's isFormulatingQueries (passed as isBusy prop)
-    // The form's `action` prop will call the `formAction` from the parent.
+    // Parent handles isBusy state
   };
 
   return (
-    <div className="w-full">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className="w-full"
+    >
       <Card className="w-full shadow-2xl card-glow-border border-primary/30 rounded-2xl overflow-hidden bg-card transform hover:shadow-primary/25 transition-all duration-400 ease-out">
         <CardHeader className="p-7 md:p-8 bg-gradient-to-br from-primary/15 via-transparent to-primary/5 border-b border-primary/25">
            <div className="flex items-center space-x-4 md:space-x-5">
-             <div className="p-4 bg-gradient-to-br from-accent to-accent/80 rounded-2xl shadow-xl border-2 border-accent/50 text-accent-foreground ring-2 ring-accent/30 ring-offset-2 ring-offset-card">
-                <Brain className="h-8 w-8 md:h-9 md:w-9"/> {/* Changed BrainWave to Brain */}
-             </div>
+             <motion.div 
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.1 }}
+                className="p-4 bg-gradient-to-br from-accent to-accent/80 rounded-2xl shadow-xl border-2 border-accent/50 text-accent-foreground ring-2 ring-accent/30 ring-offset-2 ring-offset-card"
+              >
+                <Brain className="h-8 w-8 md:h-9 md:w-9"/> 
+             </motion.div>
             <div>
               <CardTitle className="text-2xl md:text-3xl font-extrabold text-primary tracking-tight">
                 Launch Your Exploration
@@ -76,8 +74,8 @@ export default function QueryForm({ formAction, isBusy, value, onChange }: Query
         </CardHeader>
         <CardContent className="p-7 md:p-8 pt-6">
           <form
-            action={formAction} // Use formAction from parent
-            onSubmit={handleFormSubmit} // Optional: if any client-side logic needed before parent's action
+            action={formAction} 
+            onSubmit={handleFormSubmit}
             className="space-y-6"
           >
             <div>
@@ -87,7 +85,7 @@ export default function QueryForm({ formAction, isBusy, value, onChange }: Query
               </Label>
               <Textarea
                 id="researchQuestion"
-                name="researchQuestion" // Name attribute is crucial for FormData
+                name="researchQuestion" 
                 rows={7}
                 placeholder="e.g., Explore the multifaceted impacts of generative AI on the future of creative professions, considering ethical dilemmas, economic shifts, and the evolution of human-AI collaboration..."
                 className={cn(
@@ -99,12 +97,10 @@ export default function QueryForm({ formAction, isBusy, value, onChange }: Query
                 minLength={10}
                 maxLength={1500}
                 disabled={isBusy}
-                value={value} // Controlled component
-                onChange={(e) => onChange(e.target.value)} // Controlled component
-                aria-describedby="question-error-message" // For potential error display linked by parent
+                value={value} 
+                onChange={(e) => onChange(e.target.value)} 
+                aria-describedby="question-error-message" 
               />
-              {/* Error display can be passed as a prop if needed, e.g., props.errors?.researchQuestion */}
-              {/* <p id="question-error-message" className="text-sm text-destructive mt-1">{props.errors?.researchQuestion?.join(', ')}</p> */}
             </div>
             <CardFooter className="flex flex-col sm:flex-row justify-end items-center p-0 pt-3 space-y-3 sm:space-y-0 sm:space-x-3">
               <SubmitButtonQueryForm />
@@ -112,6 +108,6 @@ export default function QueryForm({ formAction, isBusy, value, onChange }: Query
           </form>
         </CardContent>
       </Card>
-    </div>
+    </motion.div>
   );
 }
