@@ -19,7 +19,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
-import { motion } from 'framer-motion';
 
 export interface ResearchReportDisplayProps {
   report: GenerateResearchReportOutput;
@@ -28,12 +27,8 @@ export interface ResearchReportDisplayProps {
 }
 
 const Section: React.FC<{ title: string; icon?: React.ReactNode; children: React.ReactNode; className?: string, defaultOpen?: boolean, value: string }> = ({ title, icon, children, className, defaultOpen = false, value }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 15, scale: 0.98 }}
-    animate={{ opacity: 1, y: 0, scale: 1 }}
-    transition={{ duration: 0.35, ease: "easeOut", delay: 0.1 }}
-  >
-    <AccordionItem value={value} className={cn('border-b-0 mb-3.5 rounded-xl overflow-hidden shadow-lg bg-card hover:shadow-primary/15 transition-all duration-300 card-glow-border', className)}>
+  <div>
+    <AccordionItem value={value} className={cn('border-b-0 mb-3.5 rounded-xl overflow-hidden shadow-lg bg-card hover:shadow-primary/15 transition-all duration-300', className)}>
       <AccordionTrigger className="py-4 px-6 hover:no-underline hover:bg-secondary/70 dark:hover:bg-secondary/35 transition-colors duration-200 rounded-t-xl data-[state=open]:rounded-b-none data-[state=open]:border-b data-[state=open]:border-border/80 data-[state=open]:bg-secondary/50 dark:data-[state=open]:bg-secondary/25 group">
         <h3 className="text-lg md:text-xl font-semibold flex items-center text-primary group-hover:text-accent transition-colors duration-200">
           {icon && <span className="mr-3.5 text-accent group-data-[state=open]:text-primary transition-colors duration-200">{icon}</span>}
@@ -46,7 +41,7 @@ const Section: React.FC<{ title: string; icon?: React.ReactNode; children: React
         </div>
       </AccordionContent>
     </AccordionItem>
-  </motion.div>
+  </div>
 );
 
 export default function ResearchReportDisplay({ report, originalQuestion, generatedImageUrl }: ResearchReportDisplayProps) {
@@ -98,7 +93,7 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
     futureWork: <LightbulbIcon size={sectionIconSize}/>,
     ethicalConsiderations: <Scale size={sectionIconSize}/>,
     references: <ClipboardList size={sectionIconSize}/>,
-    appendices: <BookText size={sectionIconSize}/>, // Changed from FileText
+    appendices: <BookText size={sectionIconSize}/>, 
     glossary: <BookMarked size={sectionIconSize}/>,
     conceptualOverview: <Brain size={sectionIconSize}/>,
   };
@@ -117,22 +112,15 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
   };
   
   return (
-    <motion.div
-        initial={{ opacity: 0, y: 25, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.5, ease: "circOut", delay: 0.25 }}
-      >
-    <Card className="w-full shadow-2xl border-primary/30 rounded-2xl overflow-hidden bg-gradient-to-br from-card via-background/5 to-card transform transition-all duration-500 hover:shadow-primary/35">
+    <div>
+    <Card className="w-full shadow-2xl border-primary/30 rounded-2xl overflow-hidden bg-gradient-to-br from-card via-background/5 to-card">
       <CardHeader className="p-7 md:p-8 bg-gradient-to-r from-primary/95 via-primary to-primary/90 text-primary-foreground border-b border-primary/50">
         <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
-          <motion.div 
+          <div 
             className="p-4 bg-gradient-to-br from-accent to-accent/70 rounded-2xl shadow-xl border-2 border-accent/60 flex-shrink-0 ring-2 ring-accent/40 ring-offset-2 ring-offset-primary"
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.2 }}
             >
             <FileJson className="h-9 w-9 md:h-11 md:w-11 text-accent-foreground" />
-          </motion.div>
+          </div>
           <div className="flex-grow">
             <CardTitle className="text-2xl md:text-3xl font-extrabold tracking-tight">
               {report.title || "Generated Research Report"}
@@ -143,7 +131,7 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
           </div>
            <div className="flex-shrink-0 flex space-x-2.5 mt-4 sm:mt-0 self-start sm:self-center">
              <Button variant="outline" size="sm" onClick={handleDownloadReport} className="bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-lg px-3.5 py-2 text-sm group">
-                <DownloadCloud size={18} className="mr-2 group-hover:animate-bounce" /> Download JSON
+                <DownloadCloud size={18} className="mr-2" /> Download JSON
              </Button>
            </div>
         </div>
@@ -154,7 +142,7 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
           <Accordion type="multiple" defaultValue={getDefaultOpenAccordionItems()} className="w-full space-y-4">
             {generatedImageUrl && (
               <Section title="Visual Conceptualization" icon={sectionIcons.conceptualOverview} value="conceptual-overview" defaultOpen>
-                 <div className="my-5 p-4 border border-border/80 rounded-xl bg-secondary/40 dark:bg-secondary/15 shadow-lg flex justify-center items-center overflow-hidden card-glow-border">
+                 <div className="my-5 p-4 border border-border/80 rounded-xl bg-secondary/40 dark:bg-secondary/15 shadow-lg flex justify-center items-center overflow-hidden">
                     <DialogTrigger asChild>
                         <div className="relative overflow-hidden rounded-lg cursor-pointer group">
                             <NextImage
@@ -162,7 +150,7 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
                                 alt="Conceptual visualization for the research report"
                                 width={600} 
                                 height={450} 
-                                className="rounded-lg object-contain shadow-xl max-h-[400px] transition-transform duration-300 ease-out group-hover:scale-105"
+                                className="rounded-lg object-contain shadow-xl max-h-[400px]"
                                 data-ai-hint="research data"
                             />
                             <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
@@ -309,6 +297,6 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
         <p className="text-base text-muted-foreground w-full">This comprehensive report was meticulously generated by ScholarAI using advanced AI models.</p>
       </CardFooter>
     </Card>
-    </motion.div>
+    </div>
   );
 }

@@ -7,10 +7,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 // handleFormulateQueryAction and FormulateQueryActionState are managed by parent
-import { Loader2, Send, Lightbulb, Brain, Wand2, Search } from 'lucide-react'; 
+import { Loader2, Search, Lightbulb, Brain, Wand2 } from 'lucide-react'; 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
 
 export interface QueryFormProps {
   formAction: (payload: FormData) => void; 
@@ -25,7 +24,7 @@ function SubmitButtonQueryForm() {
     <Button
       type="submit"
       disabled={pending}
-      className="w-full sm:w-auto mt-4 text-base py-3.5 px-8 shadow-xl hover:shadow-primary/50 bg-gradient-to-br from-primary via-primary/85 to-primary/70 text-primary-foreground rounded-xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-all duration-300 ease-out group hover:scale-[1.03] active:scale-[0.97] transform hover:-translate-y-0.5 active:translate-y-0 focus:outline-none focus-visible:ring-offset-background"
+      className="w-full sm:w-auto mt-4 text-base py-3.5 px-8 shadow-xl hover:shadow-primary/50 bg-gradient-to-br from-primary via-primary/85 to-primary/70 text-primary-foreground rounded-xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-all duration-300 ease-out group"
       aria-label="Formulate Queries and Begin Exploration"
     >
       {pending ? (
@@ -45,23 +44,17 @@ export default function QueryForm({ formAction, isBusy, value, onChange }: Query
   };
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
+    <div 
       className="w-full"
     >
-      <Card className="w-full shadow-2xl card-glow-border border-primary/30 rounded-2xl overflow-hidden bg-card transform hover:shadow-primary/25 transition-all duration-400 ease-out">
+      <Card className="w-full shadow-2xl border-primary/30 rounded-2xl overflow-hidden bg-card">
         <CardHeader className="p-7 md:p-8 bg-gradient-to-br from-primary/15 via-transparent to-primary/5 border-b border-primary/25">
            <div className="flex items-center space-x-4 md:space-x-5">
-             <motion.div 
-                initial={{ scale: 0.5, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.1 }}
+             <div 
                 className="p-4 bg-gradient-to-br from-accent to-accent/80 rounded-2xl shadow-xl border-2 border-accent/50 text-accent-foreground ring-2 ring-accent/30 ring-offset-2 ring-offset-card"
               >
                 <Brain className="h-8 w-8 md:h-9 md:w-9"/> 
-             </motion.div>
+             </div>
             <div>
               <CardTitle className="text-2xl md:text-3xl font-extrabold text-primary tracking-tight">
                 Launch Your Exploration
@@ -108,6 +101,6 @@ export default function QueryForm({ formAction, isBusy, value, onChange }: Query
           </form>
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 }

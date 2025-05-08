@@ -120,53 +120,11 @@
 }
 
 @layer components {
-  .card-glow-border {
-    position: relative;
-    overflow: hidden; 
-  }
-
-  .card-glow-border::before {
-    content: "";
-    position: absolute;
-    inset: -1px; /* Slightly larger to ensure full edge coverage */
-    border-radius: inherit; 
-    padding: 2px; /* Thickness of the glow */
-    background: conic-gradient(from 0deg at 50% 50%, hsl(var(--accent) / 0.4), hsl(var(--primary) / 0.4), hsl(var(--accent) / 0.4), hsl(var(--primary) / 0.4), hsl(var(--accent) / 0.4));
-    -webkit-mask: 
-      linear-gradient(#fff 0 0) content-box, 
-      linear-gradient(#fff 0 0);
-    mask: 
-      linear-gradient(#fff 0 0) content-box, 
-      linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    z-index: -1; 
-    opacity: 0;
-    transition: opacity 0.4s ease-in-out;
-    animation: rotateGlow 8s linear infinite paused; /* Paused by default */
-  }
-  
-  .card-glow-border:hover::before {
-    opacity: 1;
-    animation-play-state: running; /* Play animation on hover */
-  }
-
-  @keyframes rotateGlow {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
-  }
-
   /* Hero section specific styles */
   .hero-title {
     @apply text-4xl font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl;
-    background: linear-gradient(to right, hsl(var(--primary)), hsl(var(--accent)));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 2px 10px hsl(var(--primary) / 0.2);
+    /* Removed gradient and text shadow for simpler look */
+    color: hsl(var(--primary)); 
   }
 
   .hero-subtitle {
@@ -175,9 +133,5 @@
   
   .section-title {
     @apply text-2xl font-bold tracking-tight text-primary sm:text-3xl md:text-4xl;
-  }
-
-  .step-indicator {
-    @apply flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground font-bold text-lg shadow-md;
   }
 }

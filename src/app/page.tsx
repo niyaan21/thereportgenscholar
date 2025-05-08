@@ -45,7 +45,6 @@ import {
 } from "@/components/ui/dialog"
 import NextImage from 'next/image';
 import { cn } from '@/lib/utils';
-import { motion, AnimatePresence } from 'framer-motion';
 
 type AppState = 'initial' | 'queries_formulated' | 'summary_generated' | 'report_generated';
 
@@ -109,7 +108,7 @@ export default function ScholarAIPage() {
       setTheme(localTheme);
     } else {
       const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setTheme(prefersDark ? 'dark' : 'light'); // Default to light if system not dark
+      setTheme(prefersDark ? 'dark' : 'light'); 
     }
   }, []);
 
@@ -120,7 +119,7 @@ export default function ScholarAIPage() {
     } else if (theme === 'light') {
       document.documentElement.classList.remove('dark');
       localStorage.setItem('theme', 'light');
-    } else { // system
+    } else { 
       localStorage.removeItem('theme');
       if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
         document.documentElement.classList.add('dark');
@@ -143,7 +142,7 @@ export default function ScholarAIPage() {
         toast({ title: "🚦 Engine Stalled!", description, variant: 'destructive', duration: 7000 });
       }
     }
-  }, [formulateQueryState, isFormulatingQueries, toast]); // Removed handleQueriesFormulatedCallback from deps
+  }, [formulateQueryState, isFormulatingQueries, toast, handleQueriesFormulatedCallback]);
 
   useEffect(() => {
     if (!isSynthesizingResearch && synthesizeResearchState.message) {
@@ -158,7 +157,7 @@ export default function ScholarAIPage() {
         toast({ title: "🛠️ Synthesis Stumbled!", description: description, variant: 'destructive', duration: 9000 });
       }
     }
-  }, [synthesizeResearchState, isSynthesizingResearch, toast]); // Removed handleResearchSynthesizedCallback
+  }, [synthesizeResearchState, isSynthesizingResearch, toast, handleResearchSynthesizedCallback]);
 
 
   useEffect(() => {
@@ -189,7 +188,7 @@ export default function ScholarAIPage() {
   useEffect(() => {
     if (reportActionState.message && !isReportGenerating) { 
       if (reportActionState.success && reportActionState.researchReport) {
-        setAppState('report_generated'); // researchQuestion is already set from query formulation
+        setAppState('report_generated'); 
         toast({ title: "📜 Research Report Generated!", description: reportActionState.message, variant: 'default', duration: 7000,
           action: <ToastAction altText="View Report" onClick={() => document.getElementById('research-report-section')?.scrollIntoView({ behavior: 'smooth' })}>Jump to Report</ToastAction>
         });
@@ -233,8 +232,9 @@ export default function ScholarAIPage() {
       setResearchSummary('');
       setSummarizedPaperTitles([]);
       setGeneratedImageUrl(null);
-      // Consider explicitly resetting action states if they retain error messages or old data
-      // This might involve creating reset functions or passing null to their dispatchers if useActionState allows
+      // Reset action states by dispatching their initial states or a reset action if available.
+      // For useActionState, re-creating the form or changing its key might be necessary for a full reset.
+      // For now, this primarily resets the UI state.
     });
   };
 
@@ -248,7 +248,7 @@ export default function ScholarAIPage() {
         setSummarizedPaperTitles([]);
       } else if (appState === 'queries_formulated') {
         setAppState('initial');
-        setQueryFormInputValue(researchQuestion); // Repopulate form with the original question
+        setQueryFormInputValue(researchQuestion); 
       }
     });
   };
@@ -274,7 +274,7 @@ export default function ScholarAIPage() {
      if (!researchQuestion || researchQuestion.trim().length < 10) {
       toast({
         title: "🚫 Cannot Generate Report",
-        description: "A valid research question (min. 10 characters) is required. Please formulate queries first with a valid question.",
+        description: "The research question is too short or missing. Please ensure the original research question is valid (min. 10 characters).",
         variant: "destructive",
         duration: 6000,
       });
@@ -290,17 +290,12 @@ export default function ScholarAIPage() {
     });
   }, [researchQuestion, researchSummary, reportFormAction, toast]);
 
+
   const isLoading = isFormulatingQueries || isSynthesizingResearch || isImageGenerating || isReportGenerating;
-  
-  const pageVariants = {
-    initial: { opacity: 0, y: 20 },
-    enter: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "circOut" } },
-    exit: { opacity: 0, y: -20, transition: { duration: 0.3, ease: "circIn" } }
-  };
   
   const ActionButton: React.FC<React.ComponentProps<typeof Button> & { icon?: React.ElementType, isProcessing?: boolean, label: string, pending?: boolean }> = ({ icon: Icon, isProcessing, pending, label, children, ...props }) => (
     <Button {...props} disabled={isLoading || isProcessing || pending || props.disabled} className={cn("shadow-lg hover:shadow-xl transition-all duration-300 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex items-center justify-center group", props.className)}>
-      {(isProcessing || pending) ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : (Icon && <Icon className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />)}
+      {(isProcessing || pending) ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : (Icon && <Icon className="mr-2 h-5 w-5" />)}
       {label || children}
     </Button>
   );
@@ -310,25 +305,25 @@ export default function ScholarAIPage() {
     switch (appState) {
       case 'initial':
         content = (
-          <motion.div key="initial" initial="initial" animate="enter" exit="exit" variants={pageVariants} className="w-full">
+          <div key="initial" className="w-full">
             <QueryForm 
               formAction={formulateQueryFormAction}
               isBusy={isFormulatingQueries}
               value={queryFormInputValue}
               onChange={setQueryFormInputValue}
             />
-          </motion.div>
+          </div>
         );
         break;
       case 'queries_formulated':
         content = (
-          <motion.div key="queries" initial="initial" animate="enter" exit="exit" variants={pageVariants} className="w-full space-y-8">
-            <Card className="overflow-hidden shadow-xl card-glow-border border-accent/30 bg-card rounded-2xl transform hover:shadow-accent/20 transition-all duration-300 ease-in-out">
+          <div key="queries" className="w-full space-y-8">
+            <Card className="overflow-hidden shadow-xl border-accent/30 bg-card rounded-2xl">
               <CardHeader className="p-6 md:p-7 bg-gradient-to-br from-accent/15 via-transparent to-accent/5 border-b border-accent/25">
                 <div className="flex items-center space-x-4">
-                  <motion.div initial={{ scale: 0 }} animate={{ scale: 1, transition: { delay: 0.1, type: "spring", stiffness: 200, damping: 15} }} className="p-3.5 bg-gradient-to-br from-accent to-accent/70 rounded-full shadow-lg border-2 border-accent/50 text-accent-foreground">
+                  <div className="p-3.5 bg-gradient-to-br from-accent to-accent/70 rounded-full shadow-lg border-2 border-accent/50 text-accent-foreground">
                     <FileTextIcon className="h-7 w-7" />
-                  </motion.div>
+                  </div>
                   <div>
                     <CardTitle className="text-xl md:text-2xl font-semibold text-primary tracking-tight">
                       Your Research Focus
@@ -343,12 +338,12 @@ export default function ScholarAIPage() {
               formAction={synthesizeResearchFormAction}
               isBusy={isSynthesizingResearch}
             />
-          </motion.div>
+          </div>
         );
         break;
       case 'summary_generated':
         content = (
-          <motion.div key="summary" initial="initial" animate="enter" exit="exit" variants={pageVariants} className="w-full space-y-8">
+          <div key="summary" className="w-full space-y-8">
             <ResearchSummaryDisplay
               summary={researchSummary}
               originalQuestion={researchQuestion} 
@@ -362,7 +357,7 @@ export default function ScholarAIPage() {
                   onClick={handleGenerateFullReport}
                   variant="default"
                   size="lg"
-                  className="w-full sm:w-auto bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/80 hover:to-primary text-base py-3 px-8 rounded-lg shadow-lg hover:shadow-primary/40 transform hover:-translate-y-0.5 active:translate-y-0"
+                  className="w-full sm:w-auto bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/80 hover:to-primary text-base py-3 px-8 rounded-lg shadow-lg hover:shadow-primary/40"
                   pending={isReportGenerating}
                   icon={BookOpen}
                   label="Generate Full Report"
@@ -372,18 +367,18 @@ export default function ScholarAIPage() {
                   onClick={handleStartNewResearch}
                   variant="outline"
                   size="lg"
-                  className="w-full sm:w-auto border-input hover:bg-accent/10 hover:text-accent-foreground text-base py-3 px-8 rounded-lg shadow-md hover:shadow-accent/20 transform hover:-translate-y-0.5 active:translate-y-0"
+                  className="w-full sm:w-auto border-input hover:bg-accent/10 hover:text-accent-foreground text-base py-3 px-8 rounded-lg shadow-md hover:shadow-accent/20"
                   icon={RotateCcw}
                   label="Start New Research"
                   aria-label="Start a new research session"
                 />
             </CardFooter>
-          </motion.div>
+          </div>
         );
         break;
       case 'report_generated':
         content = (
-          <motion.div key="report" initial="initial" animate="enter" exit="exit" variants={pageVariants} className="w-full space-y-8" id="research-report-section">
+          <div key="report" className="w-full space-y-8" id="research-report-section">
             {reportActionState.researchReport && (
               <ResearchReportDisplay 
                 report={reportActionState.researchReport} 
@@ -396,23 +391,19 @@ export default function ScholarAIPage() {
                 onClick={handleStartNewResearch}
                 variant="default"
                 size="lg"
-                className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/80 hover:to-primary text-base py-3 px-8 rounded-lg shadow-lg hover:shadow-primary/40 transform hover:-translate-y-0.5 active:translate-y-0"
+                className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/80 hover:to-primary text-base py-3 px-8 rounded-lg shadow-lg hover:shadow-primary/40"
                 icon={RotateCcw}
                 label="Start New Research Session"
                 aria-label="Start a new research session"
               />
             </CardFooter>
-          </motion.div>
+          </div>
         );
         break;
       default:
         content = null;
     }
-    return (
-        <AnimatePresence mode="wait">
-            {content}
-        </AnimatePresence>
-    );
+    return content;
   };
 
 
@@ -423,31 +414,23 @@ export default function ScholarAIPage() {
         className="py-4 px-4 md:px-8 bg-card/95 text-card-foreground shadow-2xl sticky top-0 z-50 border-b border-border/50 backdrop-blur-xl"
       >
         <div className="container mx-auto flex items-center justify-between">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+          <div 
             className="flex items-center space-x-3.5 group cursor-pointer" 
             onClick={handleStartNewResearch}
           >
-            <motion.div
-              whileHover={{ scale: 1.1, rotate: -5 }}
-              whileTap={{ scale: 0.95 }}
+            <div
               className="p-3 bg-gradient-to-br from-primary via-primary/90 to-primary/75 rounded-xl shadow-lg text-primary-foreground ring-2 ring-primary/30 ring-offset-2 ring-offset-card"
             >
               <Beaker className="h-7 w-7" />
-            </motion.div>
+            </div>
             <div>
               <h1 className="text-xl md:text-2xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent group-hover:from-accent group-hover:to-primary transition-all duration-300">
                 ScholarAI
               </h1>
               <p className="text-xs text-muted-foreground -mt-0.5 tracking-wide">Augmented Intelligence for Research</p>
             </div>
-          </motion.div>
-           <motion.div 
-             initial={{ opacity: 0, x: 20 }}
-             animate={{ opacity: 1, x: 0 }}
-             transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
+          </div>
+           <div 
              className="flex items-center space-x-2"
             >
             {appState !== 'initial' && (
@@ -488,7 +471,7 @@ export default function ScholarAIPage() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-           </motion.div>
+           </div>
         </div>
       </header>
 
@@ -500,11 +483,7 @@ export default function ScholarAIPage() {
 
       <footer className="py-10 px-4 md:px-8 border-t border-border/40 bg-card/80 mt-20 backdrop-blur-sm">
         <div className="container mx-auto text-center text-sm text-muted-foreground">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
+          <div>
             <p>
               &copy; {currentYear ?? <span className="inline-block w-10 h-4 bg-muted/40 rounded-sm animate-pulse"></span>} ScholarAI. 
               <Sparkles className="inline h-4 w-4 text-accent mx-1.5"/>
@@ -521,7 +500,7 @@ export default function ScholarAIPage() {
             >
                 View Project on GitHub <ExternalLink className="ml-1.5 h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform"/>
             </a>
-          </motion.div>
+          </div>
         </div>
       </footer>
     </div>
