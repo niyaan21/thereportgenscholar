@@ -8,14 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
+// DialogTrigger removed as Dialog is controlled by parent state
 import { cn } from '@/lib/utils';
 
 export interface ResearchSummaryDisplayProps {
@@ -25,6 +18,7 @@ export interface ResearchSummaryDisplayProps {
   onGenerateImage: () => void; 
   generatedImageUrl: string | null;
   isGeneratingImage: boolean;
+  onOpenImagePreview: () => void; // Callback to open dialog
 }
 
 export default function ResearchSummaryDisplay({ 
@@ -33,7 +27,8 @@ export default function ResearchSummaryDisplay({
   summarizedPaperTitles,
   onGenerateImage,
   generatedImageUrl,
-  isGeneratingImage 
+  isGeneratingImage,
+  onOpenImagePreview
 }: ResearchSummaryDisplayProps) {
   const summaryParagraphs = summary.split(/\n\s*\n|\n(?=\s*•|\n\s*\d+\.)/).filter(p => p.trim() !== "");
 
@@ -137,8 +132,7 @@ export default function ResearchSummaryDisplay({
               )}
               {generatedImageUrl && !isGeneratingImage && (
                 <div className="mt-4 border border-border/70 rounded-xl p-4 bg-secondary/30 dark:bg-secondary/10 shadow-lg relative group">
-                  <DialogTrigger asChild>
-                    <div className="relative overflow-hidden rounded-lg cursor-pointer">
+                  <div onClick={onOpenImagePreview} className="relative overflow-hidden rounded-lg cursor-pointer">
                         <NextImage 
                         src={generatedImageUrl} 
                         alt="AI-generated conceptual visualization" 
@@ -151,10 +145,9 @@ export default function ResearchSummaryDisplay({
                             <MaximizeIcon className="h-10 w-10 text-white/80" />
                         </div>
                     </div>
-                  </DialogTrigger>
                   <div className="flex justify-between items-center mt-4 pt-4 border-t border-dashed border-border/50">
                       <p className="text-sm text-muted-foreground">
-                        AI-crafted visual. <DialogTrigger asChild><Button variant="link" className="p-0 h-auto text-xs text-accent hover:text-accent-foreground">View Fullscreen</Button></DialogTrigger>
+                        AI-crafted visual. <Button variant="link" className="p-0 h-auto text-xs text-accent hover:text-accent-foreground" onClick={onOpenImagePreview}>View Fullscreen</Button>
                       </p>
                       <Button onClick={handleImageGeneration} variant="link" size="sm" className="text-accent text-sm p-0 h-auto hover:text-accent-foreground group" disabled={isGeneratingImage}>
                           <SparklesIcon className="mr-1.5 h-4 w-4"/> Regenerate

@@ -12,7 +12,7 @@ import ResearchReportDisplay from '@/components/scholar-ai/ResearchReportDisplay
 import { Button } from '@/components/ui/button';
 import { ToastAction } from "@/components/ui/toast";
 import {
-  ArrowLeft, RotateCcw, FileTextIcon, Settings, Moon, Sun, Palette, Image as ImageIcon, Loader2, BookOpen, Brain, Search, Filter, BarChartBig, Telescope, Beaker, Sparkles, Bot, CornerDownLeft, Edit, CheckSquare, Zap, Eye, Lightbulb, FileArchive, Atom, ClipboardCopy, Share2, Download, Sigma, BarChartHorizontal, TrendingUpIcon, ScaleIcon, FlaskConical, LightbulbIcon as LightbulbLucideIcon, InfoIcon, AlertCircleIcon, CheckCircle2Icon, ExternalLink, MaximizeIcon, ChevronRight, Rocket
+  ArrowLeft, RotateCcw, FileTextIcon, Settings, Moon, Sun, Palette, Image as ImageIcon, Loader2, BookOpen, Brain, Search, Filter, BarChartBig, Telescope, Beaker, Sparkles, Bot, CornerDownLeft, Edit, CheckSquare, Zap, Eye, Lightbulb, FileArchive, Atom, ClipboardCopy, Share2, Download, Sigma, BarChartHorizontal, TrendingUpIcon, ScaleIcon, FlaskConical, LightbulbIcon as LightbulbLucideIcon, InfoIcon, AlertCircleIcon, CheckCircle2Icon, ExternalLink, MaximizeIcon, ChevronRight, Rocket, Check
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import {
@@ -41,7 +41,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  // DialogTrigger, // No longer needed here for direct toast usage
 } from "@/components/ui/dialog"
 import NextImage from 'next/image';
 import { cn } from '@/lib/utils';
@@ -98,6 +98,7 @@ export default function ScholarAIPage() {
   const [reportActionState, reportFormAction, isReportGenerating] = useActionState(handleGenerateReportAction, initialReportActionState);
   
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
+  const [isImagePreviewDialogOpen, setIsImagePreviewDialogOpen] = useState(false);
   
   const { toast } = useToast();
 
@@ -189,9 +190,10 @@ export default function ScholarAIPage() {
           variant: 'default', 
           duration: 5000,
           action: (
-            <DialogTrigger asChild>
-                <ToastAction altText="View Image" onClick={(e) => {e.preventDefault(); }}>View</ToastAction>
-            </DialogTrigger>
+            <ToastAction altText="View Image" onClick={(e) => {
+              e.preventDefault(); 
+              setIsImagePreviewDialogOpen(true);
+            }}>View</ToastAction>
           )
         });
       } else if (!imageActionState.success) { 
@@ -202,7 +204,7 @@ export default function ScholarAIPage() {
         toast({ title: "🚫 Image Generation Failed", description: fullErrorMessage, variant: 'destructive', duration: 7000 });
       }
     }
-  }, [imageActionState, isImageGenerating, toast]);
+  }, [imageActionState, isImageGenerating, toast, setIsImagePreviewDialogOpen]);
 
   useEffect(() => {
     if (reportActionState.message && !isReportGenerating) { 
@@ -233,9 +235,6 @@ export default function ScholarAIPage() {
       setResearchSummary('');
       setSummarizedPaperTitles([]);
       setGeneratedImageUrl(null);
-      // Reset action states by dispatching their initial states or a reset action if available.
-      // For useActionState, re-creating the form or changing its key might be necessary for a full reset.
-      // For now, this primarily resets the UI state.
     });
   };
 
@@ -291,6 +290,9 @@ export default function ScholarAIPage() {
     });
   }, [researchQuestion, researchSummary, reportFormAction, toast]);
 
+  const openImagePreviewDialog = useCallback(() => {
+    setIsImagePreviewDialogOpen(true);
+  }, []);
 
   const isLoading = isFormulatingQueries || isSynthesizingResearch || isImageGenerating || isReportGenerating;
   
@@ -352,6 +354,7 @@ export default function ScholarAIPage() {
               onGenerateImage={handleGenerateImageForTopic} 
               generatedImageUrl={generatedImageUrl}
               isGeneratingImage={isImageGenerating}
+              onOpenImagePreview={openImagePreviewDialog}
             />
             <CardFooter className="flex flex-col sm:flex-row justify-center items-center gap-4 p-0 pt-8 border-t border-border/40 mt-8">
                 <ActionButton
@@ -385,6 +388,7 @@ export default function ScholarAIPage() {
                 report={reportActionState.researchReport} 
                 originalQuestion={researchQuestion} 
                 generatedImageUrl={generatedImageUrl}
+                onOpenImagePreview={openImagePreviewDialog}
               />
             )}
             <CardFooter className="flex justify-center p-0 pt-8 border-t border-border/40 mt-8">
@@ -409,7 +413,7 @@ export default function ScholarAIPage() {
 
 
   return (
-    <Dialog>
+    <Dialog open={isImagePreviewDialogOpen} onOpenChange={setIsImagePreviewDialogOpen}>
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/5 to-background flex flex-col overflow-x-hidden antialiased selection:bg-accent/20 selection:text-accent-foreground">
       <header
         className="py-4 px-4 md:px-8 bg-card/95 text-card-foreground shadow-2xl sticky top-0 z-50 border-b border-border/50 backdrop-blur-xl"
@@ -458,17 +462,17 @@ export default function ScholarAIPage() {
                 <DropdownMenuItem onClick={() => setTheme('light')} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
                   <Sun className="mr-2.5 h-4 w-4 text-muted-foreground group-hover:text-yellow-500 transition-colors" />
                   <span>Light Mode</span>
-                  {theme === 'light' && <CheckCircle2Icon className="ml-auto h-4 w-4 text-accent" />}
+                  {theme === 'light' && <Check className="ml-auto h-4 w-4 text-accent" />}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setTheme('dark')} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
                   <Moon className="mr-2.5 h-4 w-4 text-muted-foreground group-hover:text-blue-400 transition-colors" />
                   <span>Dark Mode</span>
-                  {theme === 'dark' && <CheckCircle2Icon className="ml-auto h-4 w-4 text-accent" />}
+                  {theme === 'dark' && <Check className="ml-auto h-4 w-4 text-accent" />}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setTheme('system')} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
                   <Settings className="mr-2.5 h-4 w-4 text-muted-foreground transition-colors" />
                   <span>System Default</span>
-                  {theme === 'system' && <CheckCircle2Icon className="ml-auto h-4 w-4 text-accent" />}
+                  {theme === 'system' && <Check className="ml-auto h-4 w-4 text-accent" />}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

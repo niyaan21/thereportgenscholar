@@ -10,14 +10,7 @@ import { FileText, BookOpen, ListChecks, MessageSquareQuote, SearchCode, Lightbu
 import NextImage from 'next/image';
 import { cn } from '@/lib/utils';
 import PlaceholderChart from './PlaceholderChart';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+// DialogTrigger removed as Dialog is controlled by parent state
 import { Button } from '@/components/ui/button';
 import jsPDF from 'jspdf';
 
@@ -25,6 +18,7 @@ export interface ResearchReportDisplayProps {
   report: GenerateResearchReportOutput;
   originalQuestion: string;
   generatedImageUrl?: string | null;
+  onOpenImagePreview: () => void; // Callback to open dialog
 }
 
 const Section: React.FC<{ title: string; icon?: React.ReactNode; children: React.ReactNode; className?: string, defaultOpen?: boolean, value: string }> = ({ title, icon, children, className, defaultOpen = false, value }) => (
@@ -45,7 +39,7 @@ const Section: React.FC<{ title: string; icon?: React.ReactNode; children: React
   </div>
 );
 
-export default function ResearchReportDisplay({ report, originalQuestion, generatedImageUrl }: ResearchReportDisplayProps) {
+export default function ResearchReportDisplay({ report, originalQuestion, generatedImageUrl, onOpenImagePreview }: ResearchReportDisplayProps) {
   const renderParagraphs = (text: string | undefined | null) => {
     if (!text) return <p className="italic text-muted-foreground my-3.5">Content for this section was not provided in the generated report.</p>;
     return text.split(/\n\s*\n|\n(?=\s*(?:•|-|\*)\s)|\n(?=\s*\d+\.\s)/) 
@@ -215,7 +209,7 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
           <div 
             className="p-4 bg-gradient-to-br from-accent to-accent/70 rounded-2xl shadow-xl border-2 border-accent/60 flex-shrink-0 ring-2 ring-accent/40 ring-offset-2 ring-offset-primary"
             >
-            <FileText className="h-9 w-9 md:h-11 md:w-11 text-accent-foreground" /> {/* Changed icon to FileText */}
+            <FileText className="h-9 w-9 md:h-11 md:w-11 text-accent-foreground" /> 
           </div>
           <div className="flex-grow">
             <CardTitle className="text-2xl md:text-3xl font-extrabold tracking-tight">
@@ -242,21 +236,19 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
             {generatedImageUrl && (
               <Section title="Visual Conceptualization" icon={sectionIcons.conceptualOverview} value="conceptual-overview" defaultOpen>
                  <div className="my-5 p-4 border border-border/80 rounded-xl bg-secondary/40 dark:bg-secondary/15 shadow-lg flex justify-center items-center overflow-hidden">
-                    <DialogTrigger asChild>
-                        <div className="relative overflow-hidden rounded-lg cursor-pointer group">
-                            <NextImage
-                                src={generatedImageUrl}
-                                alt="Conceptual visualization for the research report"
-                                width={600} 
-                                height={450} 
-                                className="rounded-lg object-contain shadow-xl max-h-[400px]"
-                                data-ai-hint="research data"
-                            />
-                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                                <MaximizeIcon className="h-10 w-10 text-white/80" />
-                            </div>
+                    <div onClick={onOpenImagePreview} className="relative overflow-hidden rounded-lg cursor-pointer group">
+                        <NextImage
+                            src={generatedImageUrl}
+                            alt="Conceptual visualization for the research report"
+                            width={600} 
+                            height={450} 
+                            className="rounded-lg object-contain shadow-xl max-h-[400px]"
+                            data-ai-hint="research data"
+                        />
+                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                            <MaximizeIcon className="h-10 w-10 text-white/80" />
                         </div>
-                    </DialogTrigger>
+                    </div>
                 </div>
               </Section>
             )}
@@ -399,4 +391,3 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
     </div>
   );
 }
-
