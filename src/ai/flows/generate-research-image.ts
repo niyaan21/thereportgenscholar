@@ -13,6 +13,8 @@ import {z} from 'genkit';
 const GenerateResearchImageInputSchema = z.object({
   topic: z
     .string()
+    .min(5, "Topic must be at least 5 characters long.")
+    .max(200, "Topic must be at most 200 characters long.")
     .describe('The research topic or question to generate an image for.'),
 });
 export type GenerateResearchImageInput = z.infer<
@@ -46,7 +48,7 @@ const generateResearchImageFlow = ai.defineFlow(
   async input => {
     const {media} = await ai.generate({
       model: 'googleai/gemini-2.0-flash-exp', // IMPORTANT: Specific model for image generation
-      prompt: `Generate an artistic and abstract visual representation of the research topic: "${input.topic}". The image should be suitable for a scientific research context, conveying complexity and insight. Avoid text in the image.`,
+      prompt: `Create a striking and thought-provoking visual metaphor for the research topic: "${input.topic}". The image should be abstract, symbolic, and evoke a sense of depth and discovery suitable for a high-level research presentation. Emphasize dynamic elements and interconnectedness. Avoid any text or overly literal representations. Aim for a modern, digital art style.`,
       config: {
         responseModalities: ['TEXT', 'IMAGE'], // MUST provide both TEXT and IMAGE
       },

@@ -15,7 +15,7 @@ export interface FormulateQueryActionState {
   success: boolean;
   message: string;
   formulatedQueries: string[] | null;
-  originalQuestion?: string; // Added to carry the input question back to client
+  originalQuestion?: string; 
   errors: { researchQuestion?: string[] } | null;
 }
 
@@ -32,7 +32,7 @@ export async function handleFormulateQueryAction(
       message: "Invalid input.",
       errors: validation.error.flatten().fieldErrors,
       formulatedQueries: null,
-      originalQuestion: researchQuestion, // Return original input
+      originalQuestion: researchQuestion, 
     };
   }
 
@@ -43,7 +43,7 @@ export async function handleFormulateQueryAction(
       success: true,
       message: "Queries formulated successfully.",
       formulatedQueries: result.searchQueries,
-      originalQuestion: validation.data.researchQuestion, // Return validated input
+      originalQuestion: validation.data.researchQuestion, 
       errors: null,
     };
   } catch (error) {
@@ -52,7 +52,7 @@ export async function handleFormulateQueryAction(
       success: false,
       message: "Failed to formulate queries. An unexpected error occurred.",
       formulatedQueries: null,
-      originalQuestion: researchQuestion, // Return original input on error
+      originalQuestion: researchQuestion, 
       errors: null,
     };
   }
@@ -98,7 +98,6 @@ export async function handleSynthesizeResearchAction(
   try {
     formulatedQueries = JSON.parse(validation.data.queries);
   } catch (e) {
-     // Should be caught by Zod, but as a fallback
     return {
       success: false,
       message: "Failed to parse query data.",
@@ -140,7 +139,7 @@ export async function handleSynthesizeResearchAction(
       message: "Failed to synthesize research. An unexpected error occurred.",
       researchSummary: null,
       summarizedPaperTitles: null,
-      errors: null, // Or pass a generic error
+      errors: null,
     };
   }
 }
@@ -153,6 +152,7 @@ export interface GenerateImageActionState {
   errors: { topic?: string[] } | null;
 }
 
+// This schema should match GenerateResearchImageInputSchema in generate-research-image.ts
 const generateImageSchema = z.object({
   topic: z.string().min(5, "Topic must be at least 5 characters long.").max(200, "Topic must be at most 200 characters long."),
 });

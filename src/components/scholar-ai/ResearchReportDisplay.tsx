@@ -179,9 +179,13 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
       try {
         const MimeTypeMatch = generatedImageUrl.match(/data:(image\/[^;]+);/);
         const format = MimeTypeMatch ? MimeTypeMatch[1].split('/')[1].toUpperCase() : 'PNG';
-        const base64Data = generatedImageUrl.split(',')[1];
+        // const base64Data = generatedImageUrl.split(',')[1]; // This line was correct.
         
-        const imgProps = doc.getImageProperties(base64Data);
+        // Ensure only base64 data is passed if header is present
+        const base64ImageContent = generatedImageUrl.includes(',') ? generatedImageUrl.split(',')[1] : generatedImageUrl;
+
+        
+        const imgProps = doc.getImageProperties(base64ImageContent);
         const imgWidth = contentWidth * 0.75; // Use 75% of content width for the image
         const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
 
@@ -190,11 +194,12 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
           yPosition = margin;
         }
         addTextWithBreaks("Conceptual Visualization:", 12, { bold: true });
-        doc.addImage(base64Data, format, margin + (contentWidth * 0.125), yPosition, imgWidth, imgHeight);
+        doc.addImage(base64ImageContent, format, margin + (contentWidth * 0.125), yPosition, imgWidth, imgHeight);
         yPosition += imgHeight + lineHeight * 1.5;
       } catch (e) {
         console.error("Error adding image to PDF:", e);
         addTextWithBreaks("[Error embedding conceptual visualization in PDF. Please view on web.]", 10, {italic: true, color: "#AA0000"});
+         yPosition += lineHeight * 1.5;
       }
     }
 
@@ -234,8 +239,9 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
       addTextWithBreaks(result.content, 10, {}, 15);
       if (result.chartSuggestion && result.chartSuggestion.type !== 'none') {
         yPosition += lineHeight / 2;
+        const chartTitle = result.chartSuggestion.title || `${result.chartSuggestion.type.charAt(0).toUpperCase() + result.chartSuggestion.type.slice(1)} Chart`;
         addTextWithBreaks(
-          `[Chart Suggested: ${result.chartSuggestion.title || result.chartSuggestion.type}. Description: ${result.chartSuggestion.dataDescription}. Please view on the web application.]`,
+          `Visual Aid: ${chartTitle}. Data: ${result.chartSuggestion.dataDescription}. (Interactive chart available in the web application.)`,
           9, { italic: true, color: "#006699" }, 20
         );
         yPosition += lineHeight;
