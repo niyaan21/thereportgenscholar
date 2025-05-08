@@ -41,7 +41,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  // DialogTrigger, // No longer needed here for direct toast usage
 } from "@/components/ui/dialog"
 import NextImage from 'next/image';
 import { cn } from '@/lib/utils';
@@ -105,10 +104,11 @@ export default function ScholarAIPage() {
   const handleQueriesFormulatedCallback = useCallback((queries: string[], question: string) => {
     startTransition(() => {
       setResearchQuestion(question); 
+      setQueryFormInputValue(question); // Keep original question in input if user goes back
       setFormulatedQueries(queries);
       setAppState('queries_formulated');
       setGeneratedImageUrl(null); 
-      setQueryFormInputValue(''); 
+      // setQueryFormInputValue(''); // No longer clearing input, user might want to edit slightly
     });
   }, []);
 
@@ -235,6 +235,10 @@ export default function ScholarAIPage() {
       setResearchSummary('');
       setSummarizedPaperTitles([]);
       setGeneratedImageUrl(null);
+      // Reset action states manually if needed, though typically they reset on next call
+      // However, to clear any potential error messages from previous runs:
+      // formulateQueryState.message = ''; formulateQueryState.errors = null; // This is not directly modifiable
+      // Instead, re-initialize or rely on the useActionState hook's behavior.
     });
   };
 
@@ -247,31 +251,42 @@ export default function ScholarAIPage() {
         setResearchSummary(''); 
         setSummarizedPaperTitles([]);
       } else if (appState === 'queries_formulated') {
+        // When going back from formulated queries, repopulate the input with the original question
         setAppState('initial');
-        setQueryFormInputValue(researchQuestion); 
+        setQueryFormInputValue(researchQuestion); // researchQuestion holds the original formulated question
       }
     });
   };
   
-  const handleGenerateImageForTopic = useCallback(() => { 
-    if (!researchQuestion || researchQuestion.trim().length < 5) {
+  const handleGenerateImageForTopic = useCallback(() => {
+    let topicForImage = researchQuestion.trim(); 
+    
+    if (!topicForImage || topicForImage.length < 5) {
       toast({
         title: "🚫 Cannot Generate Image",
-        description: "A valid research question (min. 5 characters) is required. Please ensure your initial question is valid.",
+        description: "A valid research question (min. 5 characters) is required to generate a visual concept.",
         variant: "destructive",
         duration: 6000,
       });
       return;
     }
+
+    // Truncate if longer than 200 characters for image generation topic
+    if (topicForImage.length > 200) {
+      topicForImage = topicForImage.substring(0, 200);
+    }
+
     startTransition(() => {
       const formData = new FormData();
-      formData.append('topic', researchQuestion.trim()); 
+      formData.append('topic', topicForImage); 
       imageFormAction(formData);
     });
   }, [researchQuestion, imageFormAction, toast]);
 
+
   const handleGenerateFullReport = useCallback(() => {
-     if (!researchQuestion || researchQuestion.trim().length < 10) {
+    const currentResearchQuestion = researchQuestion.trim();
+     if (!currentResearchQuestion || currentResearchQuestion.length < 10) {
       toast({
         title: "🚫 Cannot Generate Report",
         description: "The research question is too short or missing. Please ensure the original research question is valid (min. 10 characters).",
@@ -282,7 +297,7 @@ export default function ScholarAIPage() {
     }
     startTransition(() => {
       const formData = new FormData();
-      formData.append('researchQuestion', researchQuestion.trim());
+      formData.append('researchQuestion', currentResearchQuestion);
       if (researchSummary && researchSummary.trim().length > 0) {
         formData.append('summary', researchSummary.trim());
       }
@@ -422,6 +437,10 @@ export default function ScholarAIPage() {
           <div 
             className="flex items-center space-x-3.5 group cursor-pointer" 
             onClick={handleStartNewResearch}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleStartNewResearch()}
+            aria-label="Start new research"
           >
             <div
               className="p-3 bg-gradient-to-br from-primary via-primary/90 to-primary/75 rounded-xl shadow-lg text-primary-foreground ring-2 ring-primary/30 ring-offset-2 ring-offset-card"
@@ -528,3 +547,5 @@ export default function ScholarAIPage() {
     </Dialog>
   );
 }
+
+    
