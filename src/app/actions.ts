@@ -1,25 +1,26 @@
 // src/app/actions.ts
 'use server';
 
-import { formulateResearchQuery, type FormulateResearchQueryInput } from '@/ai/flows/formulate-research-query';
-import { summarizeResearchPapers, type SummarizeResearchPapersInput } from '@/ai/flows/summarize-research-papers';
-import { generateResearchImage, type GenerateResearchImageInput } from '@/ai/flows/generate-research-image';
+import { formulateResearchQuery, type FormulateResearchQueryInput, type FormulateResearchQueryOutput } from '@/ai/flows/formulate-research-query';
+import { summarizeResearchPapers, type SummarizeResearchPapersInput, type SummarizeResearchPapersOutput } from '@/ai/flows/summarize-research-papers';
+import { generateResearchImage, type GenerateResearchImageInput, type GenerateResearchImageOutput } from '@/ai/flows/generate-research-image';
 import { generateResearchReport, type GenerateResearchReportInput, type GenerateResearchReportOutput } from '@/ai/flows/generate-research-report';
 import { z } from 'zod';
 
 const formulateQuerySchema = z.object({
-  researchQuestion: z.string().min(10, "Research question must be at least 10 characters long.").max(500, "Research question must be at most 500 characters long."),
+  researchQuestion: z.string().min(10, "Research question must be at least 10 characters long.").max(1500, "Research question must be at most 1500 characters long."),
 });
 
 export interface FormulateQueryActionState {
   success: boolean;
   message: string;
   formulatedQueries: string[] | null;
+  originalQuestion?: string; // Added to carry the input question back to client
   errors: { researchQuestion?: string[] } | null;
 }
 
 export async function handleFormulateQueryAction(
-  prevState: FormulateQueryActionState, 
+  prevState: FormulateQueryActionState,
   formData: FormData
 ): Promise<FormulateQueryActionState> {
   const researchQuestion = formData.get('researchQuestion') as string;
@@ -31,6 +32,7 @@ export async function handleFormulateQueryAction(
       message: "Invalid input.",
       errors: validation.error.flatten().fieldErrors,
       formulatedQueries: null,
+      originalQuestion: researchQuestion, // Return original input
     };
   }
 
@@ -41,6 +43,7 @@ export async function handleFormulateQueryAction(
       success: true,
       message: "Queries formulated successfully.",
       formulatedQueries: result.searchQueries,
+      originalQuestion: validation.data.researchQuestion, // Return validated input
       errors: null,
     };
   } catch (error) {
@@ -49,17 +52,29 @@ export async function handleFormulateQueryAction(
       success: false,
       message: "Failed to formulate queries. An unexpected error occurred.",
       formulatedQueries: null,
+      originalQuestion: researchQuestion, // Return original input on error
       errors: null,
     };
   }
 }
 
+const synthesizeResearchSchema = z.object({
+  queries: z.string().refine((val) => {
+    try {
+      const parsed = JSON.parse(val);
+      return Array.isArray(parsed) && parsed.every(q => typeof q === 'string');
+    } catch {
+      return false;
+    }
+  }, { message: "Invalid queries format."}),
+});
+
 export interface SynthesizeResearchActionState {
   success: boolean;
   message: string;
   researchSummary: string | null;
-  summarizedPaperTitles: string[] | null; 
-  errors: any | null; 
+  summarizedPaperTitles: string[] | null;
+  errors: { queries?: string[] } | null;
 }
 
 export async function handleSynthesizeResearchAction(
@@ -67,24 +82,30 @@ export async function handleSynthesizeResearchAction(
   formData: FormData
 ): Promise<SynthesizeResearchActionState> {
   const queriesJson = formData.get('queries') as string;
-  let formulatedQueries: string[] = [];
+  
+  const validation = synthesizeResearchSchema.safeParse({ queries: queriesJson });
+  if (!validation.success) {
+    return {
+      success: false,
+      message: "Invalid query data provided for synthesis.",
+      researchSummary: null,
+      summarizedPaperTitles: null,
+      errors: validation.error.flatten().fieldErrors,
+    };
+  }
 
-  if (queriesJson) {
-    try {
-      formulatedQueries = JSON.parse(queriesJson);
-      if (!Array.isArray(formulatedQueries) || !formulatedQueries.every(q => typeof q === 'string')) {
-        throw new Error("Invalid queries format.");
-      }
-    } catch (e) {
-      console.error("Failed to parse queries for synthesis:", e);
-      return {
-        success: false,
-        message: "Invalid query data provided for synthesis. Please ensure queries are correctly formatted.",
-        researchSummary: null,
-        summarizedPaperTitles: null,
-        errors: { queries: ["Failed to parse query data."] }
-      };
-    }
+  let formulatedQueries: string[] = [];
+  try {
+    formulatedQueries = JSON.parse(validation.data.queries);
+  } catch (e) {
+     // Should be caught by Zod, but as a fallback
+    return {
+      success: false,
+      message: "Failed to parse query data.",
+      researchSummary: null,
+      summarizedPaperTitles: null,
+      errors: { queries: ["Malformed JSON for queries."] }
+    };
   }
 
   if (formulatedQueries.length === 0) {
@@ -104,7 +125,7 @@ export async function handleSynthesizeResearchAction(
 
   try {
     const input: SummarizeResearchPapersInput = { papers: papersForSummary };
-    const result = await summarizeResearchPapers(input);
+    const result: SummarizeResearchPapersOutput = await summarizeResearchPapers(input);
     return {
       success: true,
       message: "Research synthesized successfully using formulated queries.",
@@ -119,7 +140,7 @@ export async function handleSynthesizeResearchAction(
       message: "Failed to synthesize research. An unexpected error occurred.",
       researchSummary: null,
       summarizedPaperTitles: null,
-      errors: null,
+      errors: null, // Or pass a generic error
     };
   }
 }
@@ -174,7 +195,7 @@ export async function handleGenerateImageAction(
 }
 
 const generateReportSchema = z.object({
-  researchQuestion: z.string().min(10, "Research question must be at least 10 characters long.").max(500, "Research question must be at most 500 characters long."),
+  researchQuestion: z.string().min(10, "Research question must be at least 10 characters long.").max(1500, "Research question must be at most 1500 characters long."),
   summary: z.string().optional(),
 });
 
@@ -203,9 +224,9 @@ export async function handleGenerateReportAction(
   }
 
   try {
-    const input: GenerateResearchReportInput = { 
+    const input: GenerateResearchReportInput = {
       researchQuestion: validation.data.researchQuestion,
-      summary: validation.data.summary
+      summary: validation.data.summary ? validation.data.summary.trim() : undefined
     };
     const result = await generateResearchReport(input);
     return {

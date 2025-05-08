@@ -1,18 +1,18 @@
 // src/app/page.tsx
 'use client';
 
-import React, { useState, useEffect, useTransition } from 'react';
-import { useActionState } from 'react';
+import React, { useState, useEffect, useTransition, useCallback } from 'react';
+import { useActionState } from 'react'; // Keep this for React 19+
 
-import QueryForm, { initialFormulateQueryActionState, type QueryFormProps } from '@/components/scholar-ai/QueryForm';
-import FormulatedQueriesDisplay, { initialSynthesizeResearchActionState, type FormulatedQueriesDisplayProps } from '@/components/scholar-ai/FormulatedQueriesDisplay';
-import ResearchSummaryDisplay, { type ResearchSummaryDisplayProps } from '@/components/scholar-ai/ResearchSummaryDisplay';
-import ResearchReportDisplay, { type ResearchReportDisplayProps } from '@/components/scholar-ai/ResearchReportDisplay';
+import QueryForm from '@/components/scholar-ai/QueryForm';
+import FormulatedQueriesDisplay from '@/components/scholar-ai/FormulatedQueriesDisplay';
+import ResearchSummaryDisplay from '@/components/scholar-ai/ResearchSummaryDisplay';
+import ResearchReportDisplay from '@/components/scholar-ai/ResearchReportDisplay';
 
 import { Button } from '@/components/ui/button';
 import { ToastAction } from "@/components/ui/toast";
 import {
-  ArrowLeft, RotateCcw, FileText, Settings, Moon, Sun, Palette, Image as ImageIcon, Loader2, BookOpen, Brain, Search, Filter, BarChartBig, Telescope, Beaker, Sparkles, Bot, CornerDownLeft, Edit, CheckSquare, Zap, Eye, Lightbulb, FileArchive, Atom, ClipboardCopy, Share2, Download, Sigma, BarChartHorizontal, TrendingUpIcon, ScaleIcon, FlaskConical, LightbulbIcon as LightbulbLucideIcon, InfoIcon, AlertCircleIcon, CheckCircle2Icon, ExternalLink, MaximizeIcon
+  ArrowLeft, RotateCcw, FileTextIcon, Settings, Moon, Sun, Palette, Image as ImageIcon, Loader2, BookOpen, Brain, Search, Filter, BarChartBig, Telescope, Beaker, Sparkles, Bot, CornerDownLeft, Edit, CheckSquare, Zap, Eye, Lightbulb, FileArchive, Atom, ClipboardCopy, Share2, Download, Sigma, BarChartHorizontal, TrendingUpIcon, ScaleIcon, FlaskConical, LightbulbIcon as LightbulbLucideIcon, InfoIcon, AlertCircleIcon, CheckCircle2Icon, ExternalLink, MaximizeIcon
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import {
@@ -44,10 +44,25 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import NextImage from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 type AppState = 'initial' | 'queries_formulated' | 'summary_generated' | 'report_generated';
+
+const initialFormulateQueryActionState: FormulateQueryActionState = {
+  success: false,
+  message: '',
+  formulatedQueries: null,
+  originalQuestion: '',
+  errors: null,
+};
+
+const initialSynthesizeResearchActionState: SynthesizeResearchActionState = {
+    success: false,
+    message: '',
+    researchSummary: null,
+    summarizedPaperTitles: null,
+    errors: null,
+};
 
 const initialImageActionState: GenerateImageActionState = {
   success: false,
@@ -66,25 +81,26 @@ const initialReportActionState: GenerateReportActionState = {
 
 export default function ScholarAIPage() {
   const [appState, setAppState] = useState<AppState>('initial');
-  const [researchQuestion, setResearchQuestion] = useState<string>('');
+  const [researchQuestion, setResearchQuestion] = useState<string>(''); // This will hold the confirmed research question
+  const [queryFormInputValue, setQueryFormInputValue] = useState<string>(''); // For controlled QueryForm textarea
+  
   const [formulatedQueries, setFormulatedQueries] = useState<string[]>([]);
   const [researchSummary, setResearchSummary] = useState<string>('');
   const [summarizedPaperTitles, setSummarizedPaperTitles] = useState<string[]>([]);
   
   const [currentYear, setCurrentYear] = useState<number | null>(null);
-  const [isTransitionPending, startTransition] = useTransition();
+  const [_isTransitionPending, startTransition] = useTransition(); // General transition pending state
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system');
 
+  // Action states
+  const [formulateQueryState, formulateQueryFormAction, isFormulatingQueries] = useActionState(handleFormulateQueryAction, initialFormulateQueryActionState);
+  const [synthesizeResearchState, synthesizeResearchFormAction, isSynthesizingResearch] = useActionState(handleSynthesizeResearchAction, initialSynthesizeResearchActionState);
   const [imageActionState, imageFormAction, isImageGenerating] = useActionState(handleGenerateImageAction, initialImageActionState);
   const [reportActionState, reportFormAction, isReportGenerating] = useActionState(handleGenerateReportAction, initialReportActionState);
+  
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
   
   const { toast } = useToast();
-
-  // States for child component busy status - managed by ScholarAIPage and passed down
-  const [isProcessingQuery, setIsProcessingQuery] = useState<boolean>(false);
-  const [isProcessingSummary, setIsProcessingSummary] = useState<boolean>(false);
-
 
   useEffect(() => {
     setCurrentYear(new Date().getFullYear());
@@ -117,6 +133,39 @@ export default function ScholarAIPage() {
     }
   }, [theme]);
   
+  // Effect for Query Formulation
+  useEffect(() => {
+    if (!isFormulatingQueries && formulateQueryState.message) { // Check if action is done and message exists
+      if (formulateQueryState.success && formulateQueryState.formulatedQueries && formulateQueryState.originalQuestion) {
+        toast({ title: "🚀 AI Engine Ignited!", description: formulateQueryState.message, variant: 'default', duration: 5000 });
+        // Call the callback with the original question from the action state
+        handleQueriesFormulatedCallback(formulateQueryState.formulatedQueries, formulateQueryState.originalQuestion);
+      } else if (!formulateQueryState.success) {
+        let description = formulateQueryState.message;
+        if (formulateQueryState.errors?.researchQuestion) {
+          description += ` ${formulateQueryState.errors.researchQuestion.join(' ')}`;
+        }
+        toast({ title: "🚦 Engine Stalled!", description, variant: 'destructive', duration: 7000 });
+      }
+    }
+  }, [formulateQueryState, isFormulatingQueries]); // Removed handleQueriesFormulatedCallback from deps
+
+  // Effect for Research Synthesis
+  useEffect(() => {
+    if (!isSynthesizingResearch && synthesizeResearchState.message) {
+      if (synthesizeResearchState.success && synthesizeResearchState.researchSummary && synthesizeResearchState.summarizedPaperTitles) {
+        toast({ title: "💡 Profound Insights Uncovered!", description: synthesizeResearchState.message, variant: 'default', duration: 7000 });
+        handleResearchSynthesizedCallback(synthesizeResearchState.researchSummary, synthesizeResearchState.summarizedPaperTitles);
+      } else if (!synthesizeResearchState.success) {
+        let description = synthesizeResearchState.message;
+        if (synthesizeResearchState.errors?.queries) {
+            description += ` ${synthesizeResearchState.errors.queries.join(' ')}`;
+        }
+        toast({ title: "🛠️ Synthesis Stumbled!", description: description, variant: 'destructive', duration: 9000 });
+      }
+    }
+  }, [synthesizeResearchState, isSynthesizingResearch]); // Removed handleResearchSynthesizedCallback from deps
+
 
   useEffect(() => {
     if (imageActionState.message && !isImageGenerating) { 
@@ -129,7 +178,7 @@ export default function ScholarAIPage() {
           duration: 5000,
           action: (
             <DialogTrigger asChild>
-                <ToastAction altText="View Image" onClick={(e) => e.preventDefault()}>View</ToastAction>
+                <ToastAction altText="View Image" onClick={(e) => {e.preventDefault(); /* Dialog should open */ }}>View</ToastAction>
             </DialogTrigger>
           )
         });
@@ -146,7 +195,7 @@ export default function ScholarAIPage() {
   useEffect(() => {
     if (reportActionState.message && !isReportGenerating) { 
       if (reportActionState.success && reportActionState.researchReport) {
-        setResearchQuestion(reportActionState.researchReport.title); // Update research question for consistency if report generates its own.
+        setResearchQuestion(reportActionState.researchReport.title); 
         setAppState('report_generated');
         toast({ title: "📜 Research Report Generated!", description: reportActionState.message, variant: 'default', duration: 7000,
           action: <ToastAction altText="View Report" onClick={() => document.getElementById('research-report-section')?.scrollIntoView({ behavior: 'smooth' })}>Jump to Report</ToastAction>
@@ -164,39 +213,35 @@ export default function ScholarAIPage() {
     }
   }, [reportActionState, isReportGenerating, toast]);
 
-  const handleQueriesFormulatedCallback = (queries: string[], question: string) => {
+  const handleQueriesFormulatedCallback = useCallback((queries: string[], question: string) => {
     startTransition(() => {
-      setResearchQuestion(question); // This is the original user question
+      setResearchQuestion(question); // Set the confirmed research question for the app
       setFormulatedQueries(queries);
       setAppState('queries_formulated');
       setGeneratedImageUrl(null); 
-      // setResearchReport(null); // Keep previous report if user goes back and forth? Or clear? Clearing for now.
+      setQueryFormInputValue(''); // Clear the input form value
     });
-    setIsProcessingQuery(false); // Reset busy state for QueryForm
-  };
+  }, []);
 
-  const handleResearchSynthesizedCallback = (summary: string, titles: string[]) => {
+  const handleResearchSynthesizedCallback = useCallback((summary: string, titles: string[]) => {
     startTransition(() => {
       setResearchSummary(summary);
       setSummarizedPaperTitles(titles);
       setAppState('summary_generated');
-      // setResearchReport(null); // Clear report when new summary is generated
     });
-    setIsProcessingSummary(false); // Reset busy state for FormulatedQueriesDisplay
-  };
+  }, []);
 
   const handleStartNewResearch = () => {
     startTransition(() => {
       setAppState('initial');
       setResearchQuestion('');
+      setQueryFormInputValue('');
       setFormulatedQueries([]);
       setResearchSummary('');
       setSummarizedPaperTitles([]);
       setGeneratedImageUrl(null);
-      // setResearchReport(null); // Cleared by other handlers or here
+      // Reset action states if needed, though useActionState usually handles this by keying or re-rendering
     });
-    setIsProcessingQuery(false);
-    setIsProcessingSummary(false);
   };
 
   const handleGoBack = () => {
@@ -205,11 +250,10 @@ export default function ScholarAIPage() {
         setAppState('summary_generated');
       } else if (appState === 'summary_generated') {
         setAppState('queries_formulated');
-        setResearchSummary(''); // Clear summary when going back
+        setResearchSummary(''); 
         setSummarizedPaperTitles([]);
       } else if (appState === 'queries_formulated') {
         setAppState('initial');
-        // researchQuestion and formulatedQueries are reset by QueryForm interaction or handleStartNewResearch
       }
     });
   };
@@ -223,7 +267,7 @@ export default function ScholarAIPage() {
       });
       return;
     }
-    startTransition(() => { // Ensure this is wrapped in startTransition if it involves state updates that affect pending status
+    startTransition(() => {
       const formData = new FormData();
       formData.append('topic', topicForImage.trim()); 
       imageFormAction(formData);
@@ -234,27 +278,27 @@ export default function ScholarAIPage() {
      if (!researchQuestion || researchQuestion.trim().length < 10) {
       toast({
         title: "🚫 Cannot Generate Report",
-        description: "The research question is too short or missing. Please ensure the original research question is valid (min. 10 characters).",
+        description: "A valid research question (min. 10 characters) is required. Please formulate queries first.",
         variant: "destructive",
       });
       return;
     }
-    startTransition(() => { // Ensure this is wrapped in startTransition
+    startTransition(() => {
       const formData = new FormData();
       formData.append('researchQuestion', researchQuestion.trim());
-      if (researchSummary && researchSummary.trim().length > 0) { // Ensure summary is not just whitespace
+      if (researchSummary && researchSummary.trim().length > 0) {
         formData.append('summary', researchSummary.trim());
       }
       reportFormAction(formData);
     });
   };
 
-  const isLoading = isTransitionPending || isProcessingQuery || isProcessingSummary || isImageGenerating || isReportGenerating;
+  const isLoading = isFormulatingQueries || isSynthesizingResearch || isImageGenerating || isReportGenerating;
   
   const pageVariants = {
-    initial: { opacity: 0, y: 20, scale: 0.98 },
-    enter: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.4, ease: [0.25, 1, 0.5, 1] } },
-    exit: { opacity: 0, y: -20, scale: 0.98, transition: { duration: 0.25, ease: [0.5, 0, 0.75, 0] } }
+    initial: { opacity: 0, y: 0 }, // Keep y at 0 for smoother transitions
+    enter: { opacity: 1, y: 0, transition: { duration: 0.3, ease: "easeInOut" } },
+    exit: { opacity: 0, y: 0, transition: { duration: 0.2, ease: "easeInOut" } }
   };
   
   const ActionButton: React.FC<React.ComponentProps<typeof Button> & { icon?: React.ElementType, isProcessing?: boolean, label: string }> = ({ icon: Icon, isProcessing, label, children, ...props }) => (
@@ -270,9 +314,11 @@ export default function ScholarAIPage() {
       case 'initial':
         content = (
           <QueryForm 
-            onQueriesFormulated={handleQueriesFormulatedCallback} 
-            isBusy={isProcessingQuery} 
-            setIsBusy={setIsProcessingQuery}
+            formAction={formulateQueryFormAction}
+            isBusy={isFormulatingQueries}
+            value={queryFormInputValue}
+            onChange={setQueryFormInputValue}
+            // errors={formulateQueryState.errors} // Pass errors for display if needed
           />
         );
         break;
@@ -283,7 +329,7 @@ export default function ScholarAIPage() {
               <CardHeader className="p-6 md:p-7 bg-gradient-to-br from-accent/10 via-transparent to-accent/5 border-b border-accent/20">
                 <div className="flex items-center space-x-4">
                   <div className="p-3.5 bg-gradient-to-br from-accent to-accent/70 rounded-full shadow-lg border-2 border-accent/50 text-accent-foreground">
-                    <FileText className="h-7 w-7" />
+                    <FileTextIcon className="h-7 w-7" />
                   </div>
                   <div>
                     <CardTitle className="text-xl md:text-2xl font-semibold text-accent-foreground tracking-tight">
@@ -296,9 +342,8 @@ export default function ScholarAIPage() {
             </Card>
             <FormulatedQueriesDisplay
               queries={formulatedQueries}
-              onResearchSynthesized={handleResearchSynthesizedCallback}
-              isBusy={isProcessingSummary}
-              setIsBusy={setIsProcessingSummary}
+              formAction={synthesizeResearchFormAction}
+              isBusy={isSynthesizingResearch}
             />
           </div>
         );
@@ -308,9 +353,9 @@ export default function ScholarAIPage() {
           <div className="space-y-8">
             <ResearchSummaryDisplay
               summary={researchSummary}
-              originalQuestion={researchQuestion}
+              originalQuestion={researchQuestion} // Use the confirmed researchQuestion
               summarizedPaperTitles={summarizedPaperTitles}
-              onGenerateImage={handleGenerateImageForTopic}
+              onGenerateImage={() => handleGenerateImageForTopic(researchQuestion)} // Pass confirmed researchQuestion
               generatedImageUrl={generatedImageUrl}
               isGeneratingImage={isImageGenerating}
             />
@@ -344,7 +389,7 @@ export default function ScholarAIPage() {
             {reportActionState.researchReport && (
               <ResearchReportDisplay 
                 report={reportActionState.researchReport} 
-                originalQuestion={researchQuestion} // Use current researchQuestion which might be report's title or original user input
+                originalQuestion={researchQuestion} 
                 generatedImageUrl={generatedImageUrl}
               />
             )}
@@ -366,18 +411,9 @@ export default function ScholarAIPage() {
         content = null;
     }
     return (
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={appState}
-          initial="initial"
-          animate="enter"
-          exit="exit"
-          variants={pageVariants}
-          className="w-full"
-        >
-          {content}
-        </motion.div>
-      </AnimatePresence>
+      <div key={appState} className="w-full"> {/* Simpler transition wrapper without AnimatePresence for now */}
+        {content}
+      </div>
     );
   };
 
@@ -386,36 +422,27 @@ export default function ScholarAIPage() {
     <Dialog>
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/10 to-background flex flex-col overflow-x-hidden antialiased selection:bg-accent/20 selection:text-accent-foreground">
       <header
-        className="py-4 px-4 md:px-8 bg-card/85 text-card-foreground shadow-lg sticky top-0 z-50 border-b border-border/50 backdrop-blur-lg"
+        className="py-4 px-4 md:px-8 bg-card/90 text-card-foreground shadow-lg sticky top-0 z-50 border-b border-border/60 backdrop-blur-lg"
       >
         <div className="container mx-auto flex items-center justify-between">
-          <motion.div 
+          <div 
             className="flex items-center space-x-3.5 group cursor-pointer" 
-            onClick={handleStartNewResearch} // Always allow reset
-            initial={{ opacity: 0, x: -25 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.1, ease: "circOut" }}
+            onClick={handleStartNewResearch}
           >
-            <motion.div 
-              className="p-2.5 bg-gradient-to-br from-primary to-primary/70 rounded-xl shadow-lg text-primary-foreground"
-              whileHover={{ scale: 1.1, rotate: -3, boxShadow: "0px 5px 15px hsla(var(--primary) / 0.3)" }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ type: "spring", stiffness: 300, damping: 12 }}
+            <div 
+              className="p-2.5 bg-gradient-to-br from-primary via-primary/90 to-primary/80 rounded-xl shadow-lg text-primary-foreground transition-all duration-300 group-hover:scale-105 group-hover:shadow-primary/40"
             >
               <Beaker className="h-7 w-7" />
-            </motion.div>
+            </div>
             <div>
               <h1 className="text-xl md:text-2xl font-extrabold tracking-tight text-primary group-hover:text-accent transition-colors duration-200">
                 ScholarAI
               </h1>
               <p className="text-xs text-muted-foreground -mt-0.5">Augmented Intelligence for Research</p>
             </div>
-          </motion.div>
-           <motion.div 
+          </div>
+           <div 
              className="flex items-center space-x-2"
-             initial={{ opacity: 0, x: 25 }}
-             animate={{ opacity: 1, x: 0 }}
-             transition={{ duration: 0.5, delay: 0.2, ease: "circOut" }}
             >
             {appState !== 'initial' && (
                 <Button 
@@ -435,24 +462,24 @@ export default function ScholarAIPage() {
                   <Palette className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 border-border/70 bg-popover shadow-xl rounded-lg">
-                <DropdownMenuLabel className="font-semibold text-popover-foreground px-3 py-2 text-sm">Appearance</DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-border/50" />
-                <DropdownMenuItem onClick={() => setTheme('light')} className="cursor-pointer hover:bg-accent/10 focus:bg-accent/15 text-sm px-3 py-2.5 group flex items-center">
+              <DropdownMenuContent align="end" className="w-48 border-border/70 bg-popover shadow-xl rounded-lg p-1.5">
+                <DropdownMenuLabel className="font-semibold text-popover-foreground px-2 py-1.5 text-sm">Appearance</DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-border/50 -mx-1 my-1" />
+                <DropdownMenuItem onClick={() => setTheme('light')} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
                   <Sun className="mr-2.5 h-4 w-4 text-muted-foreground group-hover:text-yellow-500 transition-colors" />
                   <span>Light Mode</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme('dark')} className="cursor-pointer hover:bg-accent/10 focus:bg-accent/15 text-sm px-3 py-2.5 group flex items-center">
+                <DropdownMenuItem onClick={() => setTheme('dark')} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
                   <Moon className="mr-2.5 h-4 w-4 text-muted-foreground group-hover:text-blue-400 transition-colors" />
                   <span>Dark Mode</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme('system')} className="cursor-pointer hover:bg-accent/10 focus:bg-accent/15 text-sm px-3 py-2.5 group flex items-center">
+                <DropdownMenuItem onClick={() => setTheme('system')} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
                   <Settings className="mr-2.5 h-4 w-4 text-muted-foreground transition-colors" />
                   <span>System Default</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-           </motion.div>
+           </div>
         </div>
       </header>
 
@@ -462,13 +489,9 @@ export default function ScholarAIPage() {
         </div>
       </main>
 
-      <footer className="py-10 px-4 md:px-8 border-t border-border/40 bg-card/70 mt-20">
+      <footer className="py-10 px-4 md:px-8 border-t border-border/40 bg-card/80 mt-20">
         <div className="container mx-auto text-center text-sm text-muted-foreground">
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4, ease: "easeOut" }}
-          >
+          <div>
             <p>
               &copy; {currentYear ?? <span className="inline-block w-10 h-4 bg-muted/40 rounded-sm animate-pulse"></span>} ScholarAI. 
               <Sparkles className="inline h-4 w-4 text-accent mx-1.5"/>
@@ -478,21 +501,22 @@ export default function ScholarAIPage() {
               Pioneering the future of research with augmented intelligence.
             </p>
              <a 
-                href="https://github.com/firebase/genkit/tree/main/examples/nextjs_template" // Example link
+                href="https://github.com/firebase/genkit/tree/main/examples/nextjs_template"
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="mt-4 inline-flex items-center text-xs text-accent hover:text-accent-foreground hover:underline"
             >
                 View Project on GitHub <ExternalLink className="ml-1.5 h-3.5 w-3.5"/>
             </a>
-          </motion.div>
+          </div>
         </div>
       </footer>
     </div>
+     {/* Dialog for Image Preview - Ensure DialogTitle and DialogDescription are present */}
     <DialogContent className="max-w-3xl md:max-w-4xl lg:max-w-5xl p-2 sm:p-3 bg-transparent border-none shadow-none">
-        <DialogHeader className="sr-only">
-            <DialogTitle>Image Preview</DialogTitle>
-            <DialogDescription>Full-size view of the generated image.</DialogDescription>
+        <DialogHeader>
+            <DialogTitle className="sr-only">Image Preview</DialogTitle>
+            <DialogDescription className="sr-only">Full-size view of the generated image.</DialogDescription>
         </DialogHeader>
         {generatedImageUrl && (
           <NextImage 
@@ -500,7 +524,7 @@ export default function ScholarAIPage() {
             alt="Full-size conceptual visualization" 
             width={1200} 
             height={1200} 
-            className="rounded-xl object-contain w-full h-auto max-h-[85vh] shadow-2xl bg-black/20 backdrop-blur-sm"
+            className="rounded-xl object-contain w-full h-auto max-h-[85vh] shadow-2xl bg-black/30 backdrop-blur-md"
             data-ai-hint="research concept"
           />
         )}
@@ -508,4 +532,3 @@ export default function ScholarAIPage() {
     </Dialog>
   );
 }
-
