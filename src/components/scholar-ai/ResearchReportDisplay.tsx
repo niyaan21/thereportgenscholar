@@ -6,19 +6,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { FileText, BookOpen, ListChecks, MessageSquareQuote, SearchCode, Lightbulb, AlertTriangle, ThumbsUp, Telescope, Edit3, BarChartHorizontalBig, Users, ShieldCheck, BookCopy, BookMarked, TrendingUp, FileJson, GanttChartSquare, PieChartIcon, LineChartIcon, BarChartIcon, ScatterChartIcon, Brain, LightbulbIcon, MaximizeIcon, Settings, FileQuestion, Activity, Library, UsersRound, ShieldAlert, ClipboardList, Milestone, Scale, GitBranch, DownloadCloud, Share2Icon, BookText, FileType } from 'lucide-react';
+import { FileText, BookOpen, ListChecks, MessageSquareQuote, SearchCode, Lightbulb, AlertTriangle, ThumbsUp, Telescope, Edit3, BarChartHorizontalBig, Users, ShieldCheck, BookCopy, BookMarked, TrendingUp, FileJson, GanttChartSquare, PieChartIcon, LineChartIcon, BarChartIcon, ScatterChartIcon, Brain, LightbulbIcon, MaximizeIcon, Settings, FileQuestion, Activity, Library, UsersRound, ShieldAlert, ClipboardList, Milestone, Scale, GitBranch, DownloadCloud, Share2Icon, BookText, FileType, Image as ImageIconLucide } from 'lucide-react';
 import NextImage from 'next/image';
 import { cn } from '@/lib/utils';
 import PlaceholderChart from './PlaceholderChart';
-// DialogTrigger removed as Dialog is controlled by parent state
 import { Button } from '@/components/ui/button';
 import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable'; // For better table handling if needed later
 
 export interface ResearchReportDisplayProps {
   report: GenerateResearchReportOutput;
   originalQuestion: string;
   generatedImageUrl?: string | null;
-  onOpenImagePreview: () => void; // Callback to open dialog
+  onOpenImagePreview: () => void; 
 }
 
 const Section: React.FC<{ title: string; icon?: React.ReactNode; children: React.ReactNode; className?: string, defaultOpen?: boolean, value: string }> = ({ title, icon, children, className, defaultOpen = false, value }) => (
@@ -40,27 +40,35 @@ const Section: React.FC<{ title: string; icon?: React.ReactNode; children: React
 );
 
 export default function ResearchReportDisplay({ report, originalQuestion, generatedImageUrl, onOpenImagePreview }: ResearchReportDisplayProps) {
-  const renderParagraphs = (text: string | undefined | null) => {
+  
+  const renderParagraphs = (text: string | undefined | null): JSX.Element[] | JSX.Element => {
     if (!text) return <p className="italic text-muted-foreground my-3.5">Content for this section was not provided in the generated report.</p>;
-    return text.split(/\n\s*\n|\n(?=\s*(?:•|-|\*)\s)|\n(?=\s*\d+\.\s)/) 
-               .filter(p => p.trim() !== "")
-               .map((paragraph, index) => {
-                 if (paragraph.match(/^\s*(?:•|-|\*)\s/) || paragraph.match(/^\s*\d+\.\s/)) {
-                   const listItems = paragraph.split('\n').map(item => item.trim()).filter(item => item);
-                   if (listItems.length > 0) {
-                     const listType = paragraph.match(/^\s*(\d+\.)/) ? 'ol':'ul';
-                     const ListTag = listType as keyof JSX.IntrinsicElements;
-                     return (
-                       <ListTag key={index} className={`list-${listType === 'ol' ? 'decimal' : 'disc'} list-inside mb-4.5 pl-3.5 space-y-2`}>
-                         {listItems.map((item, subIndex) => (
-                           <li key={subIndex} className="leading-relaxed text-foreground/85">{item.replace(/^\s*(?:•|-|\*|\d+\.)\s*/, '')}</li>
-                         ))}
-                       </ListTag>
-                     );
-                   }
-                 }
-                 return <p key={index} className="mb-4.5 last:mb-0 leading-relaxed text-foreground/85">{paragraph}</p>;
-               });
+  
+    // Split by double newlines, or newlines followed by list markers (bullet or numbered)
+    const paragraphs = text.split(/\n\s*\n|\n(?=\s*(?:•|-|\*|\d+\.)\s)/)
+      .filter(p => p.trim() !== "");
+  
+    return paragraphs.map((paragraph, index) => {
+      const trimmedParagraph = paragraph.trim();
+      // Check for list items
+      if (trimmedParagraph.match(/^(\s*(?:•|-|\*)\s|[ \t]*\d+\.\s+)/m)) {
+        const listItems = trimmedParagraph.split('\n').map(item => item.trim()).filter(item => item);
+        if (listItems.length > 0) {
+          const listType = listItems[0].match(/^\d+\.\s+/) ? 'ol' : 'ul';
+          const ListTag = listType as keyof JSX.IntrinsicElements;
+          return (
+            <ListTag key={index} className={`list-${listType === 'ol' ? 'decimal' : 'disc'} list-inside mb-4.5 pl-3.5 space-y-1.5`}>
+              {listItems.map((item, subIndex) => (
+                <li key={subIndex} className="leading-relaxed text-foreground/85">
+                  {item.replace(/^\s*(?:•|-|\*|\d+\.)\s*/, '')}
+                </li>
+              ))}
+            </ListTag>
+          );
+        }
+      }
+      return <p key={index} className="mb-4.5 last:mb-0 leading-relaxed text-foreground/85">{trimmedParagraph}</p>;
+    });
   };
 
   const getDefaultOpenAccordionItems = () => {
@@ -107,40 +115,97 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
   };
 
   const handleDownloadReportPdf = () => {
-    const doc = new jsPDF();
-    let yPosition = 15;
+    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+    let yPosition = 40;
     const pageHeight = doc.internal.pageSize.height;
-    const margin = 15;
-    const lineHeight = 7;
-    const contentWidth = doc.internal.pageSize.width - 2 * margin;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 40;
+    const contentWidth = pageWidth - 2 * margin;
+    const lineHeight = 14; // For 10pt font
 
-    const addTextWithBreaks = (text: string, fontSize: number, isBold = false, isItalic = false, indent = 0) => {
+    const addTextWithBreaks = (text: string, fontSize: number, styles: { bold?: boolean, italic?: boolean, color?: string } = {}, indent = 0) => {
+      if (!text || text.trim() === "") return;
       doc.setFontSize(fontSize);
-      doc.setFont(undefined, isBold ? 'bold' : (isItalic ? 'italic' : 'normal'));
-      const lines = doc.splitTextToSize(text, contentWidth - indent);
-      lines.forEach((line: string) => {
-        if (yPosition + lineHeight > pageHeight - margin) {
+      doc.setFont(undefined, styles.bold ? 'bold' : (styles.italic ? 'italic' : 'normal'));
+      if (styles.color) doc.setTextColor(styles.color);
+      else doc.setTextColor(50, 50, 50); // Default text color
+
+      const splitText = text.split(/\n\s*\n|\n(?=\s*(?:•|-|\*)\s)|\n(?=\s*\d+\.\s)/);
+
+      splitText.forEach(paragraphText => {
+        if (paragraphText.trim() === "") return;
+        
+        // Handle lists
+        if (paragraphText.match(/^(\s*(?:•|-|\*)\s|[ \t]*\d+\.\s+)/m)) {
+            const listItems = paragraphText.split('\n').map(item => item.trim()).filter(item => item);
+            listItems.forEach((item, itemIndex) => {
+                const itemMarker = item.match(/^\d+\.\s+/) ? `${itemIndex + 1}. ` : '• ';
+                const itemContent = item.replace(/^\s*(?:•|-|\*|\d+\.)\s*/, '');
+                const lines = doc.splitTextToSize(itemMarker + itemContent, contentWidth - indent - (itemMarker.length * (fontSize * 0.5))); // Approx char width
+                 lines.forEach((line: string) => {
+                    if (yPosition + lineHeight > pageHeight - margin) {
+                        doc.addPage();
+                        yPosition = margin;
+                    }
+                    doc.text(line, margin + indent + (itemMarker.length > 2 ? 0 : 10) , yPosition);
+                    yPosition += lineHeight;
+                });
+            });
+             yPosition += lineHeight / 2; // Space after list
+        } else {
+            // Handle regular paragraphs
+            const lines = doc.splitTextToSize(paragraphText, contentWidth - indent);
+            lines.forEach((line: string) => {
+                if (yPosition + lineHeight > pageHeight - margin) {
+                    doc.addPage();
+                    yPosition = margin;
+                }
+                doc.text(line, margin + indent, yPosition);
+                yPosition += lineHeight;
+            });
+            yPosition += lineHeight / 2; 
+        }
+      });
+      doc.setTextColor(50, 50, 50); // Reset color
+    };
+    
+    addTextWithBreaks(report.title || "Generated Research Report", 18, { bold: true });
+    yPosition += lineHeight;
+
+    addTextWithBreaks(`Original Research Question: ${originalQuestion}`, 11, { italic: true, color: "#555555" });
+    yPosition += lineHeight;
+
+    if (generatedImageUrl && generatedImageUrl.startsWith('data:image/')) {
+      try {
+        const MimeTypeMatch = generatedImageUrl.match(/data:(image\/[^;]+);/);
+        const format = MimeTypeMatch ? MimeTypeMatch[1].split('/')[1].toUpperCase() : 'PNG';
+        const base64Data = generatedImageUrl.split(',')[1];
+        
+        const imgProps = doc.getImageProperties(base64Data);
+        const imgWidth = contentWidth * 0.75; // Use 75% of content width for the image
+        const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+
+        if (yPosition + imgHeight > pageHeight - margin - 20) { // Check if image fits, with some buffer
           doc.addPage();
           yPosition = margin;
         }
-        doc.text(line, margin + indent, yPosition);
-        yPosition += lineHeight;
-      });
-      yPosition += lineHeight / 2; // Extra space after paragraph/section
-    };
-    
-    // Report Title
-    addTextWithBreaks(report.title || "Generated Research Report", 18, true);
-    yPosition += lineHeight;
+        addTextWithBreaks("Conceptual Visualization:", 12, { bold: true });
+        doc.addImage(base64Data, format, margin + (contentWidth * 0.125), yPosition, imgWidth, imgHeight);
+        yPosition += imgHeight + lineHeight * 1.5;
+      } catch (e) {
+        console.error("Error adding image to PDF:", e);
+        addTextWithBreaks("[Error embedding conceptual visualization in PDF. Please view on web.]", 10, {italic: true, color: "#AA0000"});
+      }
+    }
 
-    // Original Question
-    addTextWithBreaks(`Original Research Question: ${originalQuestion}`, 12, false, true);
-    yPosition += lineHeight;
 
-    // Helper to add a section
     const addSection = (title: string, content?: string | any[] | null, renderFn?: (item: any, index: number) => void) => {
       if (!content && !renderFn) return;
-      addTextWithBreaks(title, 14, true);
+       if (yPosition + lineHeight * 3 > pageHeight - margin) { // Check for section title space
+        doc.addPage();
+        yPosition = margin;
+      }
+      addTextWithBreaks(title, 14, { bold: true });
       if (typeof content === 'string') {
         addTextWithBreaks(content, 10);
       } else if (Array.isArray(content) && renderFn) {
@@ -148,7 +213,7 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
       } else if (typeof content === 'string') {
          addTextWithBreaks(content, 10);
       } else if (!content) {
-        addTextWithBreaks("Content for this section was not provided.", 10, false, true);
+        addTextWithBreaks("Content for this section was not provided.", 10, {italic: true});
       }
        yPosition += lineHeight; 
     };
@@ -158,18 +223,22 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
     addSection("Comprehensive Literature Review", report.literatureReview);
 
     addSection("Key Themes & In-Depth Discussion", report.keyThemes, (theme: any, index: number) => {
-      addTextWithBreaks(`${index + 1}. ${theme.theme}`, 12, true);
-      addTextWithBreaks(theme.discussion, 10, false, false, 5);
+      addTextWithBreaks(`${index + 1}. ${theme.theme}`, 12, { bold: true });
+      addTextWithBreaks(theme.discussion, 10, {}, 15);
     });
 
     addSection("Detailed Research Methodology", report.detailedMethodology);
     
     addSection("Results Presentation & Analysis", report.resultsAndAnalysis, (result: any, index: number) => {
-      addTextWithBreaks(result.sectionTitle, 12, true);
-      addTextWithBreaks(result.content, 10, false, false, 5);
+      addTextWithBreaks(result.sectionTitle, 12, { bold: true });
+      addTextWithBreaks(result.content, 10, {}, 15);
       if (result.chartSuggestion && result.chartSuggestion.type !== 'none') {
-        addTextWithBreaks(`Suggested Chart: ${result.chartSuggestion.title || result.chartSuggestion.type}`, 10, false, true, 10);
-        addTextWithBreaks(`Data: ${result.chartSuggestion.dataDescription}`, 10, false, true, 10);
+        yPosition += lineHeight / 2;
+        addTextWithBreaks(
+          `[Chart Suggested: ${result.chartSuggestion.title || result.chartSuggestion.type}. Description: ${result.chartSuggestion.dataDescription}. Please view on the web application.]`,
+          9, { italic: true, color: "#006699" }, 20
+        );
+        yPosition += lineHeight;
       }
     });
 
@@ -181,24 +250,25 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
 
     if (report.references && report.references.length > 0) {
         addSection("References (AI Synthesized)", report.references, (ref: string, index: number) => {
-            addTextWithBreaks(`${index + 1}. ${ref}`, 9);
+            addTextWithBreaks(`${index + 1}. ${ref}`, 9, {}, 15);
         });
     }
 
     if (report.appendices && report.appendices.length > 0) {
         addSection("Supplementary Appendices", report.appendices, (appendix: any, index: number) => {
-            addTextWithBreaks(appendix.title, 12, true);
-            addTextWithBreaks(appendix.content, 10, false, false, 5);
+            addTextWithBreaks(appendix.title, 12, { bold: true });
+            addTextWithBreaks(appendix.content, 10, {}, 15);
         });
     }
     
     if (report.glossary && report.glossary.length > 0) {
         addSection("Glossary of Key Terms", report.glossary, (item: any, index: number) => {
-            addTextWithBreaks(`${item.term}: ${item.definition}`, 9);
+            addTextWithBreaks(`${item.term}:`, 9, { bold: true });
+            addTextWithBreaks(item.definition, 9, {}, 15);
         });
     }
 
-    doc.save(`ScholarAI_Report_${report.title?.replace(/\s+/g, '_') || 'Untitled'}.pdf`);
+    doc.save(`ScholarAI_Report_${report.title?.replace(/[^\w\s]/gi, '').replace(/\s+/g, '_') || 'Untitled'}.pdf`);
   };
   
   return (
@@ -301,6 +371,7 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
                           {result.chartSuggestion.type === 'line' && <LineChartIcon className="h-5 w-5 mr-2.5 text-muted-foreground/80" />}
                           {result.chartSuggestion.type === 'pie' && <PieChartIcon className="h-5 w-5 mr-2.5 text-muted-foreground/80" />}
                           {result.chartSuggestion.type === 'scatter' && <ScatterChartIcon className="h-5 w-5 mr-2.5 text-muted-foreground/80" />}
+                          {result.chartSuggestion.type !== 'bar' && result.chartSuggestion.type !== 'line' && result.chartSuggestion.type !== 'pie' && result.chartSuggestion.type !== 'scatter' && <ImageIconLucide className="h-5 w-5 mr-2.5 text-muted-foreground/80" />}
                           Suggested Visualization: {result.chartSuggestion.title || result.chartSuggestion.type.charAt(0).toUpperCase() + result.chartSuggestion.type.slice(1) + " Chart"}
                         </h5>
                         <p className="text-sm text-muted-foreground mb-3 italic">Description: {result.chartSuggestion.dataDescription}</p>

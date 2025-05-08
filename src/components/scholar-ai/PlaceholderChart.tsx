@@ -1,15 +1,15 @@
 // src/components/scholar-ai/PlaceholderChart.tsx
 'use client';
 
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, Image as ImageIconLucide } from 'lucide-react';
 import {
   ResponsiveContainer,
   Bar,
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip as RechartsTooltip, // Keep this if used directly, or remove if only ChartTooltip is used
-  Legend as RechartsLegend, // Keep this if used directly, or remove if only ChartLegend is used
+  Tooltip as RechartsTooltip, 
+  Legend as RechartsLegend, 
   Line,
   Pie,
   Cell,
@@ -24,10 +24,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { 
   ChartConfig, 
   ChartContainer, 
-  ChartTooltip, // Use this from ui/chart
-  ChartTooltipContent, // Use this from ui/chart
-  ChartLegend, // Use this from ui/chart
-  ChartLegendContent // Use this from ui/chart
+  ChartTooltip, 
+  ChartTooltipContent,
+  ChartLegend, 
+  ChartLegendContent 
 } from '@/components/ui/chart';
 
 interface PlaceholderChartProps {
@@ -71,15 +71,13 @@ const chartConfig = {
   value: { label: 'Value', color: 'hsl(var(--chart-1))' },
 } satisfies ChartConfig;
 
-// COLORS array might not be needed if fills are directly assigned in pieSampleData or via chartConfig
-// const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
 export default function PlaceholderChart({ chartType, title, description }: PlaceholderChartProps) {
   if (chartType === 'none') {
     return (
         <Card className="border-dashed border-border/30 bg-secondary/10 mt-3 shadow-sm flex items-center justify-center h-[260px]">
             <CardContent className="p-4 text-center">
-                <TrendingUp className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
+                <ImageIconLucide className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
                 <p className="text-sm text-muted-foreground">No specific chart suggested for this section.</p>
                 <p className="text-xs text-muted-foreground/70 mt-1">Data may be qualitative or narrative.</p>
             </CardContent>
@@ -159,7 +157,7 @@ export default function PlaceholderChart({ chartType, title, description }: Plac
       ChartComponent = (
         <RechartsScatterChartPrimitive
           margin={{
-            top: 20, right: 20, bottom: 20, left: 0, // Adjusted left margin
+            top: 20, right: 20, bottom: 20, left: 0,
           }}
         >
           <CartesianGrid strokeDasharray="3 3" className="stroke-border/50"/>
@@ -184,7 +182,6 @@ export default function PlaceholderChart({ chartType, title, description }: Plac
       </CardHeader>
       <CardContent className="p-2 pt-0 h-[270px]">
         <ChartContainer config={chartConfig} className="w-full h-full">
-          {/* ResponsiveContainer is now part of ChartContainer from ui/chart */}
           {ChartComponent}
         </ChartContainer>
       </CardContent>
