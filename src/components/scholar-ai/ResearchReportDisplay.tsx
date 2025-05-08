@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { FileText, BookOpen, ListChecks, MessageSquareQuote, SearchCode, Lightbulb, AlertTriangle, ThumbsUp, Telescope, Edit3, BarChartHorizontalBig, Users, ShieldCheck, BookCopy, BookMarked, TrendingUp, FileJson, GanttChartSquare, PieChartIcon, LineChartIcon, BarChartIcon, ScatterChartIcon, Brain, LightbulbIcon, MaximizeIcon, Settings, FileQuestion, Activity, Library, UsersRound, ShieldAlert, ClipboardList, Milestone, Scale, GitBranch, DownloadCloud, Share2Icon, BookText } from 'lucide-react';
+import { FileText, BookOpen, ListChecks, MessageSquareQuote, SearchCode, Lightbulb, AlertTriangle, ThumbsUp, Telescope, Edit3, BarChartHorizontalBig, Users, ShieldCheck, BookCopy, BookMarked, TrendingUp, FileJson, GanttChartSquare, PieChartIcon, LineChartIcon, BarChartIcon, ScatterChartIcon, Brain, LightbulbIcon, MaximizeIcon, Settings, FileQuestion, Activity, Library, UsersRound, ShieldAlert, ClipboardList, Milestone, Scale, GitBranch, DownloadCloud, Share2Icon, BookText, FileType } from 'lucide-react';
 import NextImage from 'next/image';
 import { cn } from '@/lib/utils';
 import PlaceholderChart from './PlaceholderChart';
@@ -19,6 +19,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
+import jsPDF from 'jspdf';
 
 export interface ResearchReportDisplayProps {
   report: GenerateResearchReportOutput;
@@ -98,7 +99,7 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
     conceptualOverview: <Brain size={sectionIconSize}/>,
   };
 
-  const handleDownloadReport = () => {
+  const handleDownloadReportJson = () => {
     const reportString = JSON.stringify({ report, originalQuestion, generatedImageUrl }, null, 2);
     const blob = new Blob([reportString], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -110,6 +111,101 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
+
+  const handleDownloadReportPdf = () => {
+    const doc = new jsPDF();
+    let yPosition = 15;
+    const pageHeight = doc.internal.pageSize.height;
+    const margin = 15;
+    const lineHeight = 7;
+    const contentWidth = doc.internal.pageSize.width - 2 * margin;
+
+    const addTextWithBreaks = (text: string, fontSize: number, isBold = false, isItalic = false, indent = 0) => {
+      doc.setFontSize(fontSize);
+      doc.setFont(undefined, isBold ? 'bold' : (isItalic ? 'italic' : 'normal'));
+      const lines = doc.splitTextToSize(text, contentWidth - indent);
+      lines.forEach((line: string) => {
+        if (yPosition + lineHeight > pageHeight - margin) {
+          doc.addPage();
+          yPosition = margin;
+        }
+        doc.text(line, margin + indent, yPosition);
+        yPosition += lineHeight;
+      });
+      yPosition += lineHeight / 2; // Extra space after paragraph/section
+    };
+    
+    // Report Title
+    addTextWithBreaks(report.title || "Generated Research Report", 18, true);
+    yPosition += lineHeight;
+
+    // Original Question
+    addTextWithBreaks(`Original Research Question: ${originalQuestion}`, 12, false, true);
+    yPosition += lineHeight;
+
+    // Helper to add a section
+    const addSection = (title: string, content?: string | any[] | null, renderFn?: (item: any, index: number) => void) => {
+      if (!content && !renderFn) return;
+      addTextWithBreaks(title, 14, true);
+      if (typeof content === 'string') {
+        addTextWithBreaks(content, 10);
+      } else if (Array.isArray(content) && renderFn) {
+        content.forEach(renderFn);
+      } else if (typeof content === 'string') {
+         addTextWithBreaks(content, 10);
+      } else if (!content) {
+        addTextWithBreaks("Content for this section was not provided.", 10, false, true);
+      }
+       yPosition += lineHeight; 
+    };
+
+    addSection("Executive Summary", report.executiveSummary);
+    addSection("Introduction & Background", report.introduction);
+    addSection("Comprehensive Literature Review", report.literatureReview);
+
+    addSection("Key Themes & In-Depth Discussion", report.keyThemes, (theme: any, index: number) => {
+      addTextWithBreaks(`${index + 1}. ${theme.theme}`, 12, true);
+      addTextWithBreaks(theme.discussion, 10, false, false, 5);
+    });
+
+    addSection("Detailed Research Methodology", report.detailedMethodology);
+    
+    addSection("Results Presentation & Analysis", report.resultsAndAnalysis, (result: any, index: number) => {
+      addTextWithBreaks(result.sectionTitle, 12, true);
+      addTextWithBreaks(result.content, 10, false, false, 5);
+      if (result.chartSuggestion && result.chartSuggestion.type !== 'none') {
+        addTextWithBreaks(`Suggested Chart: ${result.chartSuggestion.title || result.chartSuggestion.type}`, 10, false, true, 10);
+        addTextWithBreaks(`Data: ${result.chartSuggestion.dataDescription}`, 10, false, true, 10);
+      }
+    });
+
+    addSection("Holistic Discussion of Findings", report.discussion);
+    addSection("Concluding Remarks & Implications", report.conclusion);
+    if (report.limitations) addSection("Acknowledged Limitations", report.limitations);
+    if (report.futureWork) addSection("Future Research Avenues", report.futureWork);
+    if (report.ethicalConsiderations) addSection("Ethical Considerations & Impact", report.ethicalConsiderations);
+
+    if (report.references && report.references.length > 0) {
+        addSection("References (AI Synthesized)", report.references, (ref: string, index: number) => {
+            addTextWithBreaks(`${index + 1}. ${ref}`, 9);
+        });
+    }
+
+    if (report.appendices && report.appendices.length > 0) {
+        addSection("Supplementary Appendices", report.appendices, (appendix: any, index: number) => {
+            addTextWithBreaks(appendix.title, 12, true);
+            addTextWithBreaks(appendix.content, 10, false, false, 5);
+        });
+    }
+    
+    if (report.glossary && report.glossary.length > 0) {
+        addSection("Glossary of Key Terms", report.glossary, (item: any, index: number) => {
+            addTextWithBreaks(`${item.term}: ${item.definition}`, 9);
+        });
+    }
+
+    doc.save(`ScholarAI_Report_${report.title?.replace(/\s+/g, '_') || 'Untitled'}.pdf`);
+  };
   
   return (
     <div>
@@ -119,7 +215,7 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
           <div 
             className="p-4 bg-gradient-to-br from-accent to-accent/70 rounded-2xl shadow-xl border-2 border-accent/60 flex-shrink-0 ring-2 ring-accent/40 ring-offset-2 ring-offset-primary"
             >
-            <FileJson className="h-9 w-9 md:h-11 md:w-11 text-accent-foreground" />
+            <FileText className="h-9 w-9 md:h-11 md:w-11 text-accent-foreground" /> {/* Changed icon to FileText */}
           </div>
           <div className="flex-grow">
             <CardTitle className="text-2xl md:text-3xl font-extrabold tracking-tight">
@@ -129,9 +225,12 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
               In-depth exploration for: <em className='font-semibold'>"{originalQuestion}"</em>
             </CardDescription>
           </div>
-           <div className="flex-shrink-0 flex space-x-2.5 mt-4 sm:mt-0 self-start sm:self-center">
-             <Button variant="outline" size="sm" onClick={handleDownloadReport} className="bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-lg px-3.5 py-2 text-sm group">
-                <DownloadCloud size={18} className="mr-2" /> Download JSON
+           <div className="flex-shrink-0 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2.5 mt-4 sm:mt-0 self-start sm:self-center">
+             <Button variant="outline" size="sm" onClick={handleDownloadReportJson} className="bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-lg px-3.5 py-2 text-sm group w-full sm:w-auto">
+                <FileJson size={18} className="mr-2 group-hover:animate-pulse" /> Download JSON
+             </Button>
+             <Button variant="outline" size="sm" onClick={handleDownloadReportPdf} className="bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-lg px-3.5 py-2 text-sm group w-full sm:w-auto">
+                <FileType size={18} className="mr-2 group-hover:animate-pulse" /> Download PDF
              </Button>
            </div>
         </div>
@@ -300,3 +399,4 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
     </div>
   );
 }
+
