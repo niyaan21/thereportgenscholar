@@ -1,3 +1,4 @@
+
 // src/app/page.tsx
 'use client';
 
@@ -12,7 +13,7 @@ import ResearchReportDisplay from '@/components/scholar-ai/ResearchReportDisplay
 import { Button } from '@/components/ui/button';
 import { ToastAction } from "@/components/ui/toast";
 import {
-  ArrowLeft, RotateCcw, FileTextIcon, Settings, Moon, Sun, Palette, Image as ImageIcon, Loader2, BookOpen, Brain, Search, Filter, BarChartBig, Telescope, Beaker, Sparkles, Bot, CornerDownLeft, Edit, CheckSquare, Zap, Eye, Lightbulb, FileArchive, Atom, ClipboardCopy, Share2, Download, Sigma, BarChartHorizontal, TrendingUpIcon, ScaleIcon, FlaskConical, LightbulbIcon as LightbulbLucideIcon, InfoIcon, AlertCircleIcon, CheckCircle2Icon, ExternalLink, MaximizeIcon, ChevronRight, Rocket, Check
+  ArrowLeft, RotateCcw, FileTextIcon, Settings, Moon, Sun, Palette, Image as ImageIconLucide, Loader2, BookOpen, Brain, Search, Filter, BarChartBig, Telescope, Beaker, Sparkles, Bot, CornerDownLeft, Edit, CheckSquare, Zap, Eye, Lightbulb, FileArchive, Atom, ClipboardCopy, Share2, Download, Sigma, BarChartHorizontal, TrendingUpIcon, ScaleIcon, FlaskConical, LightbulbIcon as LightbulbLucideIcon, InfoIcon, AlertCircleIcon, CheckCircle2Icon, ExternalLink, MaximizeIcon, ChevronRight, Rocket, Check
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import {
@@ -38,9 +39,9 @@ import { useToast } from '@/hooks/use-toast';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
+  DialogHeader, // Keep DialogHeader
+  DialogTitle, // Keep DialogTitle
+  DialogDescription, // Keep DialogDescription
 } from "@/components/ui/dialog"
 import NextImage from 'next/image';
 import { cn } from '@/lib/utils';
@@ -104,11 +105,10 @@ export default function ScholarAIPage() {
   const handleQueriesFormulatedCallback = useCallback((queries: string[], question: string) => {
     startTransition(() => {
       setResearchQuestion(question); 
-      setQueryFormInputValue(question); // Keep original question in input if user goes back
+      setQueryFormInputValue(question);
       setFormulatedQueries(queries);
       setAppState('queries_formulated');
       setGeneratedImageUrl(null); 
-      // setQueryFormInputValue(''); // No longer clearing input, user might want to edit slightly
     });
   }, []);
 
@@ -235,10 +235,6 @@ export default function ScholarAIPage() {
       setResearchSummary('');
       setSummarizedPaperTitles([]);
       setGeneratedImageUrl(null);
-      // Reset action states manually if needed, though typically they reset on next call
-      // However, to clear any potential error messages from previous runs:
-      // formulateQueryState.message = ''; formulateQueryState.errors = null; // This is not directly modifiable
-      // Instead, re-initialize or rely on the useActionState hook's behavior.
     });
   };
 
@@ -251,9 +247,8 @@ export default function ScholarAIPage() {
         setResearchSummary(''); 
         setSummarizedPaperTitles([]);
       } else if (appState === 'queries_formulated') {
-        // When going back from formulated queries, repopulate the input with the original question
         setAppState('initial');
-        setQueryFormInputValue(researchQuestion); // researchQuestion holds the original formulated question
+        setQueryFormInputValue(researchQuestion); 
       }
     });
   };
@@ -271,9 +266,8 @@ export default function ScholarAIPage() {
       return;
     }
 
-    // Truncate if longer than 200 characters for image generation topic
     if (topicForImage.length > 200) {
-      topicForImage = topicForImage.substring(0, 200);
+      topicForImage = topicForImage.substring(0, 195) + "..."; // Ensure it's under 200
     }
 
     startTransition(() => {
@@ -289,7 +283,7 @@ export default function ScholarAIPage() {
      if (!currentResearchQuestion || currentResearchQuestion.length < 10) {
       toast({
         title: "🚫 Cannot Generate Report",
-        description: "The research question is too short or missing. Please ensure the original research question is valid (min. 10 characters).",
+        description: "The research question is too short or missing. Please ensure a valid research question (min. 10 characters) was used to start this session.",
         variant: "destructive",
         duration: 6000,
       });
@@ -312,7 +306,7 @@ export default function ScholarAIPage() {
   const isLoading = isFormulatingQueries || isSynthesizingResearch || isImageGenerating || isReportGenerating;
   
   const ActionButton: React.FC<React.ComponentProps<typeof Button> & { icon?: React.ElementType, isProcessing?: boolean, label: string, pending?: boolean }> = ({ icon: Icon, isProcessing, pending, label, children, ...props }) => (
-    <Button {...props} disabled={isLoading || isProcessing || pending || props.disabled} className={cn("shadow-lg hover:shadow-xl transition-all duration-300 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex items-center justify-center group", props.className)}>
+    <Button {...props} disabled={isLoading || isProcessing || pending || props.disabled} className={cn("shadow-lg hover:shadow-xl transition-all duration-300 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex items-center justify-center group w-full sm:w-auto", props.className)}>
       {(isProcessing || pending) ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : (Icon && <Icon className="mr-2 h-5 w-5" />)}
       {label || children}
     </Button>
@@ -335,18 +329,18 @@ export default function ScholarAIPage() {
         break;
       case 'queries_formulated':
         content = (
-          <div key="queries" className="w-full space-y-8">
+          <div key="queries" className="w-full space-y-6 md:space-y-8">
             <Card className="overflow-hidden shadow-xl border-accent/30 bg-card rounded-2xl">
-              <CardHeader className="p-6 md:p-7 bg-gradient-to-br from-accent/15 via-transparent to-accent/5 border-b border-accent/25">
-                <div className="flex items-center space-x-4">
-                  <div className="p-3.5 bg-gradient-to-br from-accent to-accent/70 rounded-full shadow-lg border-2 border-accent/50 text-accent-foreground">
-                    <FileTextIcon className="h-7 w-7" />
+              <CardHeader className="p-4 sm:p-5 md:p-6 bg-gradient-to-br from-accent/15 via-transparent to-accent/5 border-b border-accent/25">
+                <div className="flex items-center space-x-3 sm:space-x-4">
+                  <div className="p-3 sm:p-3.5 bg-gradient-to-br from-accent to-accent/70 rounded-full shadow-lg border-2 border-accent/50 text-accent-foreground">
+                    <FileTextIcon className="h-6 w-6 sm:h-7 sm:w-7" />
                   </div>
                   <div>
-                    <CardTitle className="text-xl md:text-2xl font-semibold text-primary tracking-tight">
+                    <CardTitle className="text-lg sm:text-xl md:text-2xl font-semibold text-primary tracking-tight">
                       Your Research Focus
                     </CardTitle>
-                    <CardDescription className="text-sm text-muted-foreground mt-1 max-w-xl">The central question guiding this research endeavor: <strong className="text-foreground/90">"{researchQuestion}"</strong></CardDescription>
+                    <CardDescription className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-xl">The central question guiding this research: <strong className="text-foreground/90">"{researchQuestion}"</strong></CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -361,7 +355,7 @@ export default function ScholarAIPage() {
         break;
       case 'summary_generated':
         content = (
-          <div key="summary" className="w-full space-y-8">
+          <div key="summary" className="w-full space-y-6 md:space-y-8">
             <ResearchSummaryDisplay
               summary={researchSummary}
               originalQuestion={researchQuestion} 
@@ -371,12 +365,12 @@ export default function ScholarAIPage() {
               isGeneratingImage={isImageGenerating}
               onOpenImagePreview={openImagePreviewDialog}
             />
-            <CardFooter className="flex flex-col sm:flex-row justify-center items-center gap-4 p-0 pt-8 border-t border-border/40 mt-8">
+            <CardFooter className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4 p-0 pt-6 md:pt-8 border-t border-border/40 mt-6 md:mt-8">
                 <ActionButton
                   onClick={handleGenerateFullReport}
                   variant="default"
                   size="lg"
-                  className="w-full sm:w-auto bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/80 hover:to-primary text-base py-3 px-8 rounded-lg shadow-lg hover:shadow-primary/40"
+                  className="w-full sm:w-auto bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/80 hover:to-primary text-sm sm:text-base py-2.5 sm:py-3 px-6 sm:px-8 rounded-lg shadow-lg hover:shadow-primary/40"
                   pending={isReportGenerating}
                   icon={BookOpen}
                   label="Generate Full Report"
@@ -386,7 +380,7 @@ export default function ScholarAIPage() {
                   onClick={handleStartNewResearch}
                   variant="outline"
                   size="lg"
-                  className="w-full sm:w-auto border-input hover:bg-accent/10 hover:text-accent-foreground text-base py-3 px-8 rounded-lg shadow-md hover:shadow-accent/20"
+                  className="w-full sm:w-auto border-input hover:bg-accent/10 hover:text-accent-foreground text-sm sm:text-base py-2.5 sm:py-3 px-6 sm:px-8 rounded-lg shadow-md hover:shadow-accent/20"
                   icon={RotateCcw}
                   label="Start New Research"
                   aria-label="Start a new research session"
@@ -397,7 +391,7 @@ export default function ScholarAIPage() {
         break;
       case 'report_generated':
         content = (
-          <div key="report" className="w-full space-y-8" id="research-report-section">
+          <div key="report" className="w-full space-y-6 md:space-y-8" id="research-report-section">
             {reportActionState.researchReport && (
               <ResearchReportDisplay 
                 report={reportActionState.researchReport} 
@@ -406,12 +400,12 @@ export default function ScholarAIPage() {
                 onOpenImagePreview={openImagePreviewDialog}
               />
             )}
-            <CardFooter className="flex justify-center p-0 pt-8 border-t border-border/40 mt-8">
+            <CardFooter className="flex justify-center p-0 pt-6 md:pt-8 border-t border-border/40 mt-6 md:mt-8">
               <ActionButton
                 onClick={handleStartNewResearch}
                 variant="default"
                 size="lg"
-                className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/80 hover:to-primary text-base py-3 px-8 rounded-lg shadow-lg hover:shadow-primary/40"
+                className="w-full sm:w-auto bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/80 hover:to-primary text-sm sm:text-base py-2.5 sm:py-3 px-6 sm:px-8 rounded-lg shadow-lg hover:shadow-primary/40"
                 icon={RotateCcw}
                 label="Start New Research Session"
                 aria-label="Start a new research session"
@@ -431,11 +425,11 @@ export default function ScholarAIPage() {
     <Dialog open={isImagePreviewDialogOpen} onOpenChange={setIsImagePreviewDialogOpen}>
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/5 to-background flex flex-col overflow-x-hidden antialiased selection:bg-accent/20 selection:text-accent-foreground">
       <header
-        className="py-4 px-4 md:px-8 bg-card/95 text-card-foreground shadow-2xl sticky top-0 z-50 border-b border-border/50 backdrop-blur-xl"
+        className="py-3 sm:py-4 px-4 md:px-8 bg-card/95 text-card-foreground shadow-2xl sticky top-0 z-50 border-b border-border/50 backdrop-blur-xl"
       >
         <div className="container mx-auto flex items-center justify-between">
           <div 
-            className="flex items-center space-x-3.5 group cursor-pointer" 
+            className="flex items-center space-x-2 sm:space-x-3.5 group cursor-pointer flex-shrink min-w-0" 
             onClick={handleStartNewResearch}
             role="button"
             tabIndex={0}
@@ -443,36 +437,36 @@ export default function ScholarAIPage() {
             aria-label="Start new research"
           >
             <div
-              className="p-3 bg-gradient-to-br from-primary via-primary/90 to-primary/75 rounded-xl shadow-lg text-primary-foreground ring-2 ring-primary/30 ring-offset-2 ring-offset-card"
+              className="p-2.5 sm:p-3 bg-gradient-to-br from-primary via-primary/90 to-primary/75 rounded-lg sm:rounded-xl shadow-lg text-primary-foreground ring-2 ring-primary/30 ring-offset-2 ring-offset-card"
             >
-              <Beaker className="h-7 w-7" />
+              <Beaker className="h-6 w-6 sm:h-7 sm:w-7" />
             </div>
-            <div>
-              <h1 className="text-xl md:text-2xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent group-hover:from-accent group-hover:to-primary transition-all duration-300">
+            <div className="overflow-hidden">
+              <h1 className="text-lg sm:text-xl md:text-2xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent group-hover:from-accent group-hover:to-primary transition-all duration-300 truncate">
                 ScholarAI
               </h1>
-              <p className="text-xs text-muted-foreground -mt-0.5 tracking-wide">Augmented Intelligence for Research</p>
+              <p className="text-xs text-muted-foreground -mt-0.5 tracking-wide truncate hidden sm:block">Augmented Intelligence for Research</p>
             </div>
           </div>
            <div 
-             className="flex items-center space-x-2"
+             className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0"
             >
             {appState !== 'initial' && (
                 <Button 
                   onClick={handleGoBack} 
                   variant="ghost" 
                   size="icon"
-                  className="text-muted-foreground hover:bg-accent/10 hover:text-accent-foreground disabled:opacity-50 h-10 w-10 rounded-full"
+                  className="text-muted-foreground hover:bg-accent/10 hover:text-accent-foreground disabled:opacity-50 h-9 w-9 sm:h-10 sm:w-10 rounded-full"
                   disabled={isLoading}
                   aria-label="Go back to previous step"
                 >
-                  <ArrowLeft className="h-5 w-5" />
+                  <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
             )}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-muted-foreground hover:bg-accent/10 hover:text-accent-foreground h-10 w-10 rounded-full" aria-label="Theme settings">
-                  <Palette className="h-5 w-5" />
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:bg-accent/10 hover:text-accent-foreground h-9 w-9 sm:h-10 sm:w-10 rounded-full" aria-label="Theme settings">
+                  <Palette className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48 border-border/70 bg-popover shadow-xl rounded-lg p-1.5">
@@ -499,28 +493,28 @@ export default function ScholarAIPage() {
         </div>
       </header>
 
-      <main className="flex-grow container mx-auto px-4 sm:px-6 py-10 md:py-16">
+      <main className="flex-grow container mx-auto px-4 sm:px-6 py-8 sm:py-10 md:py-16">
         <div className="max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
             {renderCurrentStep()}
         </div>
       </main>
 
-      <footer className="py-10 px-4 md:px-8 border-t border-border/40 bg-card/80 mt-20 backdrop-blur-sm">
-        <div className="container mx-auto text-center text-sm text-muted-foreground">
+      <footer className="py-8 sm:py-10 px-4 md:px-8 border-t border-border/40 bg-card/80 mt-16 sm:mt-20 backdrop-blur-sm">
+        <div className="container mx-auto text-center text-xs sm:text-sm text-muted-foreground">
           <div>
             <p>
               &copy; {currentYear ?? <span className="inline-block w-10 h-4 bg-muted/40 rounded-sm animate-pulse"></span>} ScholarAI. 
-              <Sparkles className="inline h-4 w-4 text-accent mx-1.5"/>
+              <Sparkles className="inline h-3.5 w-3.5 sm:h-4 sm:w-4 text-accent mx-1 sm:mx-1.5"/>
               Powered by Generative AI.
             </p>
-            <p className="mt-2.5 text-xs">
+            <p className="mt-2 text-xs">
               Pioneering the future of research with augmented intelligence.
             </p>
              <a 
                 href="https://github.com/firebase/genkit/tree/main/examples/nextjs_template"
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="mt-4 inline-flex items-center text-xs text-accent hover:text-accent-foreground hover:underline group"
+                className="mt-3 sm:mt-4 inline-flex items-center text-xs text-accent hover:text-accent-foreground hover:underline group"
             >
                 View Project on GitHub <ExternalLink className="ml-1.5 h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform"/>
             </a>
@@ -528,9 +522,9 @@ export default function ScholarAIPage() {
         </div>
       </footer>
     </div>
-    <DialogContent className="max-w-3xl md:max-w-4xl lg:max-w-5xl p-2 sm:p-3 bg-transparent border-none shadow-none !rounded-xl">
+    <DialogContent className="w-[95vw] max-w-xs sm:max-w-lg md:max-w-2xl lg:max-w-4xl xl:max-w-5xl p-1 sm:p-2 bg-transparent border-none shadow-none !rounded-lg">
         <DialogHeader>
-            <DialogTitle>Image Preview</DialogTitle>
+            <DialogTitle className="sr-only">Image Preview</DialogTitle>
             <DialogDescription className="sr-only">Full-size view of the generated image.</DialogDescription>
         </DialogHeader>
         {generatedImageUrl && (
@@ -539,7 +533,7 @@ export default function ScholarAIPage() {
             alt="Full-size conceptual visualization" 
             width={1200} 
             height={1200} 
-            className="rounded-xl object-contain w-full h-auto max-h-[85vh] shadow-2xl bg-black/50 backdrop-blur-md"
+            className="rounded-lg sm:rounded-xl object-contain w-full h-auto max-h-[85svh] shadow-2xl bg-black/50 backdrop-blur-md"
             data-ai-hint="research concept"
           />
         )}
