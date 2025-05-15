@@ -13,13 +13,13 @@ import { cn } from '@/lib/utils';
 import PlaceholderChart from './PlaceholderChart';
 import { Button } from '@/components/ui/button';
 import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable'; 
+// import autoTable from 'jspdf-autotable'; // Not used in the current PDF generation logic
 
 export interface ResearchReportDisplayProps {
   report: GenerateResearchReportOutput;
   originalQuestion: string;
   generatedImageUrl?: string | null;
-  onOpenImagePreview: () => void; 
+  onOpenImagePreview: () => void;
 }
 
 const Section: React.FC<{ title: string; icon?: React.ReactNode; children: React.ReactNode; className?: string, defaultOpen?: boolean, value: string }> = ({ title, icon, children, className, defaultOpen = false, value }) => (
@@ -41,13 +41,13 @@ const Section: React.FC<{ title: string; icon?: React.ReactNode; children: React
 );
 
 export default function ResearchReportDisplay({ report, originalQuestion, generatedImageUrl, onOpenImagePreview }: ResearchReportDisplayProps) {
-  
+
   const renderParagraphs = (text: string | undefined | null): JSX.Element[] | JSX.Element => {
     if (!text) return <p className="italic text-muted-foreground my-3 sm:my-3.5 text-sm sm:text-base">Content for this section was not provided.</p>;
-  
+
     const paragraphs = text.split(/\n\s*\n|\n(?=\s*(?:•|-|\*|\d+\.)\s)/)
       .filter(p => p.trim() !== "");
-  
+
     return paragraphs.map((paragraph, index) => {
       const trimmedParagraph = paragraph.trim();
       if (trimmedParagraph.match(/^(\s*(?:•|-|\*)\s|[ \t]*\d+\.\s+)/m)) {
@@ -81,7 +81,7 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
     return items.map(item => item.replace(/\s+/g, '-').toLowerCase());
   }
 
-  const sectionIconSize = 20; // Adjusted for potentially smaller mobile views
+  const sectionIconSize = 20;
   const sectionIcons = {
     executiveSummary: <Telescope size={sectionIconSize}/>,
     introduction: <BookOpen size={sectionIconSize}/>,
@@ -95,7 +95,7 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
     futureWork: <LightbulbIcon size={sectionIconSize}/>,
     ethicalConsiderations: <Scale size={sectionIconSize}/>,
     references: <ClipboardList size={sectionIconSize}/>,
-    appendices: <BookText size={sectionIconSize}/>, 
+    appendices: <BookText size={sectionIconSize}/>,
     glossary: <BookMarked size={sectionIconSize}/>,
     conceptualOverview: <Brain size={sectionIconSize}/>,
   };
@@ -120,26 +120,42 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
     const pageWidth = doc.internal.pageSize.getWidth();
     const margin = 40;
     const contentWidth = pageWidth - 2 * margin;
-    const lineHeight = 14; 
+    const lineHeight = 14;
 
     const addTextWithBreaks = (text: string, fontSize: number, styles: { bold?: boolean, italic?: boolean, color?: string } = {}, indent = 0) => {
-      if (!text || text.trim() === "") return;
+      if (!text || text.trim() === "") {
+        // Optional: if you want to explicitly state "Content not provided" for empty strings too.
+        // doc.setFontSize(10);
+        // doc.setFont(undefined, 'italic');
+        // doc.setTextColor(150, 150, 150);
+        // const notProvidedLines = doc.splitTextToSize("Content for this section was not provided.", contentWidth - indent);
+        // notProvidedLines.forEach((line: string) => {
+        //   if (yPosition + lineHeight > pageHeight - margin) {
+        //     doc.addPage();
+        //     yPosition = margin;
+        //   }
+        //   doc.text(line, margin + indent, yPosition);
+        //   yPosition += lineHeight;
+        // });
+        // yPosition += lineHeight / 2;
+        return;
+      }
       doc.setFontSize(fontSize);
       doc.setFont(undefined, styles.bold ? 'bold' : (styles.italic ? 'italic' : 'normal'));
       if (styles.color) doc.setTextColor(styles.color);
-      else doc.setTextColor(50, 50, 50); 
+      else doc.setTextColor(50, 50, 50);
 
       const splitText = text.split(/\n\s*\n|\n(?=\s*(?:•|-|\*)\s)|\n(?=\s*\d+\.\s)/);
 
       splitText.forEach(paragraphText => {
         if (paragraphText.trim() === "") return;
-        
+
         if (paragraphText.match(/^(\s*(?:•|-|\*)\s|[ \t]*\d+\.\s+)/m)) {
             const listItems = paragraphText.split('\n').map(item => item.trim()).filter(item => item);
             listItems.forEach((item, itemIndex) => {
                 const itemMarker = item.match(/^\d+\.\s+/) ? `${itemIndex + 1}. ` : '• ';
                 const itemContent = item.replace(/^\s*(?:•|-|\*|\d+\.)\s*/, '');
-                const lines = doc.splitTextToSize(itemMarker + itemContent, contentWidth - indent - (itemMarker.length * (fontSize * 0.5))); 
+                const lines = doc.splitTextToSize(itemMarker + itemContent, contentWidth - indent - (itemMarker.length * (fontSize * 0.5)));
                  lines.forEach((line: string) => {
                     if (yPosition + lineHeight > pageHeight - margin) {
                         doc.addPage();
@@ -149,7 +165,7 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
                     yPosition += lineHeight;
                 });
             });
-             yPosition += lineHeight / 2; 
+             yPosition += lineHeight / 2;
         } else {
             const lines = doc.splitTextToSize(paragraphText, contentWidth - indent);
             lines.forEach((line: string) => {
@@ -160,12 +176,115 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
                 doc.text(line, margin + indent, yPosition);
                 yPosition += lineHeight;
             });
-            yPosition += lineHeight / 2; 
+            yPosition += lineHeight / 2;
         }
       });
-      doc.setTextColor(50, 50, 50); 
+      doc.setTextColor(50, 50, 50);
     };
-    
+
+    const generateRemainingPdfContent = (
+      docInstance: jsPDF, // Changed from doc to docInstance to avoid conflict if any
+      addTextFn: typeof addTextWithBreaks, // Changed from addTextWithBreaks
+      currentYPos: number, // Changed from currentYPosition
+      _lineHeight: number, // Changed from lineHeight (prefixed with underscore as it's also a const in outer scope)
+      _pageHeight: number, // Changed from pageHeight
+      _margin: number, // Changed from margin
+      _contentWidth: number // Changed from contentWidth
+    ) => {
+      yPosition = currentYPos; // Use and update the yPosition from the outer scope
+
+      const localAddSection = (title: string, content?: string | any[] | null, renderFn?: (item: any, index: number) => void) => {
+        if (!content && !renderFn && !(typeof content === 'string' && content.trim() !== "")) {
+             // If title itself is important, print it and then "not provided"
+            // For now, if no content and no renderFn, skip (unless content is empty string, handled by addTextFn)
+            if (!(typeof content === 'string' && content.trim() === "")) { // only return if not an empty string meant to be handled
+                 // Check if this section should be skipped entirely if content is truly absent
+                const optionalSections = ["Acknowledged Limitations", "Future Research Avenues", "Ethical Considerations & Impact", "Supplementary Appendices", "Glossary of Key Terms"];
+                if (optionalSections.includes(title) && !content && !renderFn) {
+                    return;
+                }
+            }
+        }
+
+        if (yPosition + _lineHeight * 3 > _pageHeight - _margin) {
+          docInstance.addPage();
+          yPosition = _margin;
+        }
+        addTextFn(title, 14, { bold: true });
+
+        if (typeof content === 'string') {
+          addTextFn(content, 10);
+        } else if (Array.isArray(content) && renderFn) {
+          if (content.length > 0) {
+             content.forEach(renderFn);
+          } else {
+             addTextFn("No items to display in this list.", 10, {italic: true});
+          }
+        } else { // Covers null, undefined, or other non-string/non-array cases
+          addTextFn("Content for this section was not provided.", 10, {italic: true});
+        }
+        yPosition += _lineHeight;
+      };
+
+      localAddSection("Executive Summary", report.executiveSummary);
+      localAddSection("Introduction & Background", report.introduction);
+      localAddSection("Comprehensive Literature Review", report.literatureReview);
+
+      localAddSection("Key Themes & In-Depth Discussion", report.keyThemes, (theme: any, index: number) => {
+        addTextFn(`${index + 1}. ${theme.theme}`, 12, { bold: true });
+        addTextFn(theme.discussion, 10, {}, 15);
+        yPosition += _lineHeight;
+      });
+
+      localAddSection("Detailed Research Methodology", report.detailedMethodology);
+
+      localAddSection("Results Presentation & Analysis", report.resultsAndAnalysis, (result: any, index: number) => {
+        addTextFn(result.sectionTitle, 12, { bold: true });
+        addTextFn(result.content, 10, {}, 15);
+        if (result.chartSuggestion && result.chartSuggestion.type !== 'none') {
+          yPosition += _lineHeight / 2;
+          const chartTitle = result.chartSuggestion.title || `${result.chartSuggestion.type.charAt(0).toUpperCase() + result.chartSuggestion.type.slice(1)} Chart`;
+          addTextFn(
+            `[Chart Placeholder] Visual Aid: ${chartTitle}. Type: ${result.chartSuggestion.type}. Data: ${result.chartSuggestion.dataDescription}. (Interactive chart available in web application.)`,
+            9, { italic: true, color: "#006699" }, 20
+          );
+          yPosition += _lineHeight * 1.5;
+        }
+      });
+
+      localAddSection("Holistic Discussion of Findings", report.discussion);
+      localAddSection("Concluding Remarks & Implications", report.conclusion);
+      if (report.limitations) localAddSection("Acknowledged Limitations", report.limitations);
+      if (report.futureWork) localAddSection("Future Research Avenues", report.futureWork);
+      if (report.ethicalConsiderations) localAddSection("Ethical Considerations & Impact", report.ethicalConsiderations);
+
+      if (report.references && report.references.length > 0) {
+          localAddSection("References (AI Synthesized)", report.references, (ref: string, index: number) => {
+              addTextFn(`${index + 1}. ${ref}`, 9, {}, 15);
+               yPosition += _lineHeight/2;
+          });
+      }
+
+      if (report.appendices && report.appendices.length > 0) {
+          localAddSection("Supplementary Appendices", report.appendices, (appendix: any, index: number) => {
+              addTextFn(appendix.title, 12, { bold: true });
+              addTextFn(appendix.content, 10, {}, 15);
+               yPosition += _lineHeight;
+          });
+      }
+
+      if (report.glossary && report.glossary.length > 0) {
+          localAddSection("Glossary of Key Terms", report.glossary, (item: any, index: number) => {
+              addTextFn(`${item.term}:`, 9, { bold: true });
+              addTextFn(item.definition, 9, {}, 15);
+               yPosition += _lineHeight/2;
+          });
+      }
+      // Update the yPosition in the outer scope if necessary, though it's passed by value.
+      // The yPosition being modified is the one in handleDownloadReportPdf's scope.
+    };
+
+
     addTextWithBreaks(report.title || "Generated Research Report", 18, { bold: true });
     yPosition += lineHeight;
 
@@ -176,108 +295,54 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
       try {
         const MimeTypeMatch = generatedImageUrl.match(/data:(image\/[^;]+);/);
         const format = MimeTypeMatch ? MimeTypeMatch[1].split('/')[1].toUpperCase() : 'PNG';
-        const base64ImageContent = generatedImageUrl.includes(',') ? generatedImageUrl.split(',')[1] : generatedImageUrl;
-        
-        const imgProps = doc.getImageProperties(base64ImageContent);
-        const imgWidth = contentWidth * 0.75; 
-        const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
 
-        if (yPosition + imgHeight > pageHeight - margin - 20) { 
-          doc.addPage();
-          yPosition = margin;
+        const img = new window.Image(); // Use window.Image for client-side
+        img.onload = () => {
+          const imgWidth = contentWidth * 0.75;
+          const imgHeight = (img.height * imgWidth) / img.width;
+
+          if (yPosition + imgHeight > pageHeight - margin - 20) {
+            doc.addPage();
+            yPosition = margin;
+          }
+          addTextWithBreaks("Conceptual Visualization:", 12, { bold: true });
+          yPosition += lineHeight / 2;
+          doc.addImage(generatedImageUrl, format, margin + (contentWidth * 0.125), yPosition, imgWidth, imgHeight);
+          yPosition += imgHeight + lineHeight * 1.5;
+
+          generateRemainingPdfContent(doc, addTextWithBreaks, yPosition, lineHeight, pageHeight, margin, contentWidth);
+          doc.save(`ScholarAI_Report_${report.title?.replace(/[^\w\s]/gi, '').replace(/\s+/g, '_') || 'Untitled'}.pdf`);
+        };
+        img.onerror = () => {
+          console.error("Error loading image for PDF.");
+          addTextWithBreaks("[Error embedding conceptual visualization in PDF. Please view on web.]", 10, {italic: true, color: "#AA0000"});
+          yPosition += lineHeight * 1.5;
+          generateRemainingPdfContent(doc, addTextWithBreaks, yPosition, lineHeight, pageHeight, margin, contentWidth);
+          doc.save(`ScholarAI_Report_${report.title?.replace(/[^\w\s]/gi, '').replace(/\s+/g, '_') || 'Untitled'}.pdf`);
         }
-        addTextWithBreaks("Conceptual Visualization:", 12, { bold: true });
-        doc.addImage(base64ImageContent, format, margin + (contentWidth * 0.125), yPosition, imgWidth, imgHeight);
-        yPosition += imgHeight + lineHeight * 1.5;
+        img.src = generatedImageUrl;
+        return;
+
       } catch (e) {
-        console.error("Error adding image to PDF:", e);
+        console.error("Error processing image for PDF:", e);
         addTextWithBreaks("[Error embedding conceptual visualization in PDF. Please view on web.]", 10, {italic: true, color: "#AA0000"});
          yPosition += lineHeight * 1.5;
       }
     }
 
-    const addSection = (title: string, content?: string | any[] | null, renderFn?: (item: any, index: number) => void) => {
-      if (!content && !renderFn) return;
-       if (yPosition + lineHeight * 3 > pageHeight - margin) { 
-        doc.addPage();
-        yPosition = margin;
-      }
-      addTextWithBreaks(title, 14, { bold: true });
-      if (typeof content === 'string') {
-        addTextWithBreaks(content, 10);
-      } else if (Array.isArray(content) && renderFn) {
-        content.forEach(renderFn);
-      } else if (typeof content === 'string') {
-         addTextWithBreaks(content, 10);
-      } else if (!content) {
-        addTextWithBreaks("Content for this section was not provided.", 10, {italic: true});
-      }
-       yPosition += lineHeight; 
-    };
-
-    addSection("Executive Summary", report.executiveSummary);
-    addSection("Introduction & Background", report.introduction);
-    addSection("Comprehensive Literature Review", report.literatureReview);
-
-    addSection("Key Themes & In-Depth Discussion", report.keyThemes, (theme: any, index: number) => {
-      addTextWithBreaks(`${index + 1}. ${theme.theme}`, 12, { bold: true });
-      addTextWithBreaks(theme.discussion, 10, {}, 15);
-    });
-
-    addSection("Detailed Research Methodology", report.detailedMethodology);
-    
-    addSection("Results Presentation & Analysis", report.resultsAndAnalysis, (result: any, index: number) => {
-      addTextWithBreaks(result.sectionTitle, 12, { bold: true });
-      addTextWithBreaks(result.content, 10, {}, 15);
-      if (result.chartSuggestion && result.chartSuggestion.type !== 'none') {
-        yPosition += lineHeight / 2;
-        const chartTitle = result.chartSuggestion.title || `${result.chartSuggestion.type.charAt(0).toUpperCase() + result.chartSuggestion.type.slice(1)} Chart`;
-        addTextWithBreaks(
-          `Visual Aid: ${chartTitle}. Data: ${result.chartSuggestion.dataDescription}. (Chart data is placeholder; view interactive chart in web app for details.)`,
-          9, { italic: true, color: "#006699" }, 20
-        );
-        yPosition += lineHeight;
-      }
-    });
-
-    addSection("Holistic Discussion of Findings", report.discussion);
-    addSection("Concluding Remarks & Implications", report.conclusion);
-    if (report.limitations) addSection("Acknowledged Limitations", report.limitations);
-    if (report.futureWork) addSection("Future Research Avenues", report.futureWork);
-    if (report.ethicalConsiderations) addSection("Ethical Considerations & Impact", report.ethicalConsiderations);
-
-    if (report.references && report.references.length > 0) {
-        addSection("References (AI Synthesized)", report.references, (ref: string, index: number) => {
-            addTextWithBreaks(`${index + 1}. ${ref}`, 9, {}, 15);
-        });
-    }
-
-    if (report.appendices && report.appendices.length > 0) {
-        addSection("Supplementary Appendices", report.appendices, (appendix: any, index: number) => {
-            addTextWithBreaks(appendix.title, 12, { bold: true });
-            addTextWithBreaks(appendix.content, 10, {}, 15);
-        });
-    }
-    
-    if (report.glossary && report.glossary.length > 0) {
-        addSection("Glossary of Key Terms", report.glossary, (item: any, index: number) => {
-            addTextWithBreaks(`${item.term}:`, 9, { bold: true });
-            addTextWithBreaks(item.definition, 9, {}, 15);
-        });
-    }
-
+    generateRemainingPdfContent(doc, addTextWithBreaks, yPosition, lineHeight, pageHeight, margin, contentWidth);
     doc.save(`ScholarAI_Report_${report.title?.replace(/[^\w\s]/gi, '').replace(/\s+/g, '_') || 'Untitled'}.pdf`);
-  };
-  
+  }
+
   return (
     <div>
     <Card className="w-full shadow-2xl border-primary/30 rounded-xl sm:rounded-2xl overflow-hidden bg-gradient-to-br from-card via-background/5 to-card">
       <CardHeader className="p-4 sm:p-5 md:p-6 bg-gradient-to-r from-primary/95 via-primary to-primary/90 text-primary-foreground border-b border-primary/50">
         <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 md:space-x-6">
-          <div 
+          <div
             className="p-3 sm:p-4 bg-gradient-to-br from-accent to-accent/70 rounded-xl sm:rounded-2xl shadow-xl border-2 border-accent/60 flex-shrink-0 ring-2 ring-accent/40 ring-offset-2 ring-offset-primary"
             >
-            <FileText className="h-8 w-8 sm:h-9 sm:w-9 md:h-11 md:w-11 text-accent-foreground" /> 
+            <FileText className="h-8 w-8 sm:h-9 sm:w-9 md:h-11 md:w-11 text-accent-foreground" />
           </div>
           <div className="flex-grow min-w-0">
             <CardTitle className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight break-words">
@@ -308,8 +373,8 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
                         <NextImage
                             src={generatedImageUrl}
                             alt="Conceptual visualization for the research report"
-                            width={600} 
-                            height={450} 
+                            width={600}
+                            height={450}
                             className="rounded-md sm:rounded-lg object-contain shadow-xl max-h-[300px] sm:max-h-[400px]"
                             data-ai-hint="research data"
                         />
@@ -320,7 +385,7 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
                 </div>
               </Section>
             )}
-            
+
             <Section title="Executive Summary" icon={sectionIcons.executiveSummary} value="executive-summary" defaultOpen>
               {renderParagraphs(report.executiveSummary)}
             </Section>
@@ -346,7 +411,7 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
                 ))
               ) : renderParagraphs(undefined)}
             </Section>
-            
+
             <Section title="Detailed Research Methodology" icon={sectionIcons.detailedMethodology} value="detailed-methodology">
               {renderParagraphs(report.detailedMethodology)}
             </Section>
@@ -379,9 +444,9 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
                             {result.chartSuggestion.yAxisLabel && `Y-axis: ${result.chartSuggestion.yAxisLabel}.`}
                            </p>
                         )}
-                        <PlaceholderChart 
-                          chartType={result.chartSuggestion.type} 
-                          title={result.chartSuggestion.title || "Sample Chart"} 
+                        <PlaceholderChart
+                          chartType={result.chartSuggestion.type}
+                          title={result.chartSuggestion.title || "Sample Chart"}
                           description={result.chartSuggestion.dataDescription}
                         />
                       </div>
@@ -390,7 +455,7 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
                 ))
               ) : renderParagraphs(undefined)}
             </Section>
-            
+
             <Section title="Holistic Discussion of Findings" icon={sectionIcons.discussion} value="discussion-of-findings">
               {renderParagraphs(report.discussion)}
             </Section>
@@ -416,7 +481,7 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
                 {renderParagraphs(report.ethicalConsiderations)}
               </Section>
             )}
-            
+
             {report.references && report.references.length > 0 && (
               <Section title="References (AI Synthesized)" icon={sectionIcons.references} value="references">
                 <ul className="list-decimal list-inside space-y-2 sm:space-y-2.5 text-xs sm:text-sm">
@@ -460,4 +525,3 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
     </div>
   );
 }
-
