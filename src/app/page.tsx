@@ -432,7 +432,7 @@ export default function ScholarAIPage() {
       </DialogTrigger>
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/10 to-background flex flex-col overflow-x-hidden antialiased selection:bg-accent/20 selection:text-accent-foreground">
       <header
-        className="py-3 sm:py-4 px-4 md:px-8 bg-card/95 text-card-foreground shadow-2xl sticky top-0 z-50 border-b border-border/50 backdrop-blur-xl"
+        className="py-3 sm:py-4 px-4 md:px-8 bg-card/95 text-card-foreground shadow-2xl sticky top-16 z-40 border-b border-border/50 backdrop-blur-xl"
       >
         <div className="container mx-auto flex items-center justify-between">
           <div 
