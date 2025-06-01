@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import NextLink from 'next/link';
-import { BookText, UserPlus, LogIn, Home, Palette, Settings, Moon, Sun, Check, LogOut, Info, BookOpenText, Code2, Menu, X as CloseIcon, UserCircle, ChevronDown, Sparkles } from 'lucide-react';
+import { BookText, UserPlus, LogIn, Home, Palette, Settings, Moon, Sun, Check, LogOut, Info, BookOpenText, Code2, Menu, X as CloseIcon, UserCircle, ChevronDown, Sparkles, FileText as FeaturesIcon } from 'lucide-react'; // Renamed Sparkles to FeaturesIcon for clarity if needed, or just use Sparkles
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -12,9 +12,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "@/components/ui/sheet"; // Added SheetHeader, SheetTitle
 import { cn } from '@/lib/utils';
 import { usePathname, useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
@@ -67,6 +66,7 @@ export default function Navbar() {
     try {
       await signOut(auth);
       toast({ title: "Logged Out", description: "You have been successfully logged out." });
+      setMobileMenuOpen(false); // Close mobile menu on logout
       router.push('/'); 
     } catch (error) {
       console.error("Logout Error:", error);
@@ -76,7 +76,7 @@ export default function Navbar() {
 
   const navLinks = [
     { href: "/", label: "Home", icon: Home },
-    { href: "/features", label: "Features", icon: Sparkles },
+    { href: "/features", label: "Features", icon: Sparkles }, // Using Sparkles icon for Features
     { href: "/about", label: "About", icon: Info },
     { href: "/docs", label: "Docs", icon: BookOpenText },
     { href: "/api-docs", label: "API", icon: Code2 },
@@ -137,7 +137,7 @@ export default function Navbar() {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel className="truncate">{currentUser.email}</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10">
+            <DropdownMenuItem onClick={() => { handleLogout(); onLinkClick?.(); }} className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10">
               <LogOut className="mr-2 h-4 w-4" /> Logout
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -152,7 +152,7 @@ export default function Navbar() {
     </>
   );
   
-  const ThemeSwitcherDropdown: React.FC<{ isMobile?: boolean }> = ({ isMobile }) => (
+  const ThemeSwitcherDropdown: React.FC<{ isMobile?: boolean; onLinkClick?: () => void }> = ({ isMobile, onLinkClick }) => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size={isMobile ? "sm" : "icon"} className={cn("text-muted-foreground hover:bg-accent/15 hover:text-accent-foreground", isMobile ? "w-full justify-start" : "h-9 w-9 sm:h-10 sm:w-10 rounded-full")} aria-label="Theme settings">
@@ -162,17 +162,17 @@ export default function Navbar() {
         <DropdownMenuContent align="end" className="w-48 border-border/70 bg-popover shadow-xl rounded-lg p-1.5">
           <DropdownMenuLabel className="font-semibold text-popover-foreground px-2 py-1.5 text-sm">Appearance</DropdownMenuLabel>
           <DropdownMenuSeparator className="bg-border/50 -mx-1 my-1" />
-          <DropdownMenuItem onClick={() => setThemeState('light')} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
+          <DropdownMenuItem onClick={() => { setThemeState('light'); onLinkClick?.(); }} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
             <Sun className="mr-2.5 h-4 w-4 text-muted-foreground group-hover:text-yellow-500 transition-colors" />
             <span>Light Mode</span>
             {theme === 'light' && <Check className="ml-auto h-4 w-4 text-accent" />}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setThemeState('dark')} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
+          <DropdownMenuItem onClick={() => { setThemeState('dark'); onLinkClick?.(); }} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
             <Moon className="mr-2.5 h-4 w-4 text-muted-foreground group-hover:text-blue-400 transition-colors" />
             <span>Dark Mode</span>
             {theme === 'dark' && <Check className="ml-auto h-4 w-4 text-accent" />}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setThemeState('system')} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
+          <DropdownMenuItem onClick={() => { setThemeState('system'); onLinkClick?.(); }} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
             <Settings className="mr-2.5 h-4 w-4 text-muted-foreground transition-colors" />
             <span>System Default</span>
             {theme === 'system' && <Check className="ml-auto h-4 w-4 text-accent" />}
@@ -219,21 +219,26 @@ export default function Navbar() {
                 <Menu className="h-6 w-6" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[280px] p-0 pt-10 bg-background flex flex-col">
-               <NextLink href="/" passHref legacyBehavior>
-                  <a className="flex items-center space-x-2.5 group px-4 mb-6" onClick={() => setMobileMenuOpen(false)}>
-                    <div className="p-2.5 rounded-lg bg-primary text-primary-foreground">
-                      <BookText className="h-6 w-6" />
-                    </div>
-                    <span className="text-xl font-bold text-primary">ScholarAI</span>
-                  </a>
-                </NextLink>
-              <div className="flex flex-col space-y-2 px-4 flex-grow">
+            <SheetContent side="right" className="w-[280px] p-0 bg-background flex flex-col">
+              <SheetHeader className="p-4 border-b border-border/60">
+                <SheetTitle className="text-lg font-semibold text-primary flex items-center">
+                   <NextLink href="/" passHref legacyBehavior>
+                      <a className="flex items-center space-x-2.5 group" onClick={() => setMobileMenuOpen(false)}>
+                        <div className="p-2 rounded-md bg-primary text-primary-foreground">
+                          <BookText className="h-5 w-5" />
+                        </div>
+                        <span className="text-lg font-bold text-primary">ScholarAI Menu</span>
+                      </a>
+                    </NextLink>
+                </SheetTitle>
+              </SheetHeader>
+              
+              <div className="flex flex-col space-y-2 px-4 py-4 flex-grow overflow-y-auto">
                 {navLinks.map(link => <NavLinkItem key={link.href} {...link} onClick={() => setMobileMenuOpen(false)} />)}
               </div>
               <div className="mt-auto p-4 border-t border-border/60 space-y-3">
                 <AuthButtons isMobile onLinkClick={() => setMobileMenuOpen(false)} />
-                <ThemeSwitcherDropdown isMobile />
+                <ThemeSwitcherDropdown isMobile onLinkClick={() => setMobileMenuOpen(false)} />
               </div>
               <SheetClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
                   <CloseIcon className="h-5 w-5" />
@@ -246,4 +251,3 @@ export default function Navbar() {
     </nav>
   );
 }
-
