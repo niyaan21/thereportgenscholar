@@ -16,14 +16,7 @@ import {
   ArrowLeft, RotateCcw, FileTextIcon, Settings, Moon, Sun, Palette, Image as ImageIconLucide, Loader2, BookOpen, Brain, Search, Filter, BarChartBig, Telescope, Beaker, Sparkles, Bot, CornerDownLeft, Edit, CheckSquare, Zap, Eye, Lightbulb, FileArchive, Atom, ClipboardCopy, Share2, Download, Sigma, BarChartHorizontal, TrendingUpIcon, ScaleIcon, FlaskConical, LightbulbIcon as LightbulbLucideIcon, InfoIcon, AlertCircleIcon, CheckCircle2Icon, ExternalLink, MaximizeIcon, ChevronRight, Rocket, Check
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+
 import {
   handleFormulateQueryAction,
   handleSynthesizeResearchAction,
@@ -91,7 +84,6 @@ export default function ScholarAIPage() {
   
   const [currentYear, setCurrentYear] = useState<number | null>(null);
   const [_isTransitionPending, startTransition] = useTransition();
-  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system');
 
   const [formulateQueryState, formulateQueryFormAction, isFormulatingQueries] = useActionState(handleFormulateQueryAction, initialFormulateQueryActionState);
   const [synthesizeResearchState, synthesizeResearchFormAction, isSynthesizingResearch] = useActionState(handleSynthesizeResearchAction, initialSynthesizeResearchActionState);
@@ -124,31 +116,7 @@ export default function ScholarAIPage() {
 
   useEffect(() => {
     setCurrentYear(new Date().getFullYear());
-    const localTheme = localStorage.getItem('theme') as typeof theme | null;
-    if (localTheme) {
-      setTheme(localTheme);
-    } else {
-      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setTheme(prefersDark ? 'dark' : 'light'); 
-    }
   }, []);
-
-  useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else if (theme === 'light') {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    } else { 
-      localStorage.removeItem('theme');
-      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-    }
-  }, [theme]);
   
   useEffect(() => {
     if (!isFormulatingQueries && formulateQueryState.message) {
@@ -236,8 +204,6 @@ export default function ScholarAIPage() {
       setResearchSummary('');
       setSummarizedPaperTitles([]);
       setGeneratedImageUrl(null);
-      // Reset action states if necessary
-      // formulateQueryState = initialFormulateQueryActionState; // This won't work, use a reset function if provided by useActionState or manage manually
     });
   };
 
@@ -269,7 +235,7 @@ export default function ScholarAIPage() {
       return;
     }
 
-    if (topicForImage.length > 200) {
+    if (topicForImage.length > 195) { // Adjusted to 195 to allow for "..."
       topicForImage = topicForImage.substring(0, 195) + "..."; 
     }
 
@@ -354,6 +320,20 @@ export default function ScholarAIPage() {
               formAction={synthesizeResearchFormAction}
               isBusy={isSynthesizingResearch}
             />
+             {appState === 'queries_formulated' && (
+              <CardFooter className="flex flex-col sm:flex-row justify-start items-center gap-3 sm:gap-4 p-0 pt-6 md:pt-8 border-t border-border/40 mt-6 md:mt-8">
+                <ActionButton
+                    onClick={handleGoBack}
+                    variant="outline"
+                    size="lg"
+                    className="w-full sm:w-auto border-input hover:bg-muted/20 hover:text-muted-foreground px-6 sm:px-8 rounded-xl"
+                    icon={ArrowLeft}
+                    label="Edit Question"
+                    aria-label="Go back to edit research question"
+                    disabled={isLoading}
+                  />
+              </CardFooter>
+            )}
           </div>
         );
         break;
@@ -371,6 +351,16 @@ export default function ScholarAIPage() {
             />
             <CardFooter className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4 p-0 pt-6 md:pt-8 border-t border-border/40 mt-6 md:mt-8">
                 <ActionButton
+                  onClick={handleGoBack}
+                  variant="outline"
+                  size="lg"
+                  className="w-full sm:w-auto border-input hover:bg-muted/20 hover:text-muted-foreground px-6 sm:px-8 rounded-xl"
+                  icon={ArrowLeft}
+                  label="Refine Queries"
+                  aria-label="Go back to formulated queries"
+                  disabled={isLoading}
+                />
+                <ActionButton
                   onClick={handleGenerateFullReport}
                   variant="default"
                   size="lg"
@@ -379,15 +369,6 @@ export default function ScholarAIPage() {
                   icon={BookOpen}
                   label="Generate Full Report"
                   aria-label="Generate Full Research Report"
-                />
-                <ActionButton
-                  onClick={handleStartNewResearch}
-                  variant="outline"
-                  size="lg"
-                  className="w-full sm:w-auto border-input hover:bg-accent/10 hover:text-accent-foreground px-6 sm:px-8 rounded-xl"
-                  icon={RotateCcw}
-                  label="Start New Research"
-                  aria-label="Start a new research session"
                 />
             </CardFooter>
           </div>
@@ -404,7 +385,17 @@ export default function ScholarAIPage() {
                 onOpenImagePreview={openImagePreviewDialog}
               />
             )}
-            <CardFooter className="flex justify-center p-0 pt-6 md:pt-8 border-t border-border/40 mt-6 md:mt-8">
+            <CardFooter className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4 p-0 pt-6 md:pt-8 border-t border-border/40 mt-6 md:mt-8">
+               <ActionButton
+                  onClick={handleGoBack}
+                  variant="outline"
+                  size="lg"
+                  className="w-full sm:w-auto border-input hover:bg-muted/20 hover:text-muted-foreground px-6 sm:px-8 rounded-xl"
+                  icon={ArrowLeft}
+                  label="View Summary"
+                  aria-label="Go back to research summary"
+                  disabled={isLoading}
+                />
               <ActionButton
                 onClick={handleStartNewResearch}
                 variant="default"
@@ -431,74 +422,8 @@ export default function ScholarAIPage() {
         <button className="hidden">Hidden Dialog Trigger for Programmatic Control</button>
       </DialogTrigger>
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/10 to-background flex flex-col overflow-x-hidden antialiased selection:bg-accent/20 selection:text-accent-foreground">
-      <header
-        className="py-3 sm:py-4 px-4 md:px-8 bg-card/95 text-card-foreground shadow-2xl sticky top-16 z-40 border-b border-border/50 backdrop-blur-xl"
-      >
-        <div className="container mx-auto flex items-center justify-between">
-          <div 
-            className="flex items-center space-x-2.5 sm:space-x-4 group cursor-pointer flex-shrink min-w-0" 
-            onClick={handleStartNewResearch}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleStartNewResearch()}
-            aria-label="Start new research"
-          >
-            <div
-              className="p-3.5 sm:p-4 bg-gradient-to-br from-primary via-primary/90 to-primary/75 rounded-xl sm:rounded-2xl shadow-lg text-primary-foreground ring-2 ring-primary/40 ring-offset-2 ring-offset-card"
-            >
-              <Beaker className="h-8 w-8 sm:h-10 sm:w-10" />
-            </div>
-            <div className="overflow-hidden">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent group-hover:from-accent group-hover:to-primary transition-all duration-300 truncate">
-                ScholarAI
-              </h1>
-              <p className="text-xs text-muted-foreground -mt-0.5 tracking-wide truncate hidden sm:block">Augmented Intelligence for Research</p>
-            </div>
-          </div>
-           <div 
-             className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0"
-            >
-            {appState !== 'initial' && (
-                <Button 
-                  onClick={handleGoBack} 
-                  variant="ghost" 
-                  size="icon"
-                  className="text-muted-foreground hover:bg-accent/15 hover:text-accent-foreground disabled:opacity-50 h-9 w-9 sm:h-10 sm:w-10 rounded-full"
-                  disabled={isLoading}
-                  aria-label="Go back to previous step"
-                >
-                  <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
-                </Button>
-            )}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-muted-foreground hover:bg-accent/15 hover:text-accent-foreground h-9 w-9 sm:h-10 sm:w-10 rounded-full" aria-label="Theme settings">
-                  <Palette className="h-4 w-4 sm:h-5 sm:w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 border-border/70 bg-popover shadow-xl rounded-lg p-1.5">
-                <DropdownMenuLabel className="font-semibold text-popover-foreground px-2 py-1.5 text-sm">Appearance</DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-border/50 -mx-1 my-1" />
-                <DropdownMenuItem onClick={() => setTheme('light')} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
-                  <Sun className="mr-2.5 h-4 w-4 text-muted-foreground group-hover:text-yellow-500 transition-colors" />
-                  <span>Light Mode</span>
-                  {theme === 'light' && <Check className="ml-auto h-4 w-4 text-accent" />}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme('dark')} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
-                  <Moon className="mr-2.5 h-4 w-4 text-muted-foreground group-hover:text-blue-400 transition-colors" />
-                  <span>Dark Mode</span>
-                  {theme === 'dark' && <Check className="ml-auto h-4 w-4 text-accent" />}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme('system')} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
-                  <Settings className="mr-2.5 h-4 w-4 text-muted-foreground transition-colors" />
-                  <span>System Default</span>
-                  {theme === 'system' && <Check className="ml-auto h-4 w-4 text-accent" />}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-           </div>
-        </div>
-      </header>
+      
+      {/* Page-specific header removed */}
 
       <main className="flex-grow container mx-auto px-4 sm:px-6 py-8 sm:py-10 md:py-16">
         <div className="max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
