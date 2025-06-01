@@ -30,7 +30,7 @@ const ParticleBackground: React.FC = () => {
   };
 
   const particleColor = getCurrentTheme() === 'dark' ? '#ffffff' : '#333333';
-  constlinkColor = getCurrentTheme() === 'dark' ? '#ffffff' : '#555555';
+  const linkColor = getCurrentTheme() === 'dark' ? '#ffffff' : '#555555';
 
 
   if (!init) {
@@ -113,3 +113,4 @@ const ParticleBackground: React.FC = () => {
 };
 
 export default ParticleBackground;
+
