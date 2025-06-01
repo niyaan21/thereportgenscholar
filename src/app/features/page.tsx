@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import NextLink from 'next/link';
 import { Zap, Brain, FileTextIcon, Image as ImageIcon, ShieldCheck, LayoutDashboard, Download, Smartphone, ArrowRight, Sparkles, Search, Layers, Palette, Settings, Users, ThumbsUp } from 'lucide-react';
 import type { Metadata } from 'next';
+import { cn } from '@/lib/utils'; // Added import for cn
 
 export const metadata: Metadata = {
   title: 'ScholarAI Features - Advanced AI Research Capabilities',
