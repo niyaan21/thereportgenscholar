@@ -538,7 +538,7 @@ export default function ScholarAIPage() {
             width={1200} 
             height={1200} 
             className="rounded-lg sm:rounded-xl object-contain w-full h-auto max-h-[85svh] shadow-2xl bg-black/50 backdrop-blur-md"
-            data-ai-hint="research concept"
+            data-ai-hint="research concept fullsize"
           />
         )}
     </DialogContent>

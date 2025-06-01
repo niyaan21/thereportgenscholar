@@ -24,9 +24,9 @@ export interface ResearchReportDisplayProps {
 const Section: React.FC<{ title: string; icon?: React.ReactNode; children: React.ReactNode; className?: string, defaultOpen?: boolean, value: string }> = ({ title, icon, children, className, defaultOpen = false, value }) => (
   <div>
     <AccordionItem value={value} className={cn('border-b-0 mb-3 sm:mb-3.5 rounded-lg sm:rounded-xl overflow-hidden shadow-lg bg-card hover:shadow-primary/15 transition-all duration-300', className)}>
-      <AccordionTrigger className="py-3 px-4 sm:py-4 sm:px-6 hover:no-underline hover:bg-secondary/70 dark:hover:bg-secondary/35 transition-colors duration-200 rounded-t-lg sm:rounded-t-xl data-[state=open]:rounded-b-none data-[state=open]:border-b data-[state=open]:border-border/80 data-[state=open]:bg-secondary/50 dark:data-[state=open]:bg-secondary/25 group">
+      <AccordionTrigger className="py-3 px-4 sm:py-4 sm:px-6 hover:no-underline hover:bg-secondary/70 dark:hover:bg-secondary/35 transition-colors duration-200 rounded-t-lg sm:rounded-t-xl data-[state=open]:rounded-b-none data-[state=open]:border-b data-[state=open]:border-border/80 data-[state=open]:bg-accent/10 dark:data-[state=open]:bg-accent/20 group">
         <h3 className="text-md sm:text-lg md:text-xl font-semibold flex items-center text-primary group-hover:text-accent transition-colors duration-200">
-          {icon && <span className="mr-2.5 sm:mr-3.5 text-accent group-data-[state=open]:text-primary transition-colors duration-200">{icon}</span>}
+          {icon && <span className="mr-2.5 sm:mr-3.5 text-accent group-data-[state=open]:text-accent-foreground transition-colors duration-200">{icon}</span>}
           {title}
         </h3>
       </AccordionTrigger>
@@ -119,39 +119,43 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
     const pageWidth = doc.internal.pageSize.getWidth();
     const margin = 40;
     const contentWidth = pageWidth - 2 * margin;
-    const lineHeight = 14;
+    const lineHeight = 14; // Base line height for 10pt font
 
     const addTextWithBreaks = (text: string, fontSize: number, styles: { bold?: boolean, italic?: boolean, color?: string } = {}, indent = 0) => {
       if (!text || text.trim() === "") {
+        yPosition += lineHeight /2; // Add some space even for empty content to maintain flow
         return;
       }
       doc.setFontSize(fontSize);
       doc.setFont(undefined, styles.bold ? 'bold' : (styles.italic ? 'italic' : 'normal'));
       if (styles.color) doc.setTextColor(styles.color);
-      else doc.setTextColor(50, 50, 50);
+      else doc.setTextColor(50, 50, 50); // Default text color
 
+      // Split by double newlines (paragraph breaks) or newlines followed by list markers
       const splitText = text.split(/\n\s*\n|\n(?=\s*(?:•|-|\*)\s)|\n(?=\s*\d+\.\s)/);
 
       splitText.forEach(paragraphText => {
         if (paragraphText.trim() === "") return;
 
+        // Handle list items
         if (paragraphText.match(/^(\s*(?:•|-|\*)\s|[ \t]*\d+\.\s+)/m)) {
             const listItems = paragraphText.split('\n').map(item => item.trim()).filter(item => item);
             listItems.forEach((item, itemIndex) => {
                 const itemMarker = item.match(/^\d+\.\s+/) ? `${itemIndex + 1}. ` : '• ';
                 const itemContent = item.replace(/^\s*(?:•|-|\*|\d+\.)\s*/, '');
-                const lines = doc.splitTextToSize(itemMarker + itemContent, contentWidth - indent - (itemMarker.length * (fontSize * 0.5)));
+                const lines = doc.splitTextToSize(itemMarker + itemContent, contentWidth - indent - (itemMarker.length * (fontSize * 0.5))); // Adjust for marker width
                  lines.forEach((line: string) => {
                     if (yPosition + lineHeight > pageHeight - margin) {
                         doc.addPage();
                         yPosition = margin;
                     }
+                    // Indent list item content slightly more than the marker
                     doc.text(line, margin + indent + (itemMarker.length > 2 ? 0 : 10) , yPosition);
                     yPosition += lineHeight;
                 });
             });
-             yPosition += lineHeight / 2;
-        } else {
+             yPosition += lineHeight / 2; // Space after list block
+        } else { // Handle regular paragraphs
             const lines = doc.splitTextToSize(paragraphText, contentWidth - indent);
             lines.forEach((line: string) => {
                 if (yPosition + lineHeight > pageHeight - margin) {
@@ -161,11 +165,12 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
                 doc.text(line, margin + indent, yPosition);
                 yPosition += lineHeight;
             });
-            yPosition += lineHeight / 2;
+            yPosition += lineHeight / 2; // Space after paragraph
         }
       });
-      doc.setTextColor(50, 50, 50);
+      doc.setTextColor(50, 50, 50); // Reset text color
     };
+
 
     const generateRemainingPdfContent = (
       docInstance: jsPDF, 
@@ -174,38 +179,41 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
       _lineHeight: number, 
       _pageHeight: number, 
       _margin: number, 
-      _contentWidth: number 
+      // _contentWidth is not used here, relying on the outer scope's contentWidth
     ) => {
       yPosition = currentYPos; 
 
       const localAddSection = (title: string, content?: string | any[] | null, renderFn?: (item: any, index: number) => void) => {
-        if (!content && !renderFn && !(typeof content === 'string' && content.trim() !== "")) {
-            if (!(typeof content === 'string' && content.trim() === "")) { 
-                const optionalSections = ["Acknowledged Limitations", "Future Research Avenues", "Ethical Considerations & Impact", "Supplementary Appendices", "Glossary of Key Terms"];
-                if (optionalSections.includes(title) && !content && !renderFn) {
-                    return;
-                }
-            }
-        }
+         const isOptionalAndEmpty = (
+            ["Acknowledged Limitations", "Future Research Avenues", "Ethical Considerations & Impact", "Supplementary Appendices", "Glossary of Key Terms"].includes(title) &&
+            (!content || (Array.isArray(content) && content.length === 0)) &&
+            !renderFn
+        );
 
-        if (yPosition + _lineHeight * 3 > _pageHeight - _margin) {
+        if (isOptionalAndEmpty) {
+            return; // Skip empty optional sections
+        }
+        
+        if (yPosition + _lineHeight * 3 > _pageHeight - _margin) { // Check space for section title
           docInstance.addPage();
           yPosition = _margin;
         }
-        addTextFn(title, 14, { bold: true });
+        addTextFn(title, 14, { bold: true }); // Section title style
 
         if (typeof content === 'string') {
-          addTextFn(content, 10);
+          addTextFn(content, 10); // Default content style
         } else if (Array.isArray(content) && renderFn) {
           if (content.length > 0) {
              content.forEach(renderFn);
           } else {
              addTextFn("No items to display in this list.", 10, {italic: true});
           }
-        } else { 
-          addTextFn("Content for this section was not provided.", 10, {italic: true});
+        } else if (typeof content === 'string' && content.trim() === "") {
+           addTextFn("Content for this section was not provided.", 10, {italic: true});
+        } else if (!content && !renderFn) {
+           addTextFn("Content for this section was not provided.", 10, {italic: true});
         }
-        yPosition += _lineHeight;
+        yPosition += _lineHeight; // Space after section content
       };
 
       localAddSection("Executive Summary", report.executiveSummary);
@@ -214,7 +222,7 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
 
       localAddSection("Key Themes & In-Depth Discussion", report.keyThemes, (theme: any, index: number) => {
         addTextFn(`${index + 1}. ${theme.theme}`, 12, { bold: true });
-        addTextFn(theme.discussion, 10, {}, 15);
+        addTextFn(theme.discussion, 10, {}, 15); // Indent theme discussion
         yPosition += _lineHeight;
       });
 
@@ -222,27 +230,29 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
 
       localAddSection("Results Presentation & Analysis", report.resultsAndAnalysis, (result: any, index: number) => {
         addTextFn(result.sectionTitle, 12, { bold: true });
-        addTextFn(result.content, 10, {}, 15);
+        addTextFn(result.content, 10, {}, 15); // Indent result content
         if (result.chartSuggestion && result.chartSuggestion.type !== 'none') {
           yPosition += _lineHeight / 2;
           const chartTitle = result.chartSuggestion.title || `${result.chartSuggestion.type.charAt(0).toUpperCase() + result.chartSuggestion.type.slice(1)} Chart`;
           addTextFn(
             `[Chart Placeholder] Visual Aid: ${chartTitle}. Type: ${result.chartSuggestion.type}. Data: ${result.chartSuggestion.dataDescription}. (Interactive chart available in web application.)`,
-            9, { italic: true, color: "#006699" }, 20
+            9, { italic: true, color: "#006699" }, 20 // Indent chart placeholder text
           );
-          yPosition += _lineHeight * 1.5;
+          yPosition += _lineHeight * 1.5; // Extra space after chart placeholder
         }
       });
 
       localAddSection("Holistic Discussion of Findings", report.discussion);
       localAddSection("Concluding Remarks & Implications", report.conclusion);
-      if (report.limitations) localAddSection("Acknowledged Limitations", report.limitations);
-      if (report.futureWork) localAddSection("Future Research Avenues", report.futureWork);
-      if (report.ethicalConsiderations) localAddSection("Ethical Considerations & Impact", report.ethicalConsiderations);
+      
+      // Optional sections, only add if content exists
+      if (report.limitations && report.limitations.trim() !== "") localAddSection("Acknowledged Limitations", report.limitations);
+      if (report.futureWork && report.futureWork.trim() !== "") localAddSection("Future Research Avenues", report.futureWork);
+      if (report.ethicalConsiderations && report.ethicalConsiderations.trim() !== "") localAddSection("Ethical Considerations & Impact", report.ethicalConsiderations);
 
       if (report.references && report.references.length > 0) {
           localAddSection("References (AI Synthesized)", report.references, (ref: string, index: number) => {
-              addTextFn(`${index + 1}. ${ref}`, 9, {}, 15);
+              addTextFn(`${index + 1}. ${ref}`, 9, {}, 15); // Indent references
                yPosition += _lineHeight/2;
           });
       }
@@ -250,7 +260,7 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
       if (report.appendices && report.appendices.length > 0) {
           localAddSection("Supplementary Appendices", report.appendices, (appendix: any, index: number) => {
               addTextFn(appendix.title, 12, { bold: true });
-              addTextFn(appendix.content, 10, {}, 15);
+              addTextFn(appendix.content, 10, {}, 15); // Indent appendix content
                yPosition += _lineHeight;
           });
       }
@@ -258,18 +268,19 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
       if (report.glossary && report.glossary.length > 0) {
           localAddSection("Glossary of Key Terms", report.glossary, (item: any, index: number) => {
               addTextFn(`${item.term}:`, 9, { bold: true });
-              addTextFn(item.definition, 9, {}, 15);
+              addTextFn(item.definition, 9, {}, 15); // Indent glossary definition
                yPosition += _lineHeight/2;
           });
       }
     };
 
 
+    // Main PDF generation logic starts here
     addTextWithBreaks(report.title || "Generated Research Report", 18, { bold: true });
-    yPosition += lineHeight;
+    yPosition += lineHeight; // Extra space after main title
 
     addTextWithBreaks(`Original Research Question: ${originalQuestion}`, 11, { italic: true, color: "#555555" });
-    yPosition += lineHeight;
+    yPosition += lineHeight * 1.5; // Extra space after research question
 
     if (generatedImageUrl && generatedImageUrl.startsWith('data:image/')) {
       try {
@@ -278,30 +289,32 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
 
         const img = new window.Image(); 
         img.onload = () => {
-          const imgWidth = contentWidth * 0.75;
+          const imgWidth = contentWidth * 0.75; // Adjust image width as needed
           const imgHeight = (img.height * imgWidth) / img.width;
 
-          if (yPosition + imgHeight > pageHeight - margin - 20) {
+          if (yPosition + imgHeight > pageHeight - margin - 20) { // Check space for image
             doc.addPage();
             yPosition = margin;
           }
           addTextWithBreaks("Conceptual Visualization:", 12, { bold: true });
           yPosition += lineHeight / 2;
           doc.addImage(generatedImageUrl, format, margin + (contentWidth * 0.125), yPosition, imgWidth, imgHeight);
-          yPosition += imgHeight + lineHeight * 1.5;
+          yPosition += imgHeight + lineHeight * 1.5; // Space after image
 
-          generateRemainingPdfContent(doc, addTextWithBreaks, yPosition, lineHeight, pageHeight, margin, contentWidth);
+          // Generate rest of the PDF content after image is potentially added
+          generateRemainingPdfContent(doc, addTextWithBreaks, yPosition, lineHeight, pageHeight, margin);
           doc.save(`ScholarAI_Report_${report.title?.replace(/[^\w\s]/gi, '').replace(/\s+/g, '_') || 'Untitled'}.pdf`);
         };
         img.onerror = () => {
           console.error("Error loading image for PDF.");
           addTextWithBreaks("[Error embedding conceptual visualization in PDF. Please view on web.]", 10, {italic: true, color: "#AA0000"});
           yPosition += lineHeight * 1.5;
-          generateRemainingPdfContent(doc, addTextWithBreaks, yPosition, lineHeight, pageHeight, margin, contentWidth);
+          // Generate rest of the PDF content even if image fails
+          generateRemainingPdfContent(doc, addTextWithBreaks, yPosition, lineHeight, pageHeight, margin);
           doc.save(`ScholarAI_Report_${report.title?.replace(/[^\w\s]/gi, '').replace(/\s+/g, '_') || 'Untitled'}.pdf`);
         }
-        img.src = generatedImageUrl;
-        return;
+        img.src = generatedImageUrl; // This triggers onload or onerror
+        return; // IMPORTANT: Return here because PDF saving is now async within onload/onerror
 
       } catch (e) {
         console.error("Error processing image for PDF:", e);
@@ -310,7 +323,8 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
       }
     }
 
-    generateRemainingPdfContent(doc, addTextWithBreaks, yPosition, lineHeight, pageHeight, margin, contentWidth);
+    // If no image or image processing failed before async callbacks, generate content and save
+    generateRemainingPdfContent(doc, addTextWithBreaks, yPosition, lineHeight, pageHeight, margin);
     doc.save(`ScholarAI_Report_${report.title?.replace(/[^\w\s]/gi, '').replace(/\s+/g, '_') || 'Untitled'}.pdf`);
   }
 
@@ -356,7 +370,7 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
                             width={600}
                             height={450}
                             className="rounded-md sm:rounded-lg object-contain shadow-xl max-h-[300px] sm:max-h-[400px]"
-                            data-ai-hint="research data"
+                            data-ai-hint="research visualization abstract"
                         />
                         <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                             <MaximizeIcon className="h-8 w-8 sm:h-10 sm:w-10 text-white/80" />

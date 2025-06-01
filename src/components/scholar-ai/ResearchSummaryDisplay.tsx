@@ -139,7 +139,7 @@ export default function ResearchSummaryDisplay({
                         width={700} 
                         height={400} 
                         className="rounded-md sm:rounded-lg object-contain mx-auto shadow-xl"
-                        data-ai-hint="abstract concept"
+                        data-ai-hint="research summary visualization abstract"
                         />
                         <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                             <MaximizeIcon className="h-8 w-8 sm:h-10 sm:w-10 text-white/80" />
@@ -163,7 +163,7 @@ export default function ResearchSummaryDisplay({
                     width={700} 
                     height={400}
                     className="rounded-md sm:rounded-lg object-contain mx-auto blur-sm max-h-[calc(100%-2rem)]" 
-                    data-ai-hint="abstract concept"
+                    data-ai-hint="research summary visualization abstract regenerating"
                   />
                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 rounded-lg sm:rounded-lg">
                       <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin text-white" />
@@ -182,4 +182,3 @@ export default function ResearchSummaryDisplay({
       </div>
   );
 }
-
