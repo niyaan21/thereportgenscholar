@@ -12,6 +12,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuPortal,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { cn } from '@/lib/utils';
@@ -19,25 +26,18 @@ import { usePathname, useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
+import { useTheme } from 'next-themes';
 
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { toast } = useToast();
-  const [theme, setThemeState] = useState<'light' | 'dark' | 'system'>('system');
+  const { theme, setTheme, systemTheme } = useTheme();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const localTheme = localStorage.getItem('theme') as typeof theme | null;
-    if (localTheme) {
-      setThemeState(localTheme);
-    } else {
-      const prefersDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setThemeState(prefersDark ? 'dark' : 'light');
-    }
-
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       setAuthLoading(false);
@@ -45,22 +45,6 @@ export default function Navbar() {
     return () => unsubscribe();
   }, []);
 
-  useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else if (theme === 'light') {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    } else { 
-      localStorage.removeItem('theme');
-      if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-    }
-  }, [theme]);
 
   const handleLogout = async () => {
     try {
@@ -135,7 +119,7 @@ export default function Navbar() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className={cn("text-xs sm:text-sm flex items-center gap-2", isMobile && "w-full justify-start")}>
               <UserCircle className="h-5 w-5" />
-              <span className="truncate max-w-[100px] sm:max-w-[150px]">{currentUser.email || "Profile"}</span>
+              <span className="truncate max-w-[100px] sm:max-w-[150px]">{currentUser.displayName || currentUser.email || "Profile"}</span>
               <ChevronDown className="h-4 w-4 opacity-70" />
             </Button>
           </DropdownMenuTrigger>
@@ -178,17 +162,17 @@ export default function Navbar() {
         <DropdownMenuContent align="end" className="w-48 border-border/70 bg-popover shadow-xl rounded-lg p-1.5">
           <DropdownMenuLabel className="font-semibold text-popover-foreground px-2 py-1.5 text-sm">Appearance</DropdownMenuLabel>
           <DropdownMenuSeparator className="bg-border/50 -mx-1 my-1" />
-          <DropdownMenuItem onClick={() => { setThemeState('light'); onLinkClick?.(); }} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
+          <DropdownMenuItem onClick={() => { setTheme('light'); onLinkClick?.(); }} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
             <Sun className="mr-2.5 h-4 w-4 text-muted-foreground group-hover:text-yellow-500 transition-colors" />
             <span>Light Mode</span>
             {theme === 'light' && <Check className="ml-auto h-4 w-4 text-accent" />}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => { setThemeState('dark'); onLinkClick?.(); }} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
+          <DropdownMenuItem onClick={() => { setTheme('dark'); onLinkClick?.(); }} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
             <Moon className="mr-2.5 h-4 w-4 text-muted-foreground group-hover:text-blue-400 transition-colors" />
             <span>Dark Mode</span>
             {theme === 'dark' && <Check className="ml-auto h-4 w-4 text-accent" />}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => { setThemeState('system'); onLinkClick?.(); }} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
+          <DropdownMenuItem onClick={() => { setTheme('system'); onLinkClick?.(); }} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
             <Settings className="mr-2.5 h-4 w-4 text-muted-foreground transition-colors" />
             <span>System Default</span>
             {theme === 'system' && <Check className="ml-auto h-4 w-4 text-accent" />}
@@ -200,7 +184,7 @@ export default function Navbar() {
   const currentNavLinks = currentUser ? authenticatedNavLinks : commonNavLinks;
 
   return (
-    <nav className="bg-background/80 backdrop-blur-md text-foreground shadow-lg sticky top-0 z-50 border-b border-border/60">
+    <nav className="bg-background/80 backdrop-blur-md text-foreground shadow-lg sticky top-0 z-40 border-b border-border/60"> {/* Adjusted z-index for navbar */}
       <div className="container mx-auto flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
         <NextLink href="/" passHref legacyBehavior>
           <a className="flex items-center space-x-2.5 group">
@@ -219,7 +203,6 @@ export default function Navbar() {
           </a>
         </NextLink>
 
-        {/* Desktop Navigation */}
         <div className="hidden lg:flex items-center space-x-1">
           {currentNavLinks.map(link => <NavLinkItem key={link.href} {...link} />)}
         </div>
@@ -229,7 +212,6 @@ export default function Navbar() {
           <ThemeSwitcherDropdown />
         </div>
 
-        {/* Mobile Navigation Trigger */}
         <div className="lg:hidden">
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
@@ -258,10 +240,6 @@ export default function Navbar() {
                 <AuthButtons isMobile onLinkClick={() => setMobileMenuOpen(false)} />
                 <ThemeSwitcherDropdown isMobile onLinkClick={() => setMobileMenuOpen(false)} />
               </div>
-              <SheetClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
-                  <CloseIcon className="h-5 w-5" />
-                  <span className="sr-only">Close</span>
-              </SheetClose>
             </SheetContent>
           </Sheet>
         </div>

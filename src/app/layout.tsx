@@ -3,7 +3,9 @@ import type {Metadata} from 'next';
 import {Geist, Geist_Mono} from 'next/font/google';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
-import Navbar from '@/components/layout/Navbar'; // New import
+import Navbar from '@/components/layout/Navbar';
+import ParticleBackground from '@/components/layout/ParticleBackground'; // New import
+import { ThemeProvider } from 'next-themes'; // New import for theme provider
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -42,7 +44,6 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'ScholarAI: Advanced AI Research & Report Generation',
     description: 'Elevate your research with ScholarAI. Leverage cutting-edge AI for query formulation, knowledge synthesis, and comprehensive report generation.',
-    // images: ['https://placehold.co/1200x630.png?text=ScholarAI+Research+Platform'], // OG image will be used by default if not specified
   },
   robots: {
     index: true,
@@ -55,7 +56,7 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  manifest: '/site.webmanifest', // Ensure you create this file for PWA capabilities
+  manifest: '/site.webmanifest',
 };
 
 export default function RootLayout({
@@ -64,11 +65,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
-        <Navbar />
-        {children}
-        <Toaster />
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <ParticleBackground />
+          <div className="relative z-10 flex flex-col min-h-screen"> {/* Ensure content is above particles */}
+            <Navbar />
+            <main className="flex-grow"> {/* Ensure main content can grow */}
+              {children}
+            </main>
+            <Toaster />
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   );
