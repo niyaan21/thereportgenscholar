@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import NextLink from 'next/link';
-import { BookText, UserPlus, LogIn, Home, Palette, Settings, Moon, Sun, Check, LogOut, Info, BookOpenText, Code2, Menu, X as CloseIcon, UserCircle, ChevronDown } from 'lucide-react';
+import { BookText, UserPlus, LogIn, Home, Palette, Settings, Moon, Sun, Check, LogOut, Info, BookOpenText, Code2, Menu, X as CloseIcon, UserCircle, ChevronDown, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -35,7 +35,6 @@ export default function Navbar() {
     if (localTheme) {
       setThemeState(localTheme);
     } else {
-      // Set initial theme based on system preference before full hydration if possible
       const prefersDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
       setThemeState(prefersDark ? 'dark' : 'light');
     }
@@ -68,7 +67,7 @@ export default function Navbar() {
     try {
       await signOut(auth);
       toast({ title: "Logged Out", description: "You have been successfully logged out." });
-      router.push('/'); // Redirect to home after logout
+      router.push('/'); 
     } catch (error) {
       console.error("Logout Error:", error);
       toast({ title: "Logout Failed", description: "Could not log you out. Please try again.", variant: "destructive" });
@@ -77,6 +76,7 @@ export default function Navbar() {
 
   const navLinks = [
     { href: "/", label: "Home", icon: Home },
+    { href: "/features", label: "Features", icon: Sparkles },
     { href: "/about", label: "About", icon: Info },
     { href: "/docs", label: "Docs", icon: BookOpenText },
     { href: "/api-docs", label: "API", icon: Code2 },
@@ -202,17 +202,17 @@ export default function Navbar() {
         </NextLink>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center space-x-1.5">
+        <div className="hidden lg:flex items-center space-x-1">
           {navLinks.map(link => <NavLinkItem key={link.href} {...link} />)}
         </div>
 
-        <div className="hidden md:flex items-center space-x-2">
+        <div className="hidden lg:flex items-center space-x-2">
           <AuthButtons />
           <ThemeSwitcherDropdown />
         </div>
 
         {/* Mobile Navigation Trigger */}
-        <div className="md:hidden">
+        <div className="lg:hidden">
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" aria-label="Open menu">
@@ -246,3 +246,4 @@ export default function Navbar() {
     </nav>
   );
 }
+
