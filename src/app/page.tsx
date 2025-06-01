@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { ToastAction } from "@/components/ui/toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
-  ArrowLeft, RotateCcw, FileTextIcon, Settings, Moon, Sun, Palette, Image as ImageIconLucide, Loader2, BookOpen, Brain, Search, Filter, BarChartBig, Telescope, Beaker, Sparkles, Bot, CornerDownLeft, Edit, CheckSquare, Zap, Eye, Lightbulb, FileArchive, Atom, ClipboardCopy, Share2, Download, Sigma, BarChartHorizontal, TrendingUpIcon, ScaleIcon, FlaskConical, LightbulbIcon as LightbulbLucideIcon, InfoIcon, AlertCircleIcon, CheckCircle2Icon, ExternalLink, MaximizeIcon, ChevronRight, Rocket, Check, Lock
+  ArrowLeft, RotateCcw, FileTextIcon, Settings, Moon, Sun, Palette, Image as ImageIconLucide, Loader2, BookOpen, Brain, Search, Filter, BarChartBig, Telescope, Layers, Sparkles, Bot, CornerDownLeft, Edit, CheckSquare, Zap, Eye, Lightbulb, FileArchive, Atom, ClipboardCopy, Share2, Download, Sigma, BarChartHorizontal, TrendingUpIcon, ScaleIcon, FlaskConical, LightbulbIcon as LightbulbLucideIcon, InfoIcon, AlertCircleIcon, CheckCircle2Icon, ExternalLink, MaximizeIcon, ChevronRight, Rocket, Check, Lock
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 
@@ -306,6 +306,50 @@ export default function ScholarAIPage() {
     </Button>
   );
 
+  const KeyFeaturesSection = () => (
+    <div className="mt-12 md:mt-16 space-y-8">
+      <h2 className="text-2xl sm:text-3xl font-bold text-center text-primary tracking-tight">
+        Empower Your Research with ScholarAI
+      </h2>
+      <div className="grid md:grid-cols-3 gap-6 sm:gap-8">
+        <Card className="bg-card/80 backdrop-blur-sm border-primary/20 hover:shadow-primary/20 transition-all duration-300 ease-out">
+          <CardHeader className="items-center text-center">
+            <div className="p-3 bg-gradient-to-br from-accent to-accent/80 rounded-full mb-3 ring-2 ring-accent/30 shadow-lg">
+              <LightbulbLucideIcon className="h-7 w-7 text-accent-foreground" />
+            </div>
+            <CardTitle className="text-lg sm:text-xl font-semibold text-primary">AI Query Formulation</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center text-sm sm:text-base text-muted-foreground leading-relaxed">
+            Transform your broad questions into precise, targeted search vectors for optimal information retrieval.
+          </CardContent>
+        </Card>
+        <Card className="bg-card/80 backdrop-blur-sm border-primary/20 hover:shadow-primary/20 transition-all duration-300 ease-out">
+          <CardHeader className="items-center text-center">
+            <div className="p-3 bg-gradient-to-br from-accent to-accent/80 rounded-full mb-3 ring-2 ring-accent/30 shadow-lg">
+              <Layers className="h-7 w-7 text-accent-foreground" />
+            </div>
+            <CardTitle className="text-lg sm:text-xl font-semibold text-primary">Intelligent Synthesis</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center text-sm sm:text-base text-muted-foreground leading-relaxed">
+            ScholarAI distills complex information from multiple sources into concise, actionable insights and summaries.
+          </CardContent>
+        </Card>
+        <Card className="bg-card/80 backdrop-blur-sm border-primary/20 hover:shadow-primary/20 transition-all duration-300 ease-out">
+          <CardHeader className="items-center text-center">
+            <div className="p-3 bg-gradient-to-br from-accent to-accent/80 rounded-full mb-3 ring-2 ring-accent/30 shadow-lg">
+              <FileTextIcon className="h-7 w-7 text-accent-foreground" />
+            </div>
+            <CardTitle className="text-lg sm:text-xl font-semibold text-primary">Comprehensive Reporting</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center text-sm sm:text-base text-muted-foreground leading-relaxed">
+            Automatically generate structured, in-depth academic-style research reports with references and visuals.
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+
+
   const renderCurrentStep = () => {
     let content;
     let animationClasses = "animate-in fade-in slide-in-from-bottom-6 duration-500 ease-out";
@@ -313,7 +357,7 @@ export default function ScholarAIPage() {
       case 'initial':
         content = (
           <div key="initial" className={cn("w-full", animationClasses)}>
-             {!authChecked && ( // Show a loading skeleton or similar while auth is checking
+             {!authChecked && ( 
               <Card className="w-full shadow-2xl border-primary/30 rounded-xl sm:rounded-2xl overflow-hidden bg-card">
                 <CardHeader className="p-4 sm:p-5 md:p-6">
                   <div className="h-10 w-3/4 bg-muted/50 rounded animate-pulse mb-4"></div>
@@ -346,13 +390,16 @@ export default function ScholarAIPage() {
               </Alert>
             )}
             {authChecked && (
-              <QueryForm 
-                formAction={formulateQueryFormAction}
-                isBusy={isFormulatingQueries || (!currentUser && authChecked)}
-                isDisabled={!currentUser && authChecked}
-                value={queryFormInputValue}
-                onChange={setQueryFormInputValue}
-              />
+              <>
+                <QueryForm 
+                  formAction={formulateQueryFormAction}
+                  isBusy={isFormulatingQueries || (!currentUser && authChecked)}
+                  isDisabled={!currentUser && authChecked}
+                  value={queryFormInputValue}
+                  onChange={setQueryFormInputValue}
+                />
+                {currentUser && <KeyFeaturesSection />}
+              </>
             )}
           </div>
         );
@@ -531,3 +578,4 @@ export default function ScholarAIPage() {
     </Dialog>
   );
 }
+
