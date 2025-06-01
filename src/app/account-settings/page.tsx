@@ -24,18 +24,12 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Mail, Lock, UserCircle, Trash2, Palette, Bell, Settings2, ShieldAlert, LogOut, ChevronRight, ExternalLink, Edit3, ImageDown, AlertCircle, CheckCircle2, Sun, Moon } from 'lucide-react'; // Added Sun, Moon
+import { Loader2, Mail, Lock, UserCircle, Trash2, Palette, Bell, Settings2, ShieldAlert, LogOut, ChevronRight, ExternalLink, Edit3, ImageDown, AlertCircle, CheckCircle2, Sun, Moon, History, Settings as GeneralSettingsIcon, UserRoundCog, FileText } from 'lucide-react';
 import NextLink from 'next/link';
-import type { Metadata } from 'next'; // Import Metadata type
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-
-
-// Note: Metadata object cannot be used in client components.
-// If SEO for this page is critical, consider moving metadata to a server component parent or layout.
-// export const metadata: Metadata = {
-//   title: 'Account Settings - ScholarAI',
-//   description: 'Manage your ScholarAI account settings, including email, password, profile, and preferences.',
-// };
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from '@/lib/utils'; // Ensured cn is imported
+import type { ClassValue } from 'clsx'; // Ensured ClassValue is imported
 
 const SettingsSection: React.FC<{ title: string; description?: string; icon?: React.ElementType; children: React.ReactNode; className?: string }> = ({ title, description, icon: Icon, children, className }) => (
   <Card className={cn("w-full shadow-lg border-border/60 hover:border-primary/40 transition-colors duration-300", className)}>
@@ -62,6 +56,7 @@ export default function AccountSettingsPage() {
   const [displayName, setDisplayName] = useState('');
   const [profilePicUrl, setProfilePicUrl] = useState('');
   const [theme, setThemeState] = useState<'light' | 'dark' | 'system'>('system');
+  const [activeTab, setActiveTab] = useState("general");
 
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [newsletterSubscription, setNewsletterSubscription] = useState(false);
@@ -76,22 +71,34 @@ export default function AccountSettingsPage() {
       if (user) {
         setCurrentUser(user);
         setDisplayName(user.displayName || '');
-        // Fetch user preferences for theme from localStorage or a backend if implemented
         const localTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'system' | null;
         if (localTheme) {
             setThemeState(localTheme);
         } else {
             const prefersDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-            setThemeState(prefersDark ? 'dark' : 'system'); // Default to system or light
+            setThemeState(prefersDark ? 'dark' : 'system');
         }
-
+        // Check for #history hash in URL to set active tab
+        if (window.location.hash === "#history") {
+          setActiveTab("history");
+        }
       } else {
-        router.push('/login'); // Redirect if not logged in
+        router.push('/login'); 
       }
       setIsLoading(false);
     });
     return () => unsubscribe();
   }, [router]);
+
+  useEffect(() => {
+    // Update URL hash when activeTab changes
+    if (activeTab === "history") {
+      router.replace("/account-settings#history", { scroll: false });
+    } else {
+      router.replace("/account-settings", { scroll: false });
+    }
+  }, [activeTab, router]);
+
 
   const handleThemeChange = (newTheme: 'light' | 'dark' | 'system') => {
     setThemeState(newTheme);
@@ -167,7 +174,6 @@ export default function AccountSettingsPage() {
 
   const handleDeleteAccount = async () => {
     if (!currentUser) return;
-
     if (!currentPasswordForDelete) {
         toast({ title: 'Password Required', description: 'Please enter your current password to delete your account.', variant: 'destructive' });
         return;
@@ -176,10 +182,9 @@ export default function AccountSettingsPage() {
     try {
         const credential = EmailAuthProvider.credential(currentUser.email!, currentPasswordForDelete);
         await reauthenticateWithCredential(currentUser, credential);
-        // Re-authentication successful, now delete user
         await deleteUser(currentUser);
         toast({ title: 'Account Deleted', description: 'Your account has been successfully deleted.', variant: 'default' });
-        router.push('/signup'); // Redirect to signup or home page
+        router.push('/signup'); 
     } catch (error: any) {
         let errMsg = "Failed to delete account. Please try again.";
         if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
@@ -192,10 +197,9 @@ export default function AccountSettingsPage() {
         toast({ title: 'Error Deleting Account', description: errMsg, variant: 'destructive' });
     } finally {
         setIsLoading(false);
-        setCurrentPasswordForDelete(''); // Clear password field
+        setCurrentPasswordForDelete(''); 
     }
   };
-
 
   if (isLoading || !currentUser) {
     return (
@@ -214,187 +218,214 @@ export default function AccountSettingsPage() {
         </p>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-        {/* Left Column for main settings or sidebar-like structure on larger screens */}
-        <div className="lg:col-span-2 space-y-6 sm:space-y-8">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-2 md:max-w-md mx-auto h-auto">
+          <TabsTrigger value="general" className="py-2.5 text-sm sm:text-base flex items-center gap-2">
+            <UserRoundCog className="h-5 w-5" /> General
+          </TabsTrigger>
+          <TabsTrigger value="history" className="py-2.5 text-sm sm:text-base flex items-center gap-2">
+            <History className="h-5 w-5" /> Research History
+          </TabsTrigger>
+        </TabsList>
 
-          <SettingsSection title="Email & Verification" icon={Mail} description="Manage your primary email address and verification status.">
-            <div className="space-y-3">
-                <Label htmlFor="currentEmail">Current Email Address</Label>
-                <Input id="currentEmail" type="email" value={currentUser.email || ''} readOnly disabled className="bg-muted/50 cursor-not-allowed"/>
+        <TabsContent value="general" className="mt-6 sm:mt-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+            <div className="lg:col-span-2 space-y-6 sm:space-y-8">
+              <SettingsSection title="Email & Verification" icon={Mail} description="Manage your primary email address and verification status.">
+                <div className="space-y-3">
+                    <Label htmlFor="currentEmail">Current Email Address</Label>
+                    <Input id="currentEmail" type="email" value={currentUser.email || ''} readOnly disabled className="bg-muted/50 cursor-not-allowed"/>
+                </div>
+                {currentUser.emailVerified ? (
+                  <div className="flex items-center space-x-2 p-3 bg-green-50 dark:bg-green-900/30 border border-green-300 dark:border-green-700 rounded-md">
+                    <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    <p className="text-sm text-green-700 dark:text-green-300 font-medium">Your email address is verified.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3 p-3 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-400 dark:border-yellow-600 rounded-md">
+                    <div className="flex items-start space-x-2">
+                        <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" />
+                        <p className="text-sm text-yellow-700 dark:text-yellow-300 font-medium">
+                        Your email address is not verified. Please verify to ensure full account functionality.
+                        </p>
+                    </div>
+                    <Button onClick={handleSendVerificationEmail} variant="outline" size="sm" disabled={isLoading} className="border-yellow-500 text-yellow-700 hover:bg-yellow-100 dark:border-yellow-500 dark:text-yellow-300 dark:hover:bg-yellow-700/50">
+                      {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Mail className="mr-2 h-4 w-4"/>}
+                      Resend Verification Email
+                    </Button>
+                  </div>
+                )}
+              </SettingsSection>
+
+              <SettingsSection title="Password Management" icon={Lock} description="Update your password or send a reset link if you've forgotten it.">
+                <form onSubmit={handleChangePassword} className="space-y-4">
+                  <div>
+                    <Label htmlFor="newPassword">New Password</Label>
+                    <Input id="newPassword" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Enter new password (min. 6 characters)" required />
+                  </div>
+                  <div>
+                    <Label htmlFor="confirmNewPassword">Confirm New Password</Label>
+                    <Input id="confirmNewPassword" type="password" value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)} placeholder="Confirm new password" required />
+                  </div>
+                  <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
+                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Edit3 className="mr-2 h-4 w-4"/>}
+                    Change Password
+                  </Button>
+                </form>
+                <Separator className="my-4"/>
+                <Button onClick={handleSendPasswordResetEmail} variant="outline" className="w-full sm:w-auto" disabled={isLoading}>
+                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <ExternalLink className="mr-2 h-4 w-4"/>}
+                  Send Password Reset Email
+                </Button>
+              </SettingsSection>
+
+              <SettingsSection title="Account Deletion" icon={Trash2} description="Permanently delete your ScholarAI account and all associated data. This action is irreversible.">
+                 <p className="text-sm text-destructive/90 bg-destructive/10 p-3 rounded-md border border-destructive/30">
+                    <ShieldAlert className="inline h-4 w-4 mr-1.5 mb-0.5"/>Warning: This action cannot be undone. All your research history and settings will be lost.
+                 </p>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" className="w-full sm:w-auto" disabled={isLoading}>
+                      {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Trash2 className="mr-2 h-4 w-4"/>}
+                      Delete My Account
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete your account and remove your data from our servers. Please enter your current password to confirm.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <div className="py-2">
+                        <Label htmlFor="currentPasswordForDelete" className="sr-only">Current Password</Label>
+                        <Input
+                            id="currentPasswordForDelete"
+                            type="password"
+                            placeholder="Enter your current password"
+                            value={currentPasswordForDelete}
+                            onChange={(e) => setCurrentPasswordForDelete(e.target.value)}
+                            className="border-destructive/50 focus:border-destructive"
+                        />
+                    </div>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDeleteAccount} disabled={isLoading || !currentPasswordForDelete} className="bg-destructive hover:bg-destructive/90">
+                        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : null}
+                        Yes, Delete Account
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </SettingsSection>
             </div>
-            {currentUser.emailVerified ? (
-              <div className="flex items-center space-x-2 p-3 bg-green-50 dark:bg-green-900/30 border border-green-300 dark:border-green-700 rounded-md">
-                <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
-                <p className="text-sm text-green-700 dark:text-green-300 font-medium">Your email address is verified.</p>
-              </div>
-            ) : (
-              <div className="space-y-3 p-3 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-400 dark:border-yellow-600 rounded-md">
-                <div className="flex items-start space-x-2">
-                    <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" />
-                    <p className="text-sm text-yellow-700 dark:text-yellow-300 font-medium">
-                    Your email address is not verified. Please verify to ensure full account functionality.
+
+            <div className="lg:col-span-1 space-y-6 sm:space-y-8">
+              <SettingsSection title="Profile Information" icon={UserCircle} description="Customize your public profile details. (Placeholder)">
+                <div>
+                  <Label htmlFor="displayName">Display Name</Label>
+                  <Input id="displayName" type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your Name" />
+                </div>
+                 <div>
+                  <Label htmlFor="profilePicUrl">Profile Picture URL</Label>
+                  <Input id="profilePicUrl" type="url" value={profilePicUrl} onChange={(e) => setProfilePicUrl(e.target.value)} placeholder="https://example.com/image.png" />
+                  <Button variant="outline" size="sm" className="mt-2 text-xs" onClick={() => toast({title: "Feature Coming Soon!", description:"Uploading profile pictures will be available in a future update."})}>
+                    <ImageDown className="mr-2 h-3.5 w-3.5"/> Upload Image
+                  </Button>
+                </div>
+                <Button onClick={() => toast({title: "Profile Updated (Demo)", description:"Display name and picture URL settings are for demonstration."})} className="w-full sm:w-auto">
+                  Save Profile (Demo)
+                </Button>
+              </SettingsSection>
+
+              <SettingsSection title="Appearance" icon={Palette} description="Choose how ScholarAI looks and feels.">
+                 <Label className="text-base">Theme</Label>
+                 <RadioGroup value={theme} onValueChange={(value: 'light' | 'dark' | 'system') => handleThemeChange(value)} className="grid grid-cols-3 gap-2 sm:gap-3 pt-1">
+                    <div>
+                      <RadioGroupItem value="light" id="theme-light" className="peer sr-only" />
+                      <Label htmlFor="theme-light" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-all">
+                        <Sun className="mb-1.5 h-5 w-5" /> Light
+                      </Label>
+                    </div>
+                    <div>
+                      <RadioGroupItem value="dark" id="theme-dark" className="peer sr-only" />
+                      <Label htmlFor="theme-dark" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-all">
+                        <Moon className="mb-1.5 h-5 w-5" /> Dark
+                      </Label>
+                    </div>
+                    <div>
+                      <RadioGroupItem value="system" id="theme-system" className="peer sr-only" />
+                      <Label htmlFor="theme-system" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-all">
+                        <Settings2 className="mb-1.5 h-5 w-5" /> System
+                      </Label>
+                    </div>
+                </RadioGroup>
+              </SettingsSection>
+
+              <SettingsSection title="Notification Preferences" icon={Bell} description="Control how you receive updates. (Placeholder)">
+                <div className="flex items-center justify-between space-x-2 py-2">
+                  <Label htmlFor="email-notifications" className="flex flex-col space-y-1">
+                    <span>Email Notifications</span>
+                    <span className="font-normal leading-snug text-muted-foreground text-xs">
+                      Receive important updates about your account and new features.
+                    </span>
+                  </Label>
+                  <Switch id="email-notifications" checked={emailNotifications} onCheckedChange={setEmailNotifications} />
+                </div>
+                 <div className="flex items-center justify-between space-x-2 py-2">
+                  <Label htmlFor="newsletter-subscription" className="flex flex-col space-y-1">
+                    <span>ScholarAI Newsletter</span>
+                    <span className="font-normal leading-snug text-muted-foreground text-xs">
+                      Subscribe to our monthly newsletter for tips and insights.
+                    </span>
+                  </Label>
+                  <Switch id="newsletter-subscription" checked={newsletterSubscription} onCheckedChange={setNewsletterSubscription} />
+                </div>
+                <Button onClick={() => toast({title: "Preferences Saved (Demo)", description:"Notification settings are for demonstration."})} className="w-full sm:w-auto mt-2">
+                  Save Notifications (Demo)
+                </Button>
+              </SettingsSection>
+
+              <SettingsSection title="Interface Settings" icon={Settings2} description="Customize your ScholarAI experience. (Placeholder)">
+                 <div>
+                    <Label htmlFor="itemsPerPage">Items Per Page (e.g., in results)</Label>
+                    <Input id="itemsPerPage" type="number" value={itemsPerPage} onChange={(e) => setItemsPerPage(e.target.value)} placeholder="10" min="5" max="50" />
+                </div>
+                <div className="flex items-center justify-between space-x-2 py-2">
+                  <Label htmlFor="experimental-features" className="flex flex-col space-y-1">
+                    <span>Experimental Features</span>
+                    <span className="font-normal leading-snug text-muted-foreground text-xs">
+                      Enable cutting-edge features that are still in testing.
+                    </span>
+                  </Label>
+                  <Switch id="experimental-features" checked={experimentalFeatures} onCheckedChange={setExperimentalFeatures} />
+                </div>
+                <Button onClick={() => toast({title: "Interface Settings Saved (Demo)", description:"Interface settings are for demonstration."})} className="w-full sm:w-auto mt-2">
+                  Save Interface (Demo)
+                </Button>
+              </SettingsSection>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="history" className="mt-6 sm:mt-8">
+            <SettingsSection title="Your Research Journey" icon={History} description="Review your past research queries and generated reports. (Placeholder)">
+                <div className="min-h-[300px] flex flex-col items-center justify-center text-center p-6 border-2 border-dashed border-border/60 rounded-lg bg-secondary/30 dark:bg-secondary/10">
+                    <FileText className="h-16 w-16 text-muted-foreground/70 mb-4" />
+                    <h3 className="text-xl font-semibold text-primary/90 mb-2">No History... Yet!</h3>
+                    <p className="text-muted-foreground max-w-md">
+                        Your past research sessions, queries, synthesized insights, and generated reports will appear here once you start exploring with ScholarAI.
                     </p>
+                    <Button asChild className="mt-6">
+                        <NextLink href="/">Start New Research</NextLink>
+                    </Button>
                 </div>
-                <Button onClick={handleSendVerificationEmail} variant="outline" size="sm" disabled={isLoading} className="border-yellow-500 text-yellow-700 hover:bg-yellow-100 dark:border-yellow-500 dark:text-yellow-300 dark:hover:bg-yellow-700/50">
-                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Mail className="mr-2 h-4 w-4"/>}
-                  Resend Verification Email
-                </Button>
-              </div>
-            )}
-          </SettingsSection>
-
-          <SettingsSection title="Password Management" icon={Lock} description="Update your password or send a reset link if you've forgotten it.">
-            <form onSubmit={handleChangePassword} className="space-y-4">
-              <div>
-                <Label htmlFor="newPassword">New Password</Label>
-                <Input id="newPassword" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Enter new password (min. 6 characters)" required />
-              </div>
-              <div>
-                <Label htmlFor="confirmNewPassword">Confirm New Password</Label>
-                <Input id="confirmNewPassword" type="password" value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)} placeholder="Confirm new password" required />
-              </div>
-              <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
-                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Edit3 className="mr-2 h-4 w-4"/>}
-                Change Password
-              </Button>
-            </form>
-            <Separator className="my-4"/>
-            <Button onClick={handleSendPasswordResetEmail} variant="outline" className="w-full sm:w-auto" disabled={isLoading}>
-              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <ExternalLink className="mr-2 h-4 w-4"/>}
-              Send Password Reset Email
-            </Button>
-          </SettingsSection>
-
-          <SettingsSection title="Account Deletion" icon={Trash2} description="Permanently delete your ScholarAI account and all associated data. This action is irreversible.">
-             <p className="text-sm text-destructive/90 bg-destructive/10 p-3 rounded-md border border-destructive/30">
-                <ShieldAlert className="inline h-4 w-4 mr-1.5 mb-0.5"/>Warning: This action cannot be undone. All your research history and settings will be lost.
-             </p>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" className="w-full sm:w-auto" disabled={isLoading}>
-                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Trash2 className="mr-2 h-4 w-4"/>}
-                  Delete My Account
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete your account and remove your data from our servers. Please enter your current password to confirm.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <div className="py-2">
-                    <Label htmlFor="currentPasswordForDelete" className="sr-only">Current Password</Label>
-                    <Input
-                        id="currentPasswordForDelete"
-                        type="password"
-                        placeholder="Enter your current password"
-                        value={currentPasswordForDelete}
-                        onChange={(e) => setCurrentPasswordForDelete(e.target.value)}
-                        className="border-destructive/50 focus:border-destructive"
-                    />
-                </div>
-                <AlertDialogFooter>
-                  <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDeleteAccount} disabled={isLoading || !currentPasswordForDelete} className="bg-destructive hover:bg-destructive/90">
-                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : null}
-                    Yes, Delete Account
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </SettingsSection>
-        </div>
-
-        {/* Right Column for preferences or less critical settings */}
-        <div className="lg:col-span-1 space-y-6 sm:space-y-8">
-          <SettingsSection title="Profile Information" icon={UserCircle} description="Customize your public profile details. (Placeholder)">
-            <div>
-              <Label htmlFor="displayName">Display Name</Label>
-              <Input id="displayName" type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your Name" />
-            </div>
-             <div>
-              <Label htmlFor="profilePicUrl">Profile Picture URL</Label>
-              <Input id="profilePicUrl" type="url" value={profilePicUrl} onChange={(e) => setProfilePicUrl(e.target.value)} placeholder="https://example.com/image.png" />
-              <Button variant="outline" size="sm" className="mt-2 text-xs" onClick={() => toast({title: "Feature Coming Soon!", description:"Uploading profile pictures will be available in a future update."})}>
-                <ImageDown className="mr-2 h-3.5 w-3.5"/> Upload Image
-              </Button>
-            </div>
-            <Button onClick={() => toast({title: "Profile Updated (Demo)", description:"Display name and picture URL settings are for demonstration."})} className="w-full sm:w-auto">
-              Save Profile (Demo)
-            </Button>
-          </SettingsSection>
-
-          <SettingsSection title="Appearance" icon={Palette} description="Choose how ScholarAI looks and feels.">
-             <Label className="text-base">Theme</Label>
-             <RadioGroup value={theme} onValueChange={(value: 'light' | 'dark' | 'system') => handleThemeChange(value)} className="grid grid-cols-3 gap-2 sm:gap-3 pt-1">
-                <div>
-                  <RadioGroupItem value="light" id="theme-light" className="peer sr-only" />
-                  <Label htmlFor="theme-light" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-all">
-                    <Sun className="mb-1.5 h-5 w-5" /> Light
-                  </Label>
-                </div>
-                <div>
-                  <RadioGroupItem value="dark" id="theme-dark" className="peer sr-only" />
-                  <Label htmlFor="theme-dark" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-all">
-                    <Moon className="mb-1.5 h-5 w-5" /> Dark
-                  </Label>
-                </div>
-                <div>
-                  <RadioGroupItem value="system" id="theme-system" className="peer sr-only" />
-                  <Label htmlFor="theme-system" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-all">
-                    <Settings2 className="mb-1.5 h-5 w-5" /> System
-                  </Label>
-                </div>
-            </RadioGroup>
-          </SettingsSection>
-
-          <SettingsSection title="Notification Preferences" icon={Bell} description="Control how you receive updates. (Placeholder)">
-            <div className="flex items-center justify-between space-x-2 py-2">
-              <Label htmlFor="email-notifications" className="flex flex-col space-y-1">
-                <span>Email Notifications</span>
-                <span className="font-normal leading-snug text-muted-foreground text-xs">
-                  Receive important updates about your account and new features.
-                </span>
-              </Label>
-              <Switch id="email-notifications" checked={emailNotifications} onCheckedChange={setEmailNotifications} />
-            </div>
-             <div className="flex items-center justify-between space-x-2 py-2">
-              <Label htmlFor="newsletter-subscription" className="flex flex-col space-y-1">
-                <span>ScholarAI Newsletter</span>
-                <span className="font-normal leading-snug text-muted-foreground text-xs">
-                  Subscribe to our monthly newsletter for tips and insights.
-                </span>
-              </Label>
-              <Switch id="newsletter-subscription" checked={newsletterSubscription} onCheckedChange={setNewsletterSubscription} />
-            </div>
-            <Button onClick={() => toast({title: "Preferences Saved (Demo)", description:"Notification settings are for demonstration."})} className="w-full sm:w-auto mt-2">
-              Save Notifications (Demo)
-            </Button>
-          </SettingsSection>
-
-          <SettingsSection title="Interface Settings" icon={Settings2} description="Customize your ScholarAI experience. (Placeholder)">
-             <div>
-                <Label htmlFor="itemsPerPage">Items Per Page (e.g., in results)</Label>
-                <Input id="itemsPerPage" type="number" value={itemsPerPage} onChange={(e) => setItemsPerPage(e.target.value)} placeholder="10" min="5" max="50" />
-            </div>
-            <div className="flex items-center justify-between space-x-2 py-2">
-              <Label htmlFor="experimental-features" className="flex flex-col space-y-1">
-                <span>Experimental Features</span>
-                <span className="font-normal leading-snug text-muted-foreground text-xs">
-                  Enable cutting-edge features that are still in testing.
-                </span>
-              </Label>
-              <Switch id="experimental-features" checked={experimentalFeatures} onCheckedChange={setExperimentalFeatures} />
-            </div>
-            <Button onClick={() => toast({title: "Interface Settings Saved (Demo)", description:"Interface settings are for demonstration."})} className="w-full sm:w-auto mt-2">
-              Save Interface (Demo)
-            </Button>
-          </SettingsSection>
-
-        </div>
-      </div>
+                <p className="text-xs text-muted-foreground mt-4 text-center">
+                    Note: Full history tracking requires backend integration, which is not yet implemented. This section is a placeholder for future functionality.
+                </p>
+            </SettingsSection>
+        </TabsContent>
+      </Tabs>
 
       <CardFooter className="mt-10 sm:mt-12 text-center border-t pt-6 text-xs text-muted-foreground">
         <p className="mx-auto">
@@ -405,10 +436,5 @@ export default function AccountSettingsPage() {
   );
 }
 
-function cn(...inputs: ClassValue[]): string {
-  return inputs.filter(Boolean).join(' ');
-}
-type ClassValue = string | null | undefined | { [key: string]: any } | ClassValue[];
-
-
-    
+// cn function was defined here, but it should be imported from @/lib/utils. This ensures only one definition.
+// Removed the local cn function definition. ClassValue is also imported.

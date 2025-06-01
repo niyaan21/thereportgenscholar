@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import NextLink from 'next/link';
-import { BookText, UserPlus, LogIn, Home, Palette, Settings, Moon, Sun, Check, LogOut, Info, BookOpenText, Code2, Menu, X as CloseIcon, UserCircle, ChevronDown, Sparkles, FileText as FeaturesIcon, Settings2 as AccountSettingsIcon } from 'lucide-react'; // Added AccountSettingsIcon
+import { BookText, UserPlus, LogIn, Home, Palette, Settings, Moon, Sun, Check, LogOut, Info, BookOpenText, Code2, Menu, X as CloseIcon, UserCircle, ChevronDown, Sparkles, FileText as FeaturesIcon, Settings2 as AccountSettingsIcon, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -74,12 +74,17 @@ export default function Navbar() {
     }
   };
 
-  const navLinks = [
+  const commonNavLinks = [
     { href: "/", label: "Home", icon: Home },
     { href: "/features", label: "Features", icon: Sparkles },
     { href: "/about", label: "About", icon: Info },
     { href: "/docs", label: "Docs", icon: BookOpenText },
     { href: "/api-docs", label: "API", icon: Code2 },
+  ];
+  
+  const authenticatedNavLinks = [
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    ...commonNavLinks,
   ];
 
   const NavLinkItem: React.FC<{ href: string; label: string; icon: React.ElementType; onClick?: () => void }> = ({ href, label, icon: Icon, onClick }) => (
@@ -137,6 +142,11 @@ export default function Navbar() {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel className="truncate">{currentUser.email}</DropdownMenuLabel>
             <DropdownMenuSeparator />
+             <DropdownMenuItem asChild className="cursor-pointer">
+              <NextLink href="/dashboard" onClick={onLinkClick}>
+                <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
+              </NextLink>
+            </DropdownMenuItem>
             <DropdownMenuItem asChild className="cursor-pointer">
               <NextLink href="/account-settings" onClick={onLinkClick}>
                 <AccountSettingsIcon className="mr-2 h-4 w-4" /> Account Settings
@@ -187,6 +197,8 @@ export default function Navbar() {
       </DropdownMenu>
   );
 
+  const currentNavLinks = currentUser ? authenticatedNavLinks : commonNavLinks;
+
   return (
     <nav className="bg-background/80 backdrop-blur-md text-foreground shadow-lg sticky top-0 z-50 border-b border-border/60">
       <div className="container mx-auto flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
@@ -209,7 +221,7 @@ export default function Navbar() {
 
         {/* Desktop Navigation */}
         <div className="hidden lg:flex items-center space-x-1">
-          {navLinks.map(link => <NavLinkItem key={link.href} {...link} />)}
+          {currentNavLinks.map(link => <NavLinkItem key={link.href} {...link} />)}
         </div>
 
         <div className="hidden lg:flex items-center space-x-2">
@@ -227,7 +239,7 @@ export default function Navbar() {
             </SheetTrigger>
             <SheetContent side="right" className="w-[280px] p-0 bg-background flex flex-col">
               <SheetHeader className="p-4 border-b border-border/60">
-                <SheetTitle className="text-lg font-semibold text-primary flex items-center">
+                <SheetTitle>
                    <NextLink href="/" passHref legacyBehavior>
                       <a className="flex items-center space-x-2.5 group" onClick={() => setMobileMenuOpen(false)}>
                         <div className="p-2 rounded-md bg-primary text-primary-foreground">
@@ -240,7 +252,7 @@ export default function Navbar() {
               </SheetHeader>
               
               <div className="flex flex-col space-y-2 px-4 py-4 flex-grow overflow-y-auto">
-                {navLinks.map(link => <NavLinkItem key={link.href} {...link} onClick={() => setMobileMenuOpen(false)} />)}
+                {currentNavLinks.map(link => <NavLinkItem key={link.href} {...link} onClick={() => setMobileMenuOpen(false)} />)}
               </div>
               <div className="mt-auto p-4 border-t border-border/60 space-y-3">
                 <AuthButtons isMobile onLinkClick={() => setMobileMenuOpen(false)} />
@@ -257,4 +269,3 @@ export default function Navbar() {
     </nav>
   );
 }
-
