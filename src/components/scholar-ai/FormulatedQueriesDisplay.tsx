@@ -75,7 +75,7 @@ export default function FormulatedQueriesDisplay({ queries, formAction, isBusy }
                       key={index}
                       className={cn(
                         "flex items-center space-x-3 sm:space-x-3.5 p-3 sm:p-4 bg-secondary/40 dark:bg-secondary/20 rounded-lg sm:rounded-xl shadow-md border border-border/70 transition-all duration-250 group",
-                        "hover:border-accent/50 hover:shadow-lg hover:bg-secondary/60 dark:hover:bg-secondary/30"
+                        "hover:border-accent/50 hover:shadow-lg hover:bg-secondary/60 dark:hover:bg-secondary/30 hover:scale-[1.015] transform"
                         )}
                     >
                       <IconComponent className="h-4 w-4 sm:h-5 sm:w-5 text-accent flex-shrink-0 group-hover:scale-110 transition-transform" />

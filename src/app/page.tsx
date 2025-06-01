@@ -236,6 +236,8 @@ export default function ScholarAIPage() {
       setResearchSummary('');
       setSummarizedPaperTitles([]);
       setGeneratedImageUrl(null);
+      // Reset action states if necessary
+      // formulateQueryState = initialFormulateQueryActionState; // This won't work, use a reset function if provided by useActionState or manage manually
     });
   };
 
@@ -315,10 +317,11 @@ export default function ScholarAIPage() {
 
   const renderCurrentStep = () => {
     let content;
+    let animationClasses = "animate-in fade-in slide-in-from-bottom-6 duration-500 ease-out";
     switch (appState) {
       case 'initial':
         content = (
-          <div key="initial" className="w-full">
+          <div key="initial" className={cn("w-full", animationClasses)}>
             <QueryForm 
               formAction={formulateQueryFormAction}
               isBusy={isFormulatingQueries}
@@ -330,7 +333,7 @@ export default function ScholarAIPage() {
         break;
       case 'queries_formulated':
         content = (
-          <div key="queries" className="w-full space-y-6 md:space-y-8">
+          <div key="queries" className={cn("w-full space-y-6 md:space-y-8", animationClasses)}>
             <Card className="overflow-hidden shadow-xl border-accent/30 bg-card rounded-2xl">
               <CardHeader className="p-4 sm:p-5 md:p-6 bg-gradient-to-br from-accent/15 via-transparent to-accent/5 border-b border-accent/25">
                 <div className="flex items-center space-x-3 sm:space-x-4">
@@ -356,7 +359,7 @@ export default function ScholarAIPage() {
         break;
       case 'summary_generated':
         content = (
-          <div key="summary" className="w-full space-y-6 md:space-y-8">
+          <div key="summary" className={cn("w-full space-y-6 md:space-y-8", animationClasses)}>
             <ResearchSummaryDisplay
               summary={researchSummary}
               originalQuestion={researchQuestion} 
@@ -392,7 +395,7 @@ export default function ScholarAIPage() {
         break;
       case 'report_generated':
         content = (
-          <div key="report" className="w-full space-y-6 md:space-y-8" id="research-report-section">
+          <div key="report" className={cn("w-full space-y-6 md:space-y-8", animationClasses)} id="research-report-section">
             {reportActionState.researchReport && (
               <ResearchReportDisplay 
                 report={reportActionState.researchReport} 
@@ -443,10 +446,10 @@ export default function ScholarAIPage() {
             <div
               className="p-3.5 sm:p-4 bg-gradient-to-br from-primary via-primary/90 to-primary/75 rounded-xl sm:rounded-2xl shadow-lg text-primary-foreground ring-2 ring-primary/40 ring-offset-2 ring-offset-card"
             >
-              <Beaker className="h-7 w-7 sm:h-9 sm:w-9" />
+              <Beaker className="h-8 w-8 sm:h-10 sm:w-10" />
             </div>
             <div className="overflow-hidden">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent group-hover:from-accent group-hover:to-primary transition-all duration-300 truncate">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent group-hover:from-accent group-hover:to-primary transition-all duration-300 truncate">
                 ScholarAI
               </h1>
               <p className="text-xs text-muted-foreground -mt-0.5 tracking-wide truncate hidden sm:block">Augmented Intelligence for Research</p>
@@ -545,3 +548,4 @@ export default function ScholarAIPage() {
     </Dialog>
   );
 }
+
