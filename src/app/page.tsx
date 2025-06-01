@@ -39,9 +39,9 @@ import { useToast } from '@/hooks/use-toast';
 import {
   Dialog,
   DialogContent,
-  DialogHeader, // Keep DialogHeader
-  DialogTitle, // Keep DialogTitle
-  DialogDescription, // Keep DialogDescription
+  DialogHeader, 
+  DialogTitle, 
+  DialogDescription, 
 } from "@/components/ui/dialog"
 import NextImage from 'next/image';
 import { cn } from '@/lib/utils';
@@ -235,6 +235,8 @@ export default function ScholarAIPage() {
       setResearchSummary('');
       setSummarizedPaperTitles([]);
       setGeneratedImageUrl(null);
+      // Reset action states if needed, for example:
+      // formulateQueryState.message = ''; // This is not directly mutable, use Reset functions if available or re-initialize
     });
   };
 
@@ -267,7 +269,7 @@ export default function ScholarAIPage() {
     }
 
     if (topicForImage.length > 200) {
-      topicForImage = topicForImage.substring(0, 195) + "..."; // Ensure it's under 200
+      topicForImage = topicForImage.substring(0, 195) + "..."; 
     }
 
     startTransition(() => {
@@ -306,8 +308,8 @@ export default function ScholarAIPage() {
   const isLoading = isFormulatingQueries || isSynthesizingResearch || isImageGenerating || isReportGenerating;
   
   const ActionButton: React.FC<React.ComponentProps<typeof Button> & { icon?: React.ElementType, isProcessing?: boolean, label: string, pending?: boolean }> = ({ icon: Icon, isProcessing, pending, label, children, ...props }) => (
-    <Button {...props} disabled={isLoading || isProcessing || pending || props.disabled} className={cn("shadow-lg hover:shadow-xl transition-all duration-300 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex items-center justify-center group w-full sm:w-auto", props.className)}>
-      {(isProcessing || pending) ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : (Icon && <Icon className="mr-2 h-5 w-5" />)}
+    <Button {...props} disabled={isLoading || isProcessing || pending || props.disabled} className={cn("shadow-lg hover:shadow-xl transition-all duration-300 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex items-center justify-center group w-full sm:w-auto text-base py-3", props.className)}>
+      {(isProcessing || pending) ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : (Icon && <Icon className="mr-2.5 h-5 w-5" />)}
       {label || children}
     </Button>
   );
@@ -370,7 +372,7 @@ export default function ScholarAIPage() {
                   onClick={handleGenerateFullReport}
                   variant="default"
                   size="lg"
-                  className="w-full sm:w-auto bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/80 hover:to-primary text-sm sm:text-base py-2.5 sm:py-3 px-6 sm:px-8 rounded-lg shadow-lg hover:shadow-primary/40"
+                  className="w-full sm:w-auto bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/80 hover:to-primary px-6 sm:px-8 rounded-xl"
                   pending={isReportGenerating}
                   icon={BookOpen}
                   label="Generate Full Report"
@@ -380,7 +382,7 @@ export default function ScholarAIPage() {
                   onClick={handleStartNewResearch}
                   variant="outline"
                   size="lg"
-                  className="w-full sm:w-auto border-input hover:bg-accent/10 hover:text-accent-foreground text-sm sm:text-base py-2.5 sm:py-3 px-6 sm:px-8 rounded-lg shadow-md hover:shadow-accent/20"
+                  className="w-full sm:w-auto border-input hover:bg-accent/10 hover:text-accent-foreground px-6 sm:px-8 rounded-xl"
                   icon={RotateCcw}
                   label="Start New Research"
                   aria-label="Start a new research session"
@@ -405,7 +407,7 @@ export default function ScholarAIPage() {
                 onClick={handleStartNewResearch}
                 variant="default"
                 size="lg"
-                className="w-full sm:w-auto bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/80 hover:to-primary text-sm sm:text-base py-2.5 sm:py-3 px-6 sm:px-8 rounded-lg shadow-lg hover:shadow-primary/40"
+                className="w-full sm:w-auto bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/80 hover:to-primary px-6 sm:px-8 rounded-xl"
                 icon={RotateCcw}
                 label="Start New Research Session"
                 aria-label="Start a new research session"
@@ -429,7 +431,7 @@ export default function ScholarAIPage() {
       >
         <div className="container mx-auto flex items-center justify-between">
           <div 
-            className="flex items-center space-x-2 sm:space-x-3.5 group cursor-pointer flex-shrink min-w-0" 
+            className="flex items-center space-x-2.5 sm:space-x-4 group cursor-pointer flex-shrink min-w-0" 
             onClick={handleStartNewResearch}
             role="button"
             tabIndex={0}
@@ -437,12 +439,12 @@ export default function ScholarAIPage() {
             aria-label="Start new research"
           >
             <div
-              className="p-2.5 sm:p-3 bg-gradient-to-br from-primary via-primary/90 to-primary/75 rounded-lg sm:rounded-xl shadow-lg text-primary-foreground ring-2 ring-primary/30 ring-offset-2 ring-offset-card"
+              className="p-3 sm:p-3.5 bg-gradient-to-br from-primary via-primary/90 to-primary/75 rounded-xl sm:rounded-2xl shadow-lg text-primary-foreground ring-2 ring-primary/40 ring-offset-2 ring-offset-card"
             >
-              <Beaker className="h-6 w-6 sm:h-7 sm:w-7" />
+              <Beaker className="h-7 w-7 sm:h-8 sm:w-8" />
             </div>
             <div className="overflow-hidden">
-              <h1 className="text-lg sm:text-xl md:text-2xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent group-hover:from-accent group-hover:to-primary transition-all duration-300 truncate">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent group-hover:from-accent group-hover:to-primary transition-all duration-300 truncate">
                 ScholarAI
               </h1>
               <p className="text-xs text-muted-foreground -mt-0.5 tracking-wide truncate hidden sm:block">Augmented Intelligence for Research</p>
@@ -456,7 +458,7 @@ export default function ScholarAIPage() {
                   onClick={handleGoBack} 
                   variant="ghost" 
                   size="icon"
-                  className="text-muted-foreground hover:bg-accent/10 hover:text-accent-foreground disabled:opacity-50 h-9 w-9 sm:h-10 sm:w-10 rounded-full"
+                  className="text-muted-foreground hover:bg-accent/15 hover:text-accent-foreground disabled:opacity-50 h-9 w-9 sm:h-10 sm:w-10 rounded-full"
                   disabled={isLoading}
                   aria-label="Go back to previous step"
                 >
@@ -465,7 +467,7 @@ export default function ScholarAIPage() {
             )}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-muted-foreground hover:bg-accent/10 hover:text-accent-foreground h-9 w-9 sm:h-10 sm:w-10 rounded-full" aria-label="Theme settings">
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:bg-accent/15 hover:text-accent-foreground h-9 w-9 sm:h-10 sm:w-10 rounded-full" aria-label="Theme settings">
                   <Palette className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
               </DropdownMenuTrigger>
@@ -541,5 +543,3 @@ export default function ScholarAIPage() {
     </Dialog>
   );
 }
-
-    
