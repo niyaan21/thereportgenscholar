@@ -2,9 +2,9 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import * as TSParticlesReact from 'react-tsparticles'; // Changed to namespace import
+import * as TSParticlesReact from '@tsparticles/react'; // Changed to @tsparticles/react
 import type { Container, Engine } from '@tsparticles/engine'; // Import types from @tsparticles/engine
-import { loadSlim } from 'tsparticles-slim'; 
+import { loadSlim } from '@tsparticles/slim'; // Corrected import path
 import { useTheme } from 'next-themes';
 
 const ParticleBackground: React.FC = () => {
@@ -15,7 +15,7 @@ const ParticleBackground: React.FC = () => {
     // Use TSParticlesReact.initParticlesEngine
     TSParticlesReact.initParticlesEngine(async (engine: Engine) => {
       // console.log('Particles engine initializing');
-      await loadSlim(engine);
+      await loadSlim(engine); // loadSlim is called with the engine from initParticlesEngine
       // console.log('Slim bundle loaded into engine');
     }).then(() => {
       setInit(true);
