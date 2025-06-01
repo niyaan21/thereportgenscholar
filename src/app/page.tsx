@@ -531,7 +531,7 @@ export default function ScholarAIPage() {
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/10 to-background flex flex-col overflow-x-hidden antialiased selection:bg-accent/20 selection:text-accent-foreground">
       
       <main className="flex-grow container mx-auto px-4 sm:px-6 py-8 sm:py-10 md:py-16">
-        <div className="max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
+        <div className="max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl mx-auto">
             {renderCurrentStep()}
         </div>
       </main>
