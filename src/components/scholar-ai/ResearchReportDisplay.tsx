@@ -13,7 +13,6 @@ import { cn } from '@/lib/utils';
 import PlaceholderChart from './PlaceholderChart';
 import { Button } from '@/components/ui/button';
 import jsPDF from 'jspdf';
-// import autoTable from 'jspdf-autotable'; // Not used in the current PDF generation logic
 
 export interface ResearchReportDisplayProps {
   report: GenerateResearchReportOutput;
@@ -124,20 +123,6 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
 
     const addTextWithBreaks = (text: string, fontSize: number, styles: { bold?: boolean, italic?: boolean, color?: string } = {}, indent = 0) => {
       if (!text || text.trim() === "") {
-        // Optional: if you want to explicitly state "Content not provided" for empty strings too.
-        // doc.setFontSize(10);
-        // doc.setFont(undefined, 'italic');
-        // doc.setTextColor(150, 150, 150);
-        // const notProvidedLines = doc.splitTextToSize("Content for this section was not provided.", contentWidth - indent);
-        // notProvidedLines.forEach((line: string) => {
-        //   if (yPosition + lineHeight > pageHeight - margin) {
-        //     doc.addPage();
-        //     yPosition = margin;
-        //   }
-        //   doc.text(line, margin + indent, yPosition);
-        //   yPosition += lineHeight;
-        // });
-        // yPosition += lineHeight / 2;
         return;
       }
       doc.setFontSize(fontSize);
@@ -183,22 +168,19 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
     };
 
     const generateRemainingPdfContent = (
-      docInstance: jsPDF, // Changed from doc to docInstance to avoid conflict if any
-      addTextFn: typeof addTextWithBreaks, // Changed from addTextWithBreaks
-      currentYPos: number, // Changed from currentYPosition
-      _lineHeight: number, // Changed from lineHeight (prefixed with underscore as it's also a const in outer scope)
-      _pageHeight: number, // Changed from pageHeight
-      _margin: number, // Changed from margin
-      _contentWidth: number // Changed from contentWidth
+      docInstance: jsPDF, 
+      addTextFn: typeof addTextWithBreaks, 
+      currentYPos: number, 
+      _lineHeight: number, 
+      _pageHeight: number, 
+      _margin: number, 
+      _contentWidth: number 
     ) => {
-      yPosition = currentYPos; // Use and update the yPosition from the outer scope
+      yPosition = currentYPos; 
 
       const localAddSection = (title: string, content?: string | any[] | null, renderFn?: (item: any, index: number) => void) => {
         if (!content && !renderFn && !(typeof content === 'string' && content.trim() !== "")) {
-             // If title itself is important, print it and then "not provided"
-            // For now, if no content and no renderFn, skip (unless content is empty string, handled by addTextFn)
-            if (!(typeof content === 'string' && content.trim() === "")) { // only return if not an empty string meant to be handled
-                 // Check if this section should be skipped entirely if content is truly absent
+            if (!(typeof content === 'string' && content.trim() === "")) { 
                 const optionalSections = ["Acknowledged Limitations", "Future Research Avenues", "Ethical Considerations & Impact", "Supplementary Appendices", "Glossary of Key Terms"];
                 if (optionalSections.includes(title) && !content && !renderFn) {
                     return;
@@ -220,7 +202,7 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
           } else {
              addTextFn("No items to display in this list.", 10, {italic: true});
           }
-        } else { // Covers null, undefined, or other non-string/non-array cases
+        } else { 
           addTextFn("Content for this section was not provided.", 10, {italic: true});
         }
         yPosition += _lineHeight;
@@ -280,8 +262,6 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
                yPosition += _lineHeight/2;
           });
       }
-      // Update the yPosition in the outer scope if necessary, though it's passed by value.
-      // The yPosition being modified is the one in handleDownloadReportPdf's scope.
     };
 
 
@@ -296,7 +276,7 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
         const MimeTypeMatch = generatedImageUrl.match(/data:(image\/[^;]+);/);
         const format = MimeTypeMatch ? MimeTypeMatch[1].split('/')[1].toUpperCase() : 'PNG';
 
-        const img = new window.Image(); // Use window.Image for client-side
+        const img = new window.Image(); 
         img.onload = () => {
           const imgWidth = contentWidth * 0.75;
           const imgHeight = (img.height * imgWidth) / img.width;
