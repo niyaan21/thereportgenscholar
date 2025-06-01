@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import NextLink from 'next/link';
-import { BookText, UserPlus, Home, Palette, Settings, Moon, Sun, Check, ArrowLeft } from 'lucide-react';
+import { BookText, UserPlus, LogIn, Home, Palette, Settings, Moon, Sun, Check, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -19,18 +19,21 @@ import { usePathname } from 'next/navigation';
 export default function Navbar() {
   const pathname = usePathname();
   const [theme, setThemeState] = useState<'light' | 'dark' | 'system'>('system');
+  // In a real app, user auth state would come from a context or hook
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Placeholder
 
   useEffect(() => {
     const localTheme = localStorage.getItem('theme') as typeof theme | null;
     if (localTheme) {
       setThemeState(localTheme);
     } else {
-      // Set initial theme based on system preference only if no theme is stored
-      // This logic might be slightly different if `theme` state is also used to apply the class directly
-      // For now, just setting the state for the dropdown
       const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
       setThemeState(prefersDark ? 'dark' : 'light'); 
     }
+
+    // Placeholder for auth state checking, e.g., from Firebase auth observer
+    // const unsubscribe = auth.onAuthStateChanged(user => setIsAuthenticated(!!user));
+    // return () => unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -50,10 +53,6 @@ export default function Navbar() {
     }
   }, [theme]);
 
-  // The handleGoBack and isLoading logic would typically come from page props or context
-  // For this example, I'll assume they are not part of the global navbar directly,
-  // but a page could pass a 'showBackButton' prop if needed.
-  // const showBackButton = pathname !== '/'; // Example logic
 
   return (
     <nav className="bg-background/80 backdrop-blur-md text-foreground shadow-lg sticky top-0 z-50 border-b border-border/60">
@@ -76,19 +75,6 @@ export default function Navbar() {
         </NextLink>
 
         <div className="flex items-center space-x-1.5 sm:space-x-3">
-          {/* Example of a conditional back button, if logic were passed
-          {showBackButton && (
-            <Button 
-              onClick={() => window.history.back()} // Or use Next.js router.back()
-              variant="ghost" 
-              size="icon"
-              className="text-muted-foreground hover:bg-accent/15 hover:text-accent-foreground h-9 w-9 sm:h-10 sm:w-10 rounded-full"
-              aria-label="Go back"
-            >
-              <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
-            </Button>
-          )}
-          */}
           <NextLink href="/" passHref legacyBehavior>
             <Button 
               variant={pathname === "/" ? "secondary" : "ghost"} 
@@ -102,19 +88,55 @@ export default function Navbar() {
               Home
             </Button>
           </NextLink>
-          <NextLink href="/signup" passHref legacyBehavior>
-            <Button 
-              variant={pathname === "/signup" ? "default" : "outline"} 
-              size="sm" 
-              className={cn(
-                "text-xs sm:text-sm",
-                 pathname === "/signup" ? "font-semibold ring-2 ring-primary/70" : "border-primary/60 text-primary hover:text-primary hover:bg-primary/10"
-              )}
+
+          {/* Conditional rendering based on placeholder auth state */}
+          {!isAuthenticated && (
+            <>
+              <NextLink href="/login" passHref legacyBehavior>
+                <Button 
+                  variant={pathname === "/login" ? "default" : "outline"} 
+                  size="sm" 
+                  className={cn(
+                    "text-xs sm:text-sm",
+                    pathname === "/login" ? "font-semibold ring-2 ring-primary/70" : "border-primary/60 text-primary hover:text-primary hover:bg-primary/10"
+                  )}
+                >
+                  <LogIn className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  Login
+                </Button>
+              </NextLink>
+              <NextLink href="/signup" passHref legacyBehavior>
+                <Button 
+                  variant={pathname === "/signup" ? "default" : "outline"} 
+                  size="sm" 
+                  className={cn(
+                    "text-xs sm:text-sm",
+                    pathname === "/signup" ? "font-semibold ring-2 ring-primary/70" : "border-primary/60 text-primary hover:text-primary hover:bg-primary/10"
+                  )}
+                >
+                  <UserPlus className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  Sign Up
+                </Button>
+              </NextLink>
+            </>
+          )}
+          
+          {/* Example of what you might show if authenticated */}
+          {isAuthenticated && (
+             <Button 
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                // auth.signOut(); // Example sign out
+                setIsAuthenticated(false); // Update placeholder state
+              }}
+              className="text-xs sm:text-sm border-destructive/60 text-destructive hover:text-destructive hover:bg-destructive/10"
             >
-              <UserPlus className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              Sign Up
+              <LogIn className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              Logout
             </Button>
-          </NextLink>
+          )}
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="text-muted-foreground hover:bg-accent/15 hover:text-accent-foreground h-9 w-9 sm:h-10 sm:w-10 rounded-full" aria-label="Theme settings">

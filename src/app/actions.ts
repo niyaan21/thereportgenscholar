@@ -7,7 +7,7 @@ import { generateResearchImage, type GenerateResearchImageInput, type GenerateRe
 import { generateResearchReport, type GenerateResearchReportInput, type GenerateResearchReportOutput } from '@/ai/flows/generate-research-report';
 import { z } from 'zod';
 import { auth } from '@/lib/firebase'; // Firebase auth instance
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 
 const formulateQuerySchema = z.object({
   researchQuestion: z.string().min(10, "Research question must be at least 10 characters long.").max(1500, "Research question must be at most 1500 characters long."),
@@ -262,7 +262,7 @@ export interface SignUpActionState {
   errors?: {
     email?: string[];
     password?: string[];
-    firebase?: string[]; // For general Firebase errors
+    firebase?: string[]; 
   } | null;
 }
 
@@ -285,23 +285,82 @@ export async function handleSignUpAction(
 
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, validation.data.email, validation.data.password);
-    // User created successfully
     return {
       success: true,
-      message: "Account created successfully!",
+      message: "Account created successfully! Redirecting...",
       userId: userCredential.user.uid,
       errors: null,
     };
   } catch (error: any) {
     console.error("Firebase SignUp Error:", error);
     let firebaseErrorMessage = "Failed to create account. Please try again.";
-    // Map Firebase error codes to user-friendly messages
     if (error.code === 'auth/email-already-in-use') {
       firebaseErrorMessage = 'This email address is already in use.';
     } else if (error.code === 'auth/weak-password') {
       firebaseErrorMessage = 'The password is too weak.';
     } else if (error.code === 'auth/invalid-email') {
         firebaseErrorMessage = 'The email address is not valid.';
+    }
+    
+    return {
+      success: false,
+      message: firebaseErrorMessage,
+      errors: { firebase: [firebaseErrorMessage] },
+    };
+  }
+}
+
+// Login Action
+const loginSchema = z.object({
+  email: z.string().email({ message: "Invalid email address." }),
+  password: z.string().min(1, { message: "Password cannot be empty." }), // Basic check, actual password check is by Firebase
+});
+
+export interface LoginActionState {
+  success: boolean;
+  message: string;
+  userId?: string | null;
+  errors?: {
+    email?: string[];
+    password?: string[];
+    firebase?: string[]; 
+  } | null;
+}
+
+export async function handleLoginAction(
+  prevState: LoginActionState,
+  formData: FormData
+): Promise<LoginActionState> {
+  const email = formData.get('email') as string;
+  const password = formData.get('password') as string;
+
+  const validation = loginSchema.safeParse({ email, password });
+
+  if (!validation.success) {
+    return {
+      success: false,
+      message: "Invalid login information.",
+      errors: validation.error.flatten().fieldErrors,
+    };
+  }
+
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, validation.data.email, validation.data.password);
+    return {
+      success: true,
+      message: "Logged in successfully! Redirecting...",
+      userId: userCredential.user.uid,
+      errors: null,
+    };
+  } catch (error: any) {
+    console.error("Firebase Login Error:", error);
+    let firebaseErrorMessage = "Failed to log in. Please check your credentials and try again.";
+    if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+      firebaseErrorMessage = 'Invalid email or password. Please try again.';
+    } else if (error.code === 'auth/invalid-email') {
+      firebaseErrorMessage = 'The email address is not valid.';
+    } else if (error.code === 'auth/user-disabled') {
+      firebaseErrorMessage = 'This account has been disabled.';
     }
     
     return {
