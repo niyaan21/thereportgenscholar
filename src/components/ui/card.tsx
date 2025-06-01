@@ -1,3 +1,4 @@
+
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
@@ -9,7 +10,7 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-xl border bg-card text-card-foreground shadow-lg transition-all duration-300 hover:shadow-xl",
+      "rounded-[var(--radius)] border bg-card text-card-foreground shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5",
       className
     )}
     {...props}
@@ -30,10 +31,10 @@ const CardHeader = React.forwardRef<
 CardHeader.displayName = "CardHeader"
 
 const CardTitle = React.forwardRef<
-  HTMLHeadingElement, // Changed from HTMLDivElement
-  React.HTMLAttributes<HTMLHeadingElement> // Changed from HTMLDivElement
+  HTMLHeadingElement, 
+  React.HTMLAttributes<HTMLHeadingElement> 
 >(({ className, ...props }, ref) => (
-  <h3 // Changed from div to h3
+  <h3 
     ref={ref}
     className={cn(
       "text-2xl font-semibold leading-none tracking-tight", 
@@ -45,10 +46,10 @@ const CardTitle = React.forwardRef<
 CardTitle.displayName = "CardTitle"
 
 const CardDescription = React.forwardRef<
-  HTMLParagraphElement, // Consistent with typical usage, though div is also possible
+  HTMLParagraphElement, 
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => (
-  <p // Changed from div to p for semantic description
+  <p 
     ref={ref}
     className={cn("text-sm text-muted-foreground", className)}
     {...props}

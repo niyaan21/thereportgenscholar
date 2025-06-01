@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -32,7 +33,7 @@
     --input: 210 20% 93%; /* Input background, slightly off-white */
     --ring: 174 72% 48%; /* Teal for focus rings, consistent with accent */
 
-    --radius: 0.75rem; /* Slightly larger radius for a softer look */
+    --radius: 0.85rem; /* Increased radius for a softer look */
 
     /* Chart colors */
     --chart-1: 12 76% 61%;
@@ -123,7 +124,6 @@
   /* Hero section specific styles */
   .hero-title {
     @apply text-4xl font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl;
-    /* Removed gradient and text shadow for simpler look */
     color: hsl(var(--primary)); 
   }
 

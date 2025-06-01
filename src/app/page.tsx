@@ -42,6 +42,7 @@ import {
   DialogHeader, 
   DialogTitle, 
   DialogDescription, 
+  DialogTrigger,
 } from "@/components/ui/dialog"
 import NextImage from 'next/image';
 import { cn } from '@/lib/utils';
@@ -235,8 +236,6 @@ export default function ScholarAIPage() {
       setResearchSummary('');
       setSummarizedPaperTitles([]);
       setGeneratedImageUrl(null);
-      // Reset action states if needed, for example:
-      // formulateQueryState.message = ''; // This is not directly mutable, use Reset functions if available or re-initialize
     });
   };
 
@@ -425,7 +424,10 @@ export default function ScholarAIPage() {
 
   return (
     <Dialog open={isImagePreviewDialogOpen} onOpenChange={setIsImagePreviewDialogOpen}>
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/5 to-background flex flex-col overflow-x-hidden antialiased selection:bg-accent/20 selection:text-accent-foreground">
+      <DialogTrigger asChild>
+        <button className="hidden">Hidden Dialog Trigger for Programmatic Control</button>
+      </DialogTrigger>
+    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/10 to-background flex flex-col overflow-x-hidden antialiased selection:bg-accent/20 selection:text-accent-foreground">
       <header
         className="py-3 sm:py-4 px-4 md:px-8 bg-card/95 text-card-foreground shadow-2xl sticky top-0 z-50 border-b border-border/50 backdrop-blur-xl"
       >
@@ -439,9 +441,9 @@ export default function ScholarAIPage() {
             aria-label="Start new research"
           >
             <div
-              className="p-3 sm:p-3.5 bg-gradient-to-br from-primary via-primary/90 to-primary/75 rounded-xl sm:rounded-2xl shadow-lg text-primary-foreground ring-2 ring-primary/40 ring-offset-2 ring-offset-card"
+              className="p-3.5 sm:p-4 bg-gradient-to-br from-primary via-primary/90 to-primary/75 rounded-xl sm:rounded-2xl shadow-lg text-primary-foreground ring-2 ring-primary/40 ring-offset-2 ring-offset-card"
             >
-              <Beaker className="h-7 w-7 sm:h-8 sm:w-8" />
+              <Beaker className="h-7 w-7 sm:h-9 sm:w-9" />
             </div>
             <div className="overflow-hidden">
               <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent group-hover:from-accent group-hover:to-primary transition-all duration-300 truncate">
@@ -501,7 +503,7 @@ export default function ScholarAIPage() {
         </div>
       </main>
 
-      <footer className="py-8 sm:py-10 px-4 md:px-8 border-t border-border/40 bg-card/80 mt-16 sm:mt-20 backdrop-blur-sm">
+      <footer className="py-8 sm:py-10 px-4 md:px-8 border-t-2 border-border/50 bg-background mt-16 sm:mt-20">
         <div className="container mx-auto text-center text-xs sm:text-sm text-muted-foreground">
           <div>
             <p>
