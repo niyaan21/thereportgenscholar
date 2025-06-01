@@ -24,13 +24,13 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Mail, Lock, UserCircle, Trash2, Palette, Bell, Settings2, ShieldAlert, LogOut, ChevronRight, ExternalLink, Edit3, ImageDown, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Loader2, Mail, Lock, UserCircle, Trash2, Palette, Bell, Settings2, ShieldAlert, LogOut, ChevronRight, ExternalLink, Edit3, ImageDown, AlertCircle, CheckCircle2, Sun, Moon } from 'lucide-react'; // Added Sun, Moon
 import NextLink from 'next/link';
 import type { Metadata } from 'next'; // Import Metadata type
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
 
-// Note: Metadata object cannot be used in client components. 
+// Note: Metadata object cannot be used in client components.
 // If SEO for this page is critical, consider moving metadata to a server component parent or layout.
 // export const metadata: Metadata = {
 //   title: 'Account Settings - ScholarAI',
@@ -62,7 +62,7 @@ export default function AccountSettingsPage() {
   const [displayName, setDisplayName] = useState('');
   const [profilePicUrl, setProfilePicUrl] = useState('');
   const [theme, setThemeState] = useState<'light' | 'dark' | 'system'>('system');
-  
+
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [newsletterSubscription, setNewsletterSubscription] = useState(false);
   const [itemsPerPage, setItemsPerPage] = useState('10');
@@ -164,7 +164,7 @@ export default function AccountSettingsPage() {
       setIsLoading(false);
     }
   };
-  
+
   const handleDeleteAccount = async () => {
     if (!currentUser) return;
 
@@ -217,7 +217,7 @@ export default function AccountSettingsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
         {/* Left Column for main settings or sidebar-like structure on larger screens */}
         <div className="lg:col-span-2 space-y-6 sm:space-y-8">
-        
+
           <SettingsSection title="Email & Verification" icon={Mail} description="Manage your primary email address and verification status.">
             <div className="space-y-3">
                 <Label htmlFor="currentEmail">Current Email Address</Label>
@@ -286,10 +286,10 @@ export default function AccountSettingsPage() {
                 </AlertDialogHeader>
                 <div className="py-2">
                     <Label htmlFor="currentPasswordForDelete" className="sr-only">Current Password</Label>
-                    <Input 
-                        id="currentPasswordForDelete" 
-                        type="password" 
-                        placeholder="Enter your current password" 
+                    <Input
+                        id="currentPasswordForDelete"
+                        type="password"
+                        placeholder="Enter your current password"
                         value={currentPasswordForDelete}
                         onChange={(e) => setCurrentPasswordForDelete(e.target.value)}
                         className="border-destructive/50 focus:border-destructive"
@@ -410,3 +410,5 @@ function cn(...inputs: ClassValue[]): string {
 }
 type ClassValue = string | null | undefined | { [key: string]: any } | ClassValue[];
 
+
+    
