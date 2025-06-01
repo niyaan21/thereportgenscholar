@@ -4,6 +4,7 @@
 
 import React, { useState, useEffect, useTransition, useCallback } from 'react';
 import { useActionState } from 'react'; 
+import NextLink from 'next/link';
 
 import QueryForm from '@/components/scholar-ai/QueryForm';
 import FormulatedQueriesDisplay from '@/components/scholar-ai/FormulatedQueriesDisplay';
@@ -12,8 +13,9 @@ import ResearchReportDisplay from '@/components/scholar-ai/ResearchReportDisplay
 
 import { Button } from '@/components/ui/button';
 import { ToastAction } from "@/components/ui/toast";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
-  ArrowLeft, RotateCcw, FileTextIcon, Settings, Moon, Sun, Palette, Image as ImageIconLucide, Loader2, BookOpen, Brain, Search, Filter, BarChartBig, Telescope, Beaker, Sparkles, Bot, CornerDownLeft, Edit, CheckSquare, Zap, Eye, Lightbulb, FileArchive, Atom, ClipboardCopy, Share2, Download, Sigma, BarChartHorizontal, TrendingUpIcon, ScaleIcon, FlaskConical, LightbulbIcon as LightbulbLucideIcon, InfoIcon, AlertCircleIcon, CheckCircle2Icon, ExternalLink, MaximizeIcon, ChevronRight, Rocket, Check
+  ArrowLeft, RotateCcw, FileTextIcon, Settings, Moon, Sun, Palette, Image as ImageIconLucide, Loader2, BookOpen, Brain, Search, Filter, BarChartBig, Telescope, Beaker, Sparkles, Bot, CornerDownLeft, Edit, CheckSquare, Zap, Eye, Lightbulb, FileArchive, Atom, ClipboardCopy, Share2, Download, Sigma, BarChartHorizontal, TrendingUpIcon, ScaleIcon, FlaskConical, LightbulbIcon as LightbulbLucideIcon, InfoIcon, AlertCircleIcon, CheckCircle2Icon, ExternalLink, MaximizeIcon, ChevronRight, Rocket, Check, Lock
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 
@@ -39,6 +41,8 @@ import {
 } from "@/components/ui/dialog"
 import NextImage from 'next/image';
 import { cn } from '@/lib/utils';
+import { auth } from '@/lib/firebase';
+import { onAuthStateChanged, type User } from 'firebase/auth';
 
 type AppState = 'initial' | 'queries_formulated' | 'summary_generated' | 'report_generated';
 
@@ -93,7 +97,18 @@ export default function ScholarAIPage() {
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
   const [isImagePreviewDialogOpen, setIsImagePreviewDialogOpen] = useState(false);
   
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [authChecked, setAuthChecked] = useState(false); // To track if auth state has been checked
+
   const { toast } = useToast();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+      setAuthChecked(true);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const handleQueriesFormulatedCallback = useCallback((queries: string[], question: string) => {
     startTransition(() => {
@@ -204,6 +219,7 @@ export default function ScholarAIPage() {
       setResearchSummary('');
       setSummarizedPaperTitles([]);
       setGeneratedImageUrl(null);
+      // Reset action states if needed
     });
   };
 
@@ -223,6 +239,10 @@ export default function ScholarAIPage() {
   };
   
   const handleGenerateImageForTopic = useCallback(() => {
+     if (!currentUser) {
+      toast({ title: "Authentication Required", description: "Please log in or sign up to generate images.", variant: "destructive", duration: 5000 });
+      return;
+    }
     let topicForImage = researchQuestion.trim(); 
     
     if (!topicForImage || topicForImage.length < 5) {
@@ -235,7 +255,7 @@ export default function ScholarAIPage() {
       return;
     }
 
-    if (topicForImage.length > 195) { // Adjusted to 195 to allow for "..."
+    if (topicForImage.length > 195) { 
       topicForImage = topicForImage.substring(0, 195) + "..."; 
     }
 
@@ -244,10 +264,14 @@ export default function ScholarAIPage() {
       formData.append('topic', topicForImage); 
       imageFormAction(formData);
     });
-  }, [researchQuestion, imageFormAction, toast]);
+  }, [researchQuestion, imageFormAction, toast, currentUser]);
 
 
   const handleGenerateFullReport = useCallback(() => {
+     if (!currentUser) {
+      toast({ title: "Authentication Required", description: "Please log in or sign up to generate reports.", variant: "destructive", duration: 5000 });
+      return;
+    }
     const currentResearchQuestion = researchQuestion.trim();
      if (!currentResearchQuestion || currentResearchQuestion.length < 10) {
       toast({
@@ -266,16 +290,17 @@ export default function ScholarAIPage() {
       }
       reportFormAction(formData);
     });
-  }, [researchQuestion, researchSummary, reportFormAction, toast]);
+  }, [researchQuestion, researchSummary, reportFormAction, toast, currentUser]);
 
   const openImagePreviewDialog = useCallback(() => {
     setIsImagePreviewDialogOpen(true);
   }, []);
 
   const isLoading = isFormulatingQueries || isSynthesizingResearch || isImageGenerating || isReportGenerating;
+  const isFormDisabled = (!currentUser && authChecked) || isLoading;
   
   const ActionButton: React.FC<React.ComponentProps<typeof Button> & { icon?: React.ElementType, isProcessing?: boolean, label: string, pending?: boolean }> = ({ icon: Icon, isProcessing, pending, label, children, ...props }) => (
-    <Button {...props} disabled={isLoading || isProcessing || pending || props.disabled} className={cn("shadow-lg hover:shadow-xl transition-all duration-300 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex items-center justify-center group w-full sm:w-auto text-base py-3", props.className)}>
+    <Button {...props} disabled={isLoading || isProcessing || pending || props.disabled || (!currentUser && authChecked)} className={cn("shadow-lg hover:shadow-xl transition-all duration-300 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex items-center justify-center group w-full sm:w-auto text-base py-3", props.className)}>
       {(isProcessing || pending) ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : (Icon && <Icon className="mr-2.5 h-5 w-5" />)}
       {label || children}
     </Button>
@@ -288,12 +313,47 @@ export default function ScholarAIPage() {
       case 'initial':
         content = (
           <div key="initial" className={cn("w-full", animationClasses)}>
-            <QueryForm 
-              formAction={formulateQueryFormAction}
-              isBusy={isFormulatingQueries}
-              value={queryFormInputValue}
-              onChange={setQueryFormInputValue}
-            />
+             {!authChecked && ( // Show a loading skeleton or similar while auth is checking
+              <Card className="w-full shadow-2xl border-primary/30 rounded-xl sm:rounded-2xl overflow-hidden bg-card">
+                <CardHeader className="p-4 sm:p-5 md:p-6">
+                  <div className="h-10 w-3/4 bg-muted/50 rounded animate-pulse mb-4"></div>
+                  <div className="h-6 w-1/2 bg-muted/50 rounded animate-pulse"></div>
+                </CardHeader>
+                <CardContent className="p-4 sm:p-5 md:p-6 pt-5 sm:pt-6">
+                  <div className="h-8 w-1/3 bg-muted/50 rounded animate-pulse mb-3"></div>
+                  <div className="h-32 w-full bg-muted/50 rounded-xl animate-pulse"></div>
+                   <CardFooter className="flex justify-end p-0 pt-6">
+                      <div className="h-12 w-36 bg-muted/50 rounded-lg animate-pulse"></div>
+                   </CardFooter>
+                </CardContent>
+              </Card>
+            )}
+            {authChecked && !currentUser && (
+              <Alert variant="destructive" className="mb-6 sm:mb-8 bg-destructive/10 border-destructive/30 text-destructive">
+                <Lock className="h-5 w-5" />
+                <AlertTitle className="font-semibold">Authentication Required</AlertTitle>
+                <AlertDescription>
+                  Please{' '}
+                  <NextLink href="/login" className="font-medium hover:underline underline-offset-2">
+                    log in
+                  </NextLink>{' '}
+                  or{' '}
+                  <NextLink href="/signup" className="font-medium hover:underline underline-offset-2">
+                    sign up
+                  </NextLink>{' '}
+                  to start your research journey with ScholarAI.
+                </AlertDescription>
+              </Alert>
+            )}
+            {authChecked && (
+              <QueryForm 
+                formAction={formulateQueryFormAction}
+                isBusy={isFormulatingQueries || (!currentUser && authChecked)}
+                isDisabled={!currentUser && authChecked}
+                value={queryFormInputValue}
+                onChange={setQueryFormInputValue}
+              />
+            )}
           </div>
         );
         break;
@@ -318,7 +378,7 @@ export default function ScholarAIPage() {
             <FormulatedQueriesDisplay
               queries={formulatedQueries}
               formAction={synthesizeResearchFormAction}
-              isBusy={isSynthesizingResearch}
+              isBusy={isSynthesizingResearch || (!currentUser && authChecked)}
             />
              {appState === 'queries_formulated' && (
               <CardFooter className="flex flex-col sm:flex-row justify-start items-center gap-3 sm:gap-4 p-0 pt-6 md:pt-8 border-t border-border/40 mt-6 md:mt-8">
@@ -423,8 +483,6 @@ export default function ScholarAIPage() {
       </DialogTrigger>
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/10 to-background flex flex-col overflow-x-hidden antialiased selection:bg-accent/20 selection:text-accent-foreground">
       
-      {/* Page-specific header removed */}
-
       <main className="flex-grow container mx-auto px-4 sm:px-6 py-8 sm:py-10 md:py-16">
         <div className="max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
             {renderCurrentStep()}
@@ -473,4 +531,3 @@ export default function ScholarAIPage() {
     </Dialog>
   );
 }
-

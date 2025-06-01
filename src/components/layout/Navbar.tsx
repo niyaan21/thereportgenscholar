@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import NextLink from 'next/link';
-import { BookText, UserPlus, LogIn, Home, Palette, Settings, Moon, Sun, Check, ArrowLeft } from 'lucide-react';
+import { BookText, UserPlus, LogIn, Home, Palette, Settings, Moon, Sun, Check, LogOut, Info, BookOpenText, Code2, Menu, X as CloseIcon, UserCircle, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -12,28 +12,39 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { cn } from '@/lib/utils';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { auth } from '@/lib/firebase';
+import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { toast } = useToast();
   const [theme, setThemeState] = useState<'light' | 'dark' | 'system'>('system');
-  // In a real app, user auth state would come from a context or hook
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // Placeholder
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const localTheme = localStorage.getItem('theme') as typeof theme | null;
     if (localTheme) {
       setThemeState(localTheme);
     } else {
-      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setThemeState(prefersDark ? 'dark' : 'light'); 
+      // Set initial theme based on system preference before full hydration if possible
+      const prefersDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setThemeState(prefersDark ? 'dark' : 'light');
     }
 
-    // Placeholder for auth state checking, e.g., from Firebase auth observer
-    // const unsubscribe = auth.onAuthStateChanged(user => setIsAuthenticated(!!user));
-    // return () => unsubscribe();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+      setAuthLoading(false);
+    });
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -45,7 +56,7 @@ export default function Navbar() {
       localStorage.setItem('theme', 'light');
     } else { 
       localStorage.removeItem('theme');
-      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
         document.documentElement.classList.add('dark');
       } else {
         document.documentElement.classList.remove('dark');
@@ -53,6 +64,122 @@ export default function Navbar() {
     }
   }, [theme]);
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      toast({ title: "Logged Out", description: "You have been successfully logged out." });
+      router.push('/'); // Redirect to home after logout
+    } catch (error) {
+      console.error("Logout Error:", error);
+      toast({ title: "Logout Failed", description: "Could not log you out. Please try again.", variant: "destructive" });
+    }
+  };
+
+  const navLinks = [
+    { href: "/", label: "Home", icon: Home },
+    { href: "/about", label: "About", icon: Info },
+    { href: "/docs", label: "Docs", icon: BookOpenText },
+    { href: "/api-docs", label: "API", icon: Code2 },
+  ];
+
+  const NavLinkItem: React.FC<{ href: string; label: string; icon: React.ElementType; onClick?: () => void }> = ({ href, label, icon: Icon, onClick }) => (
+    <NextLink href={href} passHref legacyBehavior>
+      <Button
+        variant={pathname === href ? "secondary" : "ghost"}
+        size="sm"
+        className={cn(
+          "text-xs sm:text-sm w-full justify-start sm:w-auto",
+          pathname === href && "font-semibold ring-1 sm:ring-2 ring-primary/50"
+        )}
+        onClick={onClick}
+      >
+        <Icon className="mr-2 h-4 w-4" />
+        {label}
+      </Button>
+    </NextLink>
+  );
+  
+  const AuthButtons: React.FC<{ isMobile?: boolean; onLinkClick?: () => void }> = ({ isMobile, onLinkClick }) => (
+    <>
+      {!currentUser && !authLoading && (
+        <>
+          <NextLink href="/login" passHref legacyBehavior>
+            <Button 
+              variant={pathname === "/login" ? "default" : "outline"} 
+              size="sm" 
+              className={cn("text-xs sm:text-sm", pathname === "/login" && "font-semibold", isMobile && "w-full justify-start")}
+              onClick={onLinkClick}
+            >
+              <LogIn className="mr-1.5 sm:mr-2 h-4 w-4" /> Login
+            </Button>
+          </NextLink>
+          <NextLink href="/signup" passHref legacyBehavior>
+            <Button 
+              variant={pathname === "/signup" ? "default" : "primary"} 
+              size="sm" 
+              className={cn("text-xs sm:text-sm", pathname === "/signup" && "font-semibold", isMobile && "w-full justify-start")}
+              onClick={onLinkClick}
+            >
+              <UserPlus className="mr-1.5 sm:mr-2 h-4 w-4" /> Sign Up
+            </Button>
+          </NextLink>
+        </>
+      )}
+      {currentUser && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" className={cn("text-xs sm:text-sm flex items-center gap-2", isMobile && "w-full justify-start")}>
+              <UserCircle className="h-5 w-5" />
+              <span className="truncate max-w-[100px] sm:max-w-[150px]">{currentUser.email || "Profile"}</span>
+              <ChevronDown className="h-4 w-4 opacity-70" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel className="truncate">{currentUser.email}</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10">
+              <LogOut className="mr-2 h-4 w-4" /> Logout
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
+      {authLoading && (
+         <div className="flex items-center space-x-2">
+            <div className="h-7 w-16 bg-muted/50 rounded-md animate-pulse"></div>
+            <div className="h-7 w-20 bg-muted/50 rounded-md animate-pulse"></div>
+         </div>
+      )}
+    </>
+  );
+  
+  const ThemeSwitcherDropdown: React.FC<{ isMobile?: boolean }> = ({ isMobile }) => (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size={isMobile ? "sm" : "icon"} className={cn("text-muted-foreground hover:bg-accent/15 hover:text-accent-foreground", isMobile ? "w-full justify-start" : "h-9 w-9 sm:h-10 sm:w-10 rounded-full")} aria-label="Theme settings">
+            <Palette className="h-4 w-4 sm:h-5 sm:w-5" /> {isMobile && <span className="ml-2">Theme</span>}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-48 border-border/70 bg-popover shadow-xl rounded-lg p-1.5">
+          <DropdownMenuLabel className="font-semibold text-popover-foreground px-2 py-1.5 text-sm">Appearance</DropdownMenuLabel>
+          <DropdownMenuSeparator className="bg-border/50 -mx-1 my-1" />
+          <DropdownMenuItem onClick={() => setThemeState('light')} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
+            <Sun className="mr-2.5 h-4 w-4 text-muted-foreground group-hover:text-yellow-500 transition-colors" />
+            <span>Light Mode</span>
+            {theme === 'light' && <Check className="ml-auto h-4 w-4 text-accent" />}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setThemeState('dark')} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
+            <Moon className="mr-2.5 h-4 w-4 text-muted-foreground group-hover:text-blue-400 transition-colors" />
+            <span>Dark Mode</span>
+            {theme === 'dark' && <Check className="ml-auto h-4 w-4 text-accent" />}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setThemeState('system')} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
+            <Settings className="mr-2.5 h-4 w-4 text-muted-foreground transition-colors" />
+            <span>System Default</span>
+            {theme === 'system' && <Check className="ml-auto h-4 w-4 text-accent" />}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+  );
 
   return (
     <nav className="bg-background/80 backdrop-blur-md text-foreground shadow-lg sticky top-0 z-50 border-b border-border/60">
@@ -74,95 +201,46 @@ export default function Navbar() {
           </a>
         </NextLink>
 
-        <div className="flex items-center space-x-1.5 sm:space-x-3">
-          <NextLink href="/" passHref legacyBehavior>
-            <Button 
-              variant={pathname === "/" ? "secondary" : "ghost"} 
-              size="sm" 
-              className={cn(
-                "text-xs sm:text-sm",
-                pathname === "/" && "font-semibold ring-2 ring-primary/50"
-              )}
-            >
-              <Home className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              Home
-            </Button>
-          </NextLink>
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center space-x-1.5">
+          {navLinks.map(link => <NavLinkItem key={link.href} {...link} />)}
+        </div>
 
-          {/* Conditional rendering based on placeholder auth state */}
-          {!isAuthenticated && (
-            <>
-              <NextLink href="/login" passHref legacyBehavior>
-                <Button 
-                  variant={pathname === "/login" ? "default" : "outline"} 
-                  size="sm" 
-                  className={cn(
-                    "text-xs sm:text-sm",
-                    pathname === "/login" ? "font-semibold ring-2 ring-primary/70" : "border-primary/60 text-primary hover:text-primary hover:bg-primary/10"
-                  )}
-                >
-                  <LogIn className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  Login
-                </Button>
-              </NextLink>
-              <NextLink href="/signup" passHref legacyBehavior>
-                <Button 
-                  variant={pathname === "/signup" ? "default" : "outline"} 
-                  size="sm" 
-                  className={cn(
-                    "text-xs sm:text-sm",
-                    pathname === "/signup" ? "font-semibold ring-2 ring-primary/70" : "border-primary/60 text-primary hover:text-primary hover:bg-primary/10"
-                  )}
-                >
-                  <UserPlus className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  Sign Up
-                </Button>
-              </NextLink>
-            </>
-          )}
-          
-          {/* Example of what you might show if authenticated */}
-          {isAuthenticated && (
-             <Button 
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                // auth.signOut(); // Example sign out
-                setIsAuthenticated(false); // Update placeholder state
-              }}
-              className="text-xs sm:text-sm border-destructive/60 text-destructive hover:text-destructive hover:bg-destructive/10"
-            >
-              <LogIn className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              Logout
-            </Button>
-          )}
+        <div className="hidden md:flex items-center space-x-2">
+          <AuthButtons />
+          <ThemeSwitcherDropdown />
+        </div>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-muted-foreground hover:bg-accent/15 hover:text-accent-foreground h-9 w-9 sm:h-10 sm:w-10 rounded-full" aria-label="Theme settings">
-                <Palette className="h-4 w-4 sm:h-5 sm:w-5" />
+        {/* Mobile Navigation Trigger */}
+        <div className="md:hidden">
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label="Open menu">
+                <Menu className="h-6 w-6" />
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 border-border/70 bg-popover shadow-xl rounded-lg p-1.5">
-              <DropdownMenuLabel className="font-semibold text-popover-foreground px-2 py-1.5 text-sm">Appearance</DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-border/50 -mx-1 my-1" />
-              <DropdownMenuItem onClick={() => setThemeState('light')} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
-                <Sun className="mr-2.5 h-4 w-4 text-muted-foreground group-hover:text-yellow-500 transition-colors" />
-                <span>Light Mode</span>
-                {theme === 'light' && <Check className="ml-auto h-4 w-4 text-accent" />}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setThemeState('dark')} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
-                <Moon className="mr-2.5 h-4 w-4 text-muted-foreground group-hover:text-blue-400 transition-colors" />
-                <span>Dark Mode</span>
-                {theme === 'dark' && <Check className="ml-auto h-4 w-4 text-accent" />}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setThemeState('system')} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
-                <Settings className="mr-2.5 h-4 w-4 text-muted-foreground transition-colors" />
-                <span>System Default</span>
-                {theme === 'system' && <Check className="ml-auto h-4 w-4 text-accent" />}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[280px] p-0 pt-10 bg-background flex flex-col">
+               <NextLink href="/" passHref legacyBehavior>
+                  <a className="flex items-center space-x-2.5 group px-4 mb-6" onClick={() => setMobileMenuOpen(false)}>
+                    <div className="p-2.5 rounded-lg bg-primary text-primary-foreground">
+                      <BookText className="h-6 w-6" />
+                    </div>
+                    <span className="text-xl font-bold text-primary">ScholarAI</span>
+                  </a>
+                </NextLink>
+              <div className="flex flex-col space-y-2 px-4 flex-grow">
+                {navLinks.map(link => <NavLinkItem key={link.href} {...link} onClick={() => setMobileMenuOpen(false)} />)}
+              </div>
+              <div className="mt-auto p-4 border-t border-border/60 space-y-3">
+                <AuthButtons isMobile onLinkClick={() => setMobileMenuOpen(false)} />
+                <ThemeSwitcherDropdown isMobile />
+              </div>
+              <SheetClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
+                  <CloseIcon className="h-5 w-5" />
+                  <span className="sr-only">Close</span>
+              </SheetClose>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </nav>

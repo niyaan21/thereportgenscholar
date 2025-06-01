@@ -3,45 +3,46 @@
 'use client';
 
 import React from 'react';
-import { useFormStatus, useActionState as useReactActionState } from 'react-dom';
+import { useFormStatus } from 'react-dom';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Loader2, Send, Lightbulb, Brain, Wand2 } from 'lucide-react'; 
+import { Loader2, Send, Lightbulb, Brain, Wand2, Lock } from 'lucide-react'; 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 export interface QueryFormProps {
   formAction: (payload: FormData) => void; 
   isBusy: boolean; 
+  isDisabled?: boolean; // Added to explicitly disable the form
   value: string; 
   onChange: (value: string) => void; 
 }
 
-function SubmitButtonQueryForm() {
+function SubmitButtonQueryForm({ isDisabled }: { isDisabled?: boolean }) {
   const { pending } = useFormStatus();
   return (
     <Button
       type="submit"
-      disabled={pending}
+      disabled={pending || isDisabled}
       className="w-full sm:w-auto mt-2 sm:mt-4 text-sm sm:text-base py-2.5 sm:py-3.5 px-6 sm:px-8 shadow-xl hover:shadow-primary/50 bg-gradient-to-br from-primary via-primary/85 to-primary/70 text-primary-foreground rounded-lg sm:rounded-xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-all duration-300 ease-out group"
       aria-label="Formulate Queries and Begin Exploration"
     >
       {pending ? (
         <Loader2 className="mr-2 h-4 w-4 sm:mr-2.5 sm:h-5 sm:w-5 animate-spin" />
+      ) : isDisabled ? (
+        <Lock className="mr-2 h-4 w-4 sm:mr-2.5 sm:h-5 sm:w-5" />
       ) : (
         <Send className="mr-2 h-4 w-4 sm:mr-2.5 sm:h-5 sm:w-5 group-hover:animate-pulse transition-transform duration-200" />
       )}
-      Explore Insights
+      {isDisabled ? "Login to Explore" : "Explore Insights"}
     </Button>
   );
 }
 
-export default function QueryForm({ formAction, isBusy, value, onChange }: QueryFormProps) {
+export default function QueryForm({ formAction, isBusy, isDisabled, value, onChange }: QueryFormProps) {
 
-  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    // Parent handles isBusy state
-  };
+  const actualIsDisabled = isBusy || isDisabled;
 
   return (
     <div 
@@ -60,15 +61,15 @@ export default function QueryForm({ formAction, isBusy, value, onChange }: Query
                 Launch Your Exploration
               </CardTitle>
               <CardDescription className="text-muted-foreground text-sm sm:text-base mt-1 sm:mt-1.5 max-w-lg">
-                Articulate your research challenge. ScholarAI will map the knowledge frontier.
+                {actualIsDisabled && !isBusy ? "Log in to articulate your research challenge." : "Articulate your research challenge. ScholarAI will map the knowledge frontier."}
               </CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="p-4 sm:p-5 md:p-6 pt-5 sm:pt-6">
           <form
-            action={formAction} 
-            onSubmit={handleFormSubmit}
+            action={actualIsDisabled ? undefined : formAction} 
+            onSubmit={(e) => { if (actualIsDisabled) e.preventDefault(); }}
             className="space-y-4 sm:space-y-6"
           >
             <div>
@@ -80,23 +81,23 @@ export default function QueryForm({ formAction, isBusy, value, onChange }: Query
                 id="researchQuestion"
                 name="researchQuestion" 
                 rows={6}
-                placeholder="e.g., Explore the multifaceted impacts of generative AI on the future of creative professions, considering ethical dilemmas, economic shifts, and the evolution of human-AI collaboration..."
+                placeholder={actualIsDisabled && !isBusy ? "Please log in or sign up to enter your research question." : "e.g., Explore the multifaceted impacts of generative AI on the future of creative professions, considering ethical dilemmas, economic shifts, and the evolution of human-AI collaboration..."}
                 className={cn(
                   "w-full border-input focus:border-accent focus:ring-2 focus:ring-accent/60 rounded-lg sm:rounded-xl shadow-inner text-sm sm:text-base bg-background/80 placeholder:text-muted-foreground/70 p-3 sm:p-4 transition-all duration-200 leading-relaxed",
                   "hover:border-primary/60 focus:shadow-accent/25 focus:shadow-lg",
-                  isBusy && "opacity-60 cursor-not-allowed bg-muted/30"
+                  actualIsDisabled && "opacity-60 cursor-not-allowed bg-muted/30 placeholder:text-destructive/70"
                 )}
                 required
                 minLength={10}
                 maxLength={1500}
-                disabled={isBusy}
+                disabled={actualIsDisabled}
                 value={value} 
                 onChange={(e) => onChange(e.target.value)} 
                 aria-describedby="question-error-message" 
               />
             </div>
             <CardFooter className="flex flex-col sm:flex-row justify-end items-center p-0 pt-2 sm:pt-3 space-y-2 sm:space-y-0 sm:space-x-3">
-              <SubmitButtonQueryForm />
+              <SubmitButtonQueryForm isDisabled={actualIsDisabled && !isBusy} />
             </CardFooter>
           </form>
         </CardContent>
@@ -104,4 +105,3 @@ export default function QueryForm({ formAction, isBusy, value, onChange }: Query
     </div>
   );
 }
-
