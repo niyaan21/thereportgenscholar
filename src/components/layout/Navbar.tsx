@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import NextLink from 'next/link';
-import { BookText, UserPlus, LogIn, Home, Palette, Settings, Moon, Sun, Check, LogOut, Info, BookOpenText, Code2, Menu, X as CloseIcon, UserCircle, ChevronDown, Sparkles, FileText as FeaturesIcon } from 'lucide-react'; // Renamed Sparkles to FeaturesIcon for clarity if needed, or just use Sparkles
+import { BookText, UserPlus, LogIn, Home, Palette, Settings, Moon, Sun, Check, LogOut, Info, BookOpenText, Code2, Menu, X as CloseIcon, UserCircle, ChevronDown, Sparkles, FileText as FeaturesIcon, Settings2 as AccountSettingsIcon } from 'lucide-react'; // Added AccountSettingsIcon
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "@/components/ui/sheet"; // Added SheetHeader, SheetTitle
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { cn } from '@/lib/utils';
 import { usePathname, useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
@@ -66,7 +66,7 @@ export default function Navbar() {
     try {
       await signOut(auth);
       toast({ title: "Logged Out", description: "You have been successfully logged out." });
-      setMobileMenuOpen(false); // Close mobile menu on logout
+      setMobileMenuOpen(false); 
       router.push('/'); 
     } catch (error) {
       console.error("Logout Error:", error);
@@ -76,7 +76,7 @@ export default function Navbar() {
 
   const navLinks = [
     { href: "/", label: "Home", icon: Home },
-    { href: "/features", label: "Features", icon: Sparkles }, // Using Sparkles icon for Features
+    { href: "/features", label: "Features", icon: Sparkles },
     { href: "/about", label: "About", icon: Info },
     { href: "/docs", label: "Docs", icon: BookOpenText },
     { href: "/api-docs", label: "API", icon: Code2 },
@@ -136,6 +136,12 @@ export default function Navbar() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel className="truncate">{currentUser.email}</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild className="cursor-pointer">
+              <NextLink href="/account-settings" onClick={onLinkClick}>
+                <AccountSettingsIcon className="mr-2 h-4 w-4" /> Account Settings
+              </NextLink>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => { handleLogout(); onLinkClick?.(); }} className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10">
               <LogOut className="mr-2 h-4 w-4" /> Logout
@@ -251,3 +257,4 @@ export default function Navbar() {
     </nav>
   );
 }
+
