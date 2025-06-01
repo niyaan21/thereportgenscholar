@@ -2,19 +2,26 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import Particles, { type Container, type Engine } from 'react-tsparticles';
+import * as TSParticlesReact from 'react-tsparticles'; // Changed to namespace import
+import type { Container, Engine } from '@tsparticles/engine'; // Import types from @tsparticles/engine
 import { loadSlim } from 'tsparticles-slim'; 
-import { useTheme } from 'next-themes'; // Using next-themes if available, or adapt to your theme context
+import { useTheme } from 'next-themes';
 
 const ParticleBackground: React.FC = () => {
   const [init, setInit] = useState(false);
-  const { theme, systemTheme } = useTheme(); // Or your app's theme context
+  const { theme, systemTheme } = useTheme();
 
   useEffect(() => {
-    loadSlim(async (engine: Engine) => {
-      // console.log('Particles engine loaded', engine);
+    // Use TSParticlesReact.initParticlesEngine
+    TSParticlesReact.initParticlesEngine(async (engine: Engine) => {
+      // console.log('Particles engine initializing');
+      await loadSlim(engine);
+      // console.log('Slim bundle loaded into engine');
     }).then(() => {
       setInit(true);
+      // console.log('Particles engine initialized successfully');
+    }).catch((error) => {
+      console.error("Error initializing particles engine:", error);
     });
   }, []);
 
@@ -38,7 +45,8 @@ const ParticleBackground: React.FC = () => {
   }
 
   return (
-    <Particles
+    // Use TSParticlesReact.Particles
+    <TSParticlesReact.Particles
       id="tsparticles"
       particlesLoaded={particlesLoaded}
       options={{
@@ -113,4 +121,3 @@ const ParticleBackground: React.FC = () => {
 };
 
 export default ParticleBackground;
-
