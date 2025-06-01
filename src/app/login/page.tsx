@@ -1,56 +1,79 @@
+
 // src/app/login/page.tsx
 'use client';
 
-import React, { useEffect } from 'react';
-import { useActionState } from 'react';
-import { handleLoginAction, type LoginActionState } from '@/app/actions';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, LogIn, Mail, Lock, AlertCircle, UserPlus } from 'lucide-react';
+import { Loader2, LogIn, Mail, Lock, AlertCircle } from 'lucide-react';
 import NextLink from 'next/link';
 import { useRouter } from 'next/navigation';
+import { auth } from '@/lib/firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { z } from 'zod';
 
-const initialLoginState: LoginActionState = {
-  success: false,
-  message: '',
-  errors: null,
-};
+const loginFormSchema = z.object({
+  email: z.string().email({ message: "Invalid email address." }),
+  password: z.string().min(1, { message: "Password cannot be empty." }),
+});
 
 export default function LoginPage() {
-  const [loginState, loginFormAction, isLoggingIn] = useActionState(handleLoginAction, initialLoginState);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<{ email?: string[]; password?: string[]; firebase?: string[] } | null>(null);
+
   const { toast } = useToast();
   const router = useRouter();
 
-  useEffect(() => {
-    if (!isLoggingIn && loginState.message) {
-      if (loginState.success) {
-        toast({
-          title: 'Login Successful!',
-          description: loginState.message,
-          variant: 'default',
-        });
-        router.push('/'); // Redirect to home or dashboard after login
-      } else {
-        let description = loginState.message;
-        // Prioritize firebase general error message if available
-        if (loginState.errors?.firebase) {
-            description = loginState.errors.firebase.join(' ');
-        } else {
-            if (loginState.errors?.email) description += ` Email: ${loginState.errors.email.join(' ')}`;
-            if (loginState.errors?.password) description += ` Password: ${loginState.errors.password.join(' ')}`;
-        }
-        
-        toast({
-          title: 'Login Failed',
-          description: description || "An unexpected error occurred.",
-          variant: 'destructive',
-        });
-      }
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setErrors(null);
+
+    const validation = loginFormSchema.safeParse({ email, password });
+    if (!validation.success) {
+      const zodErrors = validation.error.flatten().fieldErrors;
+      setErrors(zodErrors);
+      toast({
+        title: 'Login Failed',
+        description: "Please correct the errors in the form.",
+        variant: 'destructive',
+      });
+      setIsLoading(false);
+      return;
     }
-  }, [loginState, isLoggingIn, toast, router]);
+
+    try {
+      await signInWithEmailAndPassword(auth, validation.data.email, validation.data.password);
+      toast({
+        title: 'Login Successful!',
+        description: "Logged in successfully! Redirecting...",
+        variant: 'default',
+      });
+      router.push('/'); // Redirect to home or dashboard after login
+    } catch (error: any) {
+      let firebaseErrorMessage = "Failed to log in. Please check your credentials and try again.";
+       if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+        firebaseErrorMessage = 'Invalid email or password. Please try again.';
+      } else if (error.code === 'auth/invalid-email') {
+        firebaseErrorMessage = 'The email address is not valid.';
+      } else if (error.code === 'auth/user-disabled') {
+        firebaseErrorMessage = 'This account has been disabled.';
+      }
+      setErrors({ firebase: [firebaseErrorMessage] });
+      toast({
+        title: 'Login Failed',
+        description: firebaseErrorMessage,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background via-secondary/10 to-background p-4">
@@ -70,15 +93,23 @@ export default function LoginPage() {
           <CardDescription>Log in to continue your research with ScholarAI.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={loginFormAction} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="email" className="flex items-center">
                 <Mail className="mr-2 h-4 w-4 text-muted-foreground" /> Email
               </Label>
-              <Input id="email" name="email" type="email" placeholder="you@example.com" required />
-              {loginState.errors?.email && (
+              <Input 
+                id="email" 
+                name="email" 
+                type="email" 
+                placeholder="you@example.com" 
+                required 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              {errors?.email && (
                 <p className="text-xs text-destructive flex items-center mt-1">
-                  <AlertCircle className="mr-1 h-3 w-3" /> {loginState.errors.email.join(', ')}
+                  <AlertCircle className="mr-1 h-3 w-3" /> {errors.email.join(', ')}
                 </p>
               )}
             </div>
@@ -86,21 +117,29 @@ export default function LoginPage() {
               <Label htmlFor="password" className="flex items-center">
                 <Lock className="mr-2 h-4 w-4 text-muted-foreground" /> Password
               </Label>
-              <Input id="password" name="password" type="password" placeholder="••••••••" required />
-              {loginState.errors?.password && (
+              <Input 
+                id="password" 
+                name="password" 
+                type="password" 
+                placeholder="••••••••" 
+                required 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              {errors?.password && (
                 <p className="text-xs text-destructive flex items-center mt-1">
-                  <AlertCircle className="mr-1 h-3 w-3" /> {loginState.errors.password.join(', ')}
+                  <AlertCircle className="mr-1 h-3 w-3" /> {errors.password.join(', ')}
                 </p>
               )}
             </div>
-            {loginState.errors?.firebase && (
+            {errors?.firebase && (
                 <p className="text-sm text-destructive bg-destructive/10 p-3 rounded-md flex items-start">
-                  <AlertCircle className="mr-2 h-4 w-4 flex-shrink-0 mt-0.5" /> {loginState.errors.firebase.join('; ')}
+                  <AlertCircle className="mr-2 h-4 w-4 flex-shrink-0 mt-0.5" /> {errors.firebase.join('; ')}
                 </p>
               )}
             <CardFooter className="p-0 pt-4">
-              <Button type="submit" className="w-full" disabled={isLoggingIn}>
-                {isLoggingIn ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LogIn className="mr-2 h-4 w-4" />}
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LogIn className="mr-2 h-4 w-4" />}
                 Log In
               </Button>
             </CardFooter>

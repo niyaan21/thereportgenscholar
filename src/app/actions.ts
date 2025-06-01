@@ -1,3 +1,4 @@
+
 // src/app/actions.ts
 'use server';
 
@@ -6,8 +7,9 @@ import { summarizeResearchPapers, type SummarizeResearchPapersInput, type Summar
 import { generateResearchImage, type GenerateResearchImageInput, type GenerateResearchImageOutput } from '@/ai/flows/generate-research-image';
 import { generateResearchReport, type GenerateResearchReportInput, type GenerateResearchReportOutput } from '@/ai/flows/generate-research-report';
 import { z } from 'zod';
-import { auth } from '@/lib/firebase'; // Firebase auth instance
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+// Firebase auth instance from @/lib/firebase is no longer needed here for direct auth calls.
+// import { auth } from '@/lib/firebase'; 
+// import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 
 const formulateQuerySchema = z.object({
   researchQuestion: z.string().min(10, "Research question must be at least 10 characters long.").max(1500, "Research question must be at most 1500 characters long."),
@@ -249,124 +251,51 @@ export async function handleGenerateReportAction(
   }
 }
 
-// Sign Up Action
-const signUpSchema = z.object({
-  email: z.string().email({ message: "Invalid email address." }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters long." }),
-});
+// Sign Up and Login server actions are removed as they are now handled client-side.
+// // Sign Up Action
+// const signUpSchema = z.object({
+//   email: z.string().email({ message: "Invalid email address." }),
+//   password: z.string().min(6, { message: "Password must be at least 6 characters long." }),
+// });
 
-export interface SignUpActionState {
-  success: boolean;
-  message: string;
-  userId?: string | null;
-  errors?: {
-    email?: string[];
-    password?: string[];
-    firebase?: string[]; 
-  } | null;
-}
+// export interface SignUpActionState {
+//   success: boolean;
+//   message: string;
+//   userId?: string | null;
+//   errors?: {
+//     email?: string[];
+//     password?: string[];
+//     firebase?: string[]; 
+//   } | null;
+// }
 
-export async function handleSignUpAction(
-  prevState: SignUpActionState,
-  formData: FormData
-): Promise<SignUpActionState> {
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
+// export async function handleSignUpAction(
+//   prevState: SignUpActionState,
+//   formData: FormData
+// ): Promise<SignUpActionState> {
+//   // ... implementation removed
+// }
 
-  const validation = signUpSchema.safeParse({ email, password });
+// // Login Action
+// const loginSchema = z.object({
+//   email: z.string().email({ message: "Invalid email address." }),
+//   password: z.string().min(1, { message: "Password cannot be empty." }), 
+// });
 
-  if (!validation.success) {
-    return {
-      success: false,
-      message: "Invalid sign up information.",
-      errors: validation.error.flatten().fieldErrors,
-    };
-  }
+// export interface LoginActionState {
+//   success: boolean;
+//   message: string;
+//   userId?: string | null;
+//   errors?: {
+//     email?: string[];
+//     password?: string[];
+//     firebase?: string[]; 
+//   } | null;
+// }
 
-  try {
-    const userCredential = await createUserWithEmailAndPassword(auth, validation.data.email, validation.data.password);
-    return {
-      success: true,
-      message: "Account created successfully! Redirecting...",
-      userId: userCredential.user.uid,
-      errors: null,
-    };
-  } catch (error: any) {
-    console.error("Firebase SignUp Error:", error);
-    let firebaseErrorMessage = "Failed to create account. Please try again.";
-    if (error.code === 'auth/email-already-in-use') {
-      firebaseErrorMessage = 'This email address is already in use.';
-    } else if (error.code === 'auth/weak-password') {
-      firebaseErrorMessage = 'The password is too weak.';
-    } else if (error.code === 'auth/invalid-email') {
-        firebaseErrorMessage = 'The email address is not valid.';
-    }
-    
-    return {
-      success: false,
-      message: firebaseErrorMessage,
-      errors: { firebase: [firebaseErrorMessage] },
-    };
-  }
-}
-
-// Login Action
-const loginSchema = z.object({
-  email: z.string().email({ message: "Invalid email address." }),
-  password: z.string().min(1, { message: "Password cannot be empty." }), // Basic check, actual password check is by Firebase
-});
-
-export interface LoginActionState {
-  success: boolean;
-  message: string;
-  userId?: string | null;
-  errors?: {
-    email?: string[];
-    password?: string[];
-    firebase?: string[]; 
-  } | null;
-}
-
-export async function handleLoginAction(
-  prevState: LoginActionState,
-  formData: FormData
-): Promise<LoginActionState> {
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
-
-  const validation = loginSchema.safeParse({ email, password });
-
-  if (!validation.success) {
-    return {
-      success: false,
-      message: "Invalid login information.",
-      errors: validation.error.flatten().fieldErrors,
-    };
-  }
-
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, validation.data.email, validation.data.password);
-    return {
-      success: true,
-      message: "Logged in successfully! Redirecting...",
-      userId: userCredential.user.uid,
-      errors: null,
-    };
-  } catch (error: any) {
-    console.error("Firebase Login Error:", error);
-    let firebaseErrorMessage = "Failed to log in. Please check your credentials and try again.";
-    if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-      firebaseErrorMessage = 'Invalid email or password. Please try again.';
-    } else if (error.code === 'auth/invalid-email') {
-      firebaseErrorMessage = 'The email address is not valid.';
-    } else if (error.code === 'auth/user-disabled') {
-      firebaseErrorMessage = 'This account has been disabled.';
-    }
-    
-    return {
-      success: false,
-      message: firebaseErrorMessage,
-      errors: { firebase: [firebaseErrorMessage] },
-    };
-  }
-}
+// export async function handleLoginAction(
+//   prevState: LoginActionState,
+//   formData: FormData
+// ): Promise<LoginActionState> {
+//  // ... implementation removed
+// }
