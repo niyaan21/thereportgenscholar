@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 export interface QueryFormProps {
   formAction: (payload: FormData) => void; 
   isBusy: boolean; 
-  isDisabled?: boolean; // Added to explicitly disable the form
+  isDisabled?: boolean; 
   value: string; 
   onChange: (value: string) => void; 
 }
@@ -40,22 +40,61 @@ function SubmitButtonQueryForm({ isDisabled }: { isDisabled?: boolean }) {
   );
 }
 
-const QueryForm = React.memo(function QueryForm({ formAction, isBusy, isDisabled, value, onChange }: QueryFormProps) {
-
+function QueryFormInner({ formAction, isBusy, isDisabled, value, onChange }: QueryFormProps) {
+  const { pending } = useFormStatus();
   const actualIsDisabled = isBusy || isDisabled;
 
   return (
-    <div 
+    <>
+      <div className="relative">
+        {pending && (
+          <div className="absolute inset-0 bg-card/80 backdrop-blur-sm flex items-center justify-center z-10 rounded-b-xl sm:rounded-b-2xl -mt-px"> {/* Adjusted to cover content area */}
+            <Loader2 className="h-10 w-10 text-primary animate-spin" />
+          </div>
+        )}
+        <Textarea
+          id="researchQuestion"
+          name="researchQuestion"
+          rows={6}
+          placeholder={actualIsDisabled && !isBusy ? "Please log in or sign up to enter your research question." : "e.g., Explore the multifaceted impacts of generative AI on the future of creative professions, considering ethical dilemmas, economic shifts, and the evolution of human-AI collaboration..."}
+          className={cn(
+            "w-full border-input focus:border-accent focus:ring-2 focus:ring-accent/60 rounded-lg sm:rounded-xl shadow-inner text-sm sm:text-base bg-background/80 placeholder:text-muted-foreground/70 p-3 sm:p-4 transition-all duration-200 leading-relaxed",
+            "hover:border-primary/60 focus:shadow-accent/25 focus:shadow-lg",
+            actualIsDisabled && "opacity-60 cursor-not-allowed bg-muted/30 placeholder:text-destructive/70",
+            pending && "opacity-50"
+          )}
+          required
+          minLength={10}
+          maxLength={1500}
+          disabled={actualIsDisabled}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          aria-describedby="question-error-message"
+        />
+      </div>
+      <CardFooter className={cn("flex flex-col sm:flex-row justify-end items-center p-0 pt-2 sm:pt-3 space-y-2 sm:space-y-0 sm:space-x-3", pending && "opacity-50")}>
+        <SubmitButtonQueryForm isDisabled={actualIsDisabled && !isBusy} />
+      </CardFooter>
+    </>
+  );
+}
+
+
+const QueryForm = React.memo(function QueryForm({ formAction, isBusy, isDisabled, value, onChange }: QueryFormProps) {
+  const actualIsDisabled = isBusy || isDisabled;
+
+  return (
+    <div
       className="w-full"
     >
       <Card className="w-full shadow-2xl border-primary/30 rounded-xl sm:rounded-2xl overflow-hidden bg-card">
         <CardHeader className="p-4 sm:p-5 md:p-6 bg-gradient-to-br from-primary/15 via-transparent to-primary/5 border-b border-primary/25">
-           <div className="flex items-center space-x-3 sm:space-x-4">
-             <div 
-                className="p-3 sm:p-4 bg-gradient-to-br from-accent to-accent/80 rounded-xl sm:rounded-2xl shadow-xl border-2 border-accent/50 text-accent-foreground ring-2 ring-accent/30 ring-offset-2 ring-offset-card"
-              >
-                <Brain className="h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9"/> 
-             </div>
+          <div className="flex items-center space-x-3 sm:space-x-4">
+            <div
+              className="p-3 sm:p-4 bg-gradient-to-br from-accent to-accent/80 rounded-xl sm:rounded-2xl shadow-xl border-2 border-accent/50 text-accent-foreground ring-2 ring-accent/30 ring-offset-2 ring-offset-card"
+            >
+              <Brain className="h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9" />
+            </div>
             <div>
               <CardTitle className="text-xl sm:text-2xl md:text-3xl font-extrabold text-primary tracking-tight">
                 Launch Your Exploration
@@ -66,39 +105,13 @@ const QueryForm = React.memo(function QueryForm({ formAction, isBusy, isDisabled
             </div>
           </div>
         </CardHeader>
-        <CardContent className="p-4 sm:p-5 md:p-6 pt-5 sm:pt-6">
+        <CardContent className="p-4 sm:p-5 md:p-6 pt-5 sm:pt-6 relative"> {/* Added relative here */}
           <form
-            action={actualIsDisabled ? undefined : formAction} 
+            action={actualIsDisabled ? undefined : formAction}
             onSubmit={(e) => { if (actualIsDisabled) e.preventDefault(); }}
             className="space-y-4 sm:space-y-6"
           >
-            <div>
-              <Label htmlFor="researchQuestion" className="block text-md sm:text-lg font-semibold mb-2 sm:mb-3 text-foreground flex items-center">
-                <Lightbulb className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3 text-yellow-400 drop-shadow-[0_0_10px_rgba(250,204,21,0.6)]"/>
-                Your Core Research Question
-              </Label>
-              <Textarea
-                id="researchQuestion"
-                name="researchQuestion" 
-                rows={6}
-                placeholder={actualIsDisabled && !isBusy ? "Please log in or sign up to enter your research question." : "e.g., Explore the multifaceted impacts of generative AI on the future of creative professions, considering ethical dilemmas, economic shifts, and the evolution of human-AI collaboration..."}
-                className={cn(
-                  "w-full border-input focus:border-accent focus:ring-2 focus:ring-accent/60 rounded-lg sm:rounded-xl shadow-inner text-sm sm:text-base bg-background/80 placeholder:text-muted-foreground/70 p-3 sm:p-4 transition-all duration-200 leading-relaxed",
-                  "hover:border-primary/60 focus:shadow-accent/25 focus:shadow-lg",
-                  actualIsDisabled && "opacity-60 cursor-not-allowed bg-muted/30 placeholder:text-destructive/70"
-                )}
-                required
-                minLength={10}
-                maxLength={1500}
-                disabled={actualIsDisabled}
-                value={value} 
-                onChange={(e) => onChange(e.target.value)} 
-                aria-describedby="question-error-message" 
-              />
-            </div>
-            <CardFooter className="flex flex-col sm:flex-row justify-end items-center p-0 pt-2 sm:pt-3 space-y-2 sm:space-y-0 sm:space-x-3">
-              <SubmitButtonQueryForm isDisabled={actualIsDisabled && !isBusy} />
-            </CardFooter>
+            <QueryFormInner formAction={formAction} isBusy={isBusy} isDisabled={isDisabled} value={value} onChange={onChange} />
           </form>
         </CardContent>
       </Card>
