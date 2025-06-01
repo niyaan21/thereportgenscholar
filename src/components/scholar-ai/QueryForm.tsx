@@ -40,7 +40,7 @@ function SubmitButtonQueryForm({ isDisabled }: { isDisabled?: boolean }) {
   );
 }
 
-export default function QueryForm({ formAction, isBusy, isDisabled, value, onChange }: QueryFormProps) {
+const QueryForm = React.memo(function QueryForm({ formAction, isBusy, isDisabled, value, onChange }: QueryFormProps) {
 
   const actualIsDisabled = isBusy || isDisabled;
 
@@ -104,4 +104,6 @@ export default function QueryForm({ formAction, isBusy, isDisabled, value, onCha
       </Card>
     </div>
   );
-}
+});
+QueryForm.displayName = 'QueryForm';
+export default QueryForm;

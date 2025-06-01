@@ -39,7 +39,7 @@ function SubmitButtonFormulatedQueries({ isBusy }: { isBusy: boolean }) {
   );
 }
 
-export default function FormulatedQueriesDisplay({ queries, formAction, isBusy }: FormulatedQueriesDisplayProps) {
+const FormulatedQueriesDisplay = React.memo(function FormulatedQueriesDisplay({ queries, formAction, isBusy }: FormulatedQueriesDisplayProps) {
   const icons = [FileSearch2, DatabaseZap, Telescope, Brain, Sparkles, Layers, Activity];
 
   // isBusy prop is now directly controlled by the parent page (src/app/page.tsx)
@@ -109,4 +109,6 @@ export default function FormulatedQueriesDisplay({ queries, formAction, isBusy }
         </Card>
       </div>
   );
-}
+});
+FormulatedQueriesDisplay.displayName = 'FormulatedQueriesDisplay';
+export default FormulatedQueriesDisplay;

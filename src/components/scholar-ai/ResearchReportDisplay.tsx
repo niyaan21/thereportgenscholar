@@ -2,6 +2,7 @@
 // src/components/scholar-ai/ResearchReportDisplay.tsx
 'use client';
 
+import React from 'react';
 import type { GenerateResearchReportOutput } from '@/ai/flows/generate-research-report';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -39,7 +40,7 @@ const Section: React.FC<{ title: string; icon?: React.ReactNode; children: React
   </div>
 );
 
-export default function ResearchReportDisplay({ report, originalQuestion, generatedImageUrl, onOpenImagePreview }: ResearchReportDisplayProps) {
+const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report, originalQuestion, generatedImageUrl, onOpenImagePreview }: ResearchReportDisplayProps) {
 
   const renderParagraphs = (text: string | undefined | null): JSX.Element[] | JSX.Element => {
     if (!text) return <p className="italic text-muted-foreground my-3 sm:my-3.5 text-sm sm:text-base">Content for this section was not provided.</p>;
@@ -518,4 +519,7 @@ export default function ResearchReportDisplay({ report, originalQuestion, genera
     </Card>
     </div>
   );
-}
+});
+ResearchReportDisplay.displayName = 'ResearchReportDisplay';
+export default ResearchReportDisplay;
+

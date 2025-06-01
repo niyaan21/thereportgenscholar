@@ -210,7 +210,7 @@ export default function ScholarAIPage() {
     }
   }, [reportActionState, isReportGenerating, toast]);
 
-  const handleStartNewResearch = () => {
+  const handleStartNewResearch = useCallback(() => {
     startTransition(() => {
       setAppState('initial');
       setResearchQuestion('');
@@ -221,9 +221,9 @@ export default function ScholarAIPage() {
       setGeneratedImageUrl(null);
       // Reset action states if needed
     });
-  };
+  }, []);
 
-  const handleGoBack = () => {
+  const handleGoBack = useCallback(() => {
     startTransition(() => {
       if (appState === 'report_generated') {
         setAppState('summary_generated');
@@ -236,7 +236,7 @@ export default function ScholarAIPage() {
         setQueryFormInputValue(researchQuestion); 
       }
     });
-  };
+  }, [appState, researchQuestion]);
   
   const handleGenerateImageForTopic = useCallback(() => {
      if (!currentUser) {
@@ -306,7 +306,7 @@ export default function ScholarAIPage() {
     </Button>
   );
 
-  const KeyFeaturesSection = () => (
+  const KeyFeaturesSection = React.memo(() => (
     <div className="mt-12 md:mt-16 space-y-8">
       <h2 className="text-2xl sm:text-3xl font-bold text-center text-primary tracking-tight">
         Empower Your Research with ScholarAI
@@ -347,7 +347,8 @@ export default function ScholarAIPage() {
         </Card>
       </div>
     </div>
-  );
+  ));
+  KeyFeaturesSection.displayName = 'KeyFeaturesSection';
 
 
   const renderCurrentStep = () => {

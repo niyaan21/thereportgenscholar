@@ -2,6 +2,7 @@
 // src/components/scholar-ai/ResearchSummaryDisplay.tsx
 'use client';
 
+import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { BookOpenCheck, FileText, Lightbulb, Quote, Brain, CheckCircle, BarChart3, SparklesIcon, Image as ImageIconLucide, Loader2, MaximizeIcon, Eye, ExternalLink, Zap } from 'lucide-react';
 import NextImage from 'next/image'; 
@@ -21,7 +22,7 @@ export interface ResearchSummaryDisplayProps {
   onOpenImagePreview: () => void; 
 }
 
-export default function ResearchSummaryDisplay({ 
+const ResearchSummaryDisplay = React.memo(function ResearchSummaryDisplay({ 
   summary, 
   originalQuestion, 
   summarizedPaperTitles,
@@ -181,4 +182,6 @@ export default function ResearchSummaryDisplay({
         </Card>
       </div>
   );
-}
+});
+ResearchSummaryDisplay.displayName = 'ResearchSummaryDisplay';
+export default ResearchSummaryDisplay;
