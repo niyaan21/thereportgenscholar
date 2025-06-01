@@ -6,6 +6,8 @@ import { summarizeResearchPapers, type SummarizeResearchPapersInput, type Summar
 import { generateResearchImage, type GenerateResearchImageInput, type GenerateResearchImageOutput } from '@/ai/flows/generate-research-image';
 import { generateResearchReport, type GenerateResearchReportInput, type GenerateResearchReportOutput } from '@/ai/flows/generate-research-report';
 import { z } from 'zod';
+import { auth } from '@/lib/firebase'; // Firebase auth instance
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 
 const formulateQuerySchema = z.object({
   researchQuestion: z.string().min(10, "Research question must be at least 10 characters long.").max(1500, "Research question must be at most 1500 characters long."),
@@ -243,6 +245,69 @@ export async function handleGenerateReportAction(
       message: `Failed to generate research report: ${errorMessage}`,
       researchReport: null,
       errors: null,
+    };
+  }
+}
+
+// Sign Up Action
+const signUpSchema = z.object({
+  email: z.string().email({ message: "Invalid email address." }),
+  password: z.string().min(6, { message: "Password must be at least 6 characters long." }),
+});
+
+export interface SignUpActionState {
+  success: boolean;
+  message: string;
+  userId?: string | null;
+  errors?: {
+    email?: string[];
+    password?: string[];
+    firebase?: string[]; // For general Firebase errors
+  } | null;
+}
+
+export async function handleSignUpAction(
+  prevState: SignUpActionState,
+  formData: FormData
+): Promise<SignUpActionState> {
+  const email = formData.get('email') as string;
+  const password = formData.get('password') as string;
+
+  const validation = signUpSchema.safeParse({ email, password });
+
+  if (!validation.success) {
+    return {
+      success: false,
+      message: "Invalid sign up information.",
+      errors: validation.error.flatten().fieldErrors,
+    };
+  }
+
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, validation.data.email, validation.data.password);
+    // User created successfully
+    return {
+      success: true,
+      message: "Account created successfully!",
+      userId: userCredential.user.uid,
+      errors: null,
+    };
+  } catch (error: any) {
+    console.error("Firebase SignUp Error:", error);
+    let firebaseErrorMessage = "Failed to create account. Please try again.";
+    // Map Firebase error codes to user-friendly messages
+    if (error.code === 'auth/email-already-in-use') {
+      firebaseErrorMessage = 'This email address is already in use.';
+    } else if (error.code === 'auth/weak-password') {
+      firebaseErrorMessage = 'The password is too weak.';
+    } else if (error.code === 'auth/invalid-email') {
+        firebaseErrorMessage = 'The email address is not valid.';
+    }
+    
+    return {
+      success: false,
+      message: firebaseErrorMessage,
+      errors: { firebase: [firebaseErrorMessage] },
     };
   }
 }
