@@ -2,33 +2,39 @@
 // src/app/dashboard/page.tsx
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react'; // Added useMemo
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, LayoutDashboard, History, FileText, Settings, PlusCircle, BarChart2, ExternalLink, UserCircle, Info, BookOpen, Zap, UploadCloud, ClockIcon, Search, FileSignature, Activity, Filter as FilterIcon } from 'lucide-react';
+import { Loader2, LayoutDashboard, History, FileText, Settings, PlusCircle, BarChart2, ExternalLink, UserCircle, Info, BookOpen, Zap, UploadCloud, ClockIcon, Search, FileSignature, Activity, Filter as FilterIcon, PieChart as PieChartIcon } from 'lucide-react';
 import NextLink from 'next/link';
 import type { Metadata } from 'next';
 import { getResearchHistory, type ResearchActivityItem } from '@/lib/historyService';
 import { cn } from '@/lib/utils';
+import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent, RechartsPrimitive } from "@/components/ui/chart";
+import type { ChartConfig } from "@/components/ui/chart";
 
-const DashboardStatCard: React.FC<{ title: string; value: string; icon: React.ElementType; description: string, className?: string }> = ({ title, value, icon: Icon, description, className }) => (
-  <Card className={className}>
-    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-      <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-      <Icon className="h-5 w-5 text-primary" />
-    </CardHeader>
-    <CardContent>
-      <div className="text-3xl font-bold text-primary">{value}</div>
-      <p className="text-xs text-muted-foreground pt-1">{description}</p>
-    </CardContent>
-  </Card>
-);
 
-const QuickActionCard: React.FC<{ title: string; href: string; icon: React.ElementType; description: string }> = ({ title, href, icon: Icon, description }) => (
+const DashboardStatCard = React.memo(function DashboardStatCard({ title, value, icon: Icon, description, className }: { title: string; value: string; icon: React.ElementType; description: string, className?: string }) {
+  return (
+    <Card className={className}>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+        <Icon className="h-5 w-5 text-primary" />
+      </CardHeader>
+      <CardContent>
+        <div className="text-3xl font-bold text-primary">{value}</div>
+        <p className="text-xs text-muted-foreground pt-1">{description}</p>
+      </CardContent>
+    </Card>
+  );
+});
+
+const QuickActionCard = React.memo(function QuickActionCard({ title, href, icon: Icon, description }: { title: string; href: string; icon: React.ElementType; description: string }) {
+ return (
  <NextLink href={href} passHref>
     <Card className="hover:shadow-lg hover:border-accent transition-all duration-200 cursor-pointer h-full flex flex-col">
       <CardHeader>
@@ -49,7 +55,9 @@ const QuickActionCard: React.FC<{ title: string; href: string; icon: React.Eleme
        </CardFooter>
     </Card>
   </NextLink>
-);
+ );
+});
+
 
 type ActivityFilterType = 'all' | 'query-formulation' | 'report-generation' | 'file-report-generation';
 
@@ -61,6 +69,29 @@ export default function DashboardPage() {
   const [activityFilter, setActivityFilter] = useState<ActivityFilterType>('all');
   const router = useRouter();
 
+  const activityChartData = useMemo(() => {
+    if (!allActivities.length) return [];
+    const counts = allActivities.reduce((acc, activity) => {
+      if (activity.type === 'query-formulation') acc.queries = (acc.queries || 0) + 1;
+      else if (activity.type === 'report-generation') acc.aiReports = (acc.aiReports || 0) + 1;
+      else if (activity.type === 'file-report-generation') acc.fileReports = (acc.fileReports || 0) + 1;
+      return acc;
+    }, {} as { queries?: number; aiReports?: number; fileReports?: number });
+
+    return [
+      { name: 'Queries', value: counts.queries || 0, fill: 'hsl(var(--chart-1))' },
+      { name: 'AI Reports', value: counts.aiReports || 0, fill: 'hsl(var(--chart-2))' },
+      { name: 'File Reports', value: counts.fileReports || 0, fill: 'hsl(var(--chart-3))' },
+    ].filter(item => item.value > 0);
+  }, [allActivities]);
+
+  const chartConfig = useMemo(() => ({
+    queries: { label: "Queries", color: "hsl(var(--chart-1))" },
+    aiReports: { label: "AI Reports", color: "hsl(var(--chart-2))" },
+    fileReports: { label: "File Reports", color: "hsl(var(--chart-3))" },
+  } as ChartConfig), []);
+
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -68,7 +99,6 @@ export default function DashboardPage() {
         const history = getResearchHistory();
         setAllActivities(history);
         
-        // Calculate stats based on all activities
         const uniqueSessions = new Set(history.filter(item => item.type === 'query-formulation').map(item => item.question)).size;
         const reportCount = history.filter(item => item.type === 'report-generation' || item.type === 'file-report-generation').length;
         setStats({ sessions: uniqueSessions, reports: reportCount, activities: history.length });
@@ -85,7 +115,7 @@ export default function DashboardPage() {
     ? allActivities 
     : allActivities.filter(item => item.type === activityFilter);
 
-  const displayedActivities = filteredActivities.slice(0, 5); // Show latest 5 filtered activities
+  const displayedActivities = filteredActivities.slice(0, 5); 
 
   if (isLoading || !currentUser) {
     return (
@@ -133,6 +163,66 @@ export default function DashboardPage() {
         </div>
          <p className="text-xs text-muted-foreground mt-3 text-center sm:text-left">Data reflects activity stored locally in this browser.</p>
       </section>
+      
+      {activityChartData.length > 0 && (
+        <section className="mb-8 sm:mb-10">
+          <h2 className="text-2xl sm:text-3xl font-semibold text-primary mb-4 sm:mb-6 flex items-center">
+            <PieChartIcon className="mr-3 h-7 w-7 text-accent" />
+            Activity Distribution
+          </h2>
+          <Card className="bg-card/80 backdrop-blur-sm shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-xl font-medium text-primary/90">Activity Types</CardTitle>
+              <CardDescription className="text-sm">Breakdown of your research activities.</CardDescription>
+            </CardHeader>
+            <CardContent className="h-[300px] sm:h-[350px]">
+              <ChartContainer config={chartConfig} className="w-full h-full">
+                <RechartsPrimitive.ResponsiveContainer width="100%" height="100%">
+                  <RechartsPrimitive.PieChart>
+                    <ChartTooltip content={<ChartTooltipContent nameKey="name" hideLabel />} />
+                    <RechartsPrimitive.Pie
+                      data={activityChartData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius="80%"
+                      labelLine={false}
+                      label={({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
+                        const RADIAN = Math.PI / 180;
+                        const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+                        const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                        const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                        return (
+                          <text
+                            x={x}
+                            y={y}
+                            fill="hsl(var(--card-foreground))"
+                            textAnchor={x > cx ? 'start' : 'end'}
+                            dominantBaseline="central"
+                            className="text-xs font-medium"
+                          >
+                            {`${activityChartData[index].name} (${(percent * 100).toFixed(0)}%)`}
+                          </text>
+                        );
+                      }}
+                    >
+                      {activityChartData.map((entry) => (
+                        <RechartsPrimitive.Cell key={`cell-${entry.name}`} fill={entry.fill} />
+                      ))}
+                    </RechartsPrimitive.Pie>
+                     <ChartLegend content={<ChartLegendContent nameKey="name" />} />
+                  </RechartsPrimitive.PieChart>
+                </RechartsPrimitive.ResponsiveContainer>
+              </ChartContainer>
+            </CardContent>
+             <CardFooter>
+                <p className="text-xs text-muted-foreground">Chart reflects locally stored activity data.</p>
+             </CardFooter>
+          </Card>
+        </section>
+      )}
+
 
       <section className="mb-8 sm:mb-10">
         <h2 className="text-2xl sm:text-3xl font-semibold text-primary mb-4 sm:mb-6 flex items-center">
@@ -261,3 +351,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+

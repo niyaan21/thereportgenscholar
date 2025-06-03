@@ -6,6 +6,7 @@ import NextLink from 'next/link';
 import { Zap, Brain, FileTextIcon, Image as ImageIconLucide, ShieldCheck, LayoutDashboard, Download, Smartphone, ArrowRight, Sparkles, Search, Layers, Palette, Settings, Users, ThumbsUp, UploadCloud, MessageCircle, BarChart, BookOpen, Server, Share2 } from 'lucide-react';
 import type { Metadata } from 'next';
 import { cn } from '@/lib/utils';
+import React from 'react'; // Import React
 
 export const metadata: Metadata = {
   title: 'ScholarAI Features - Advanced AI Research Capabilities',
@@ -32,19 +33,21 @@ interface FeatureCardProps {
   className?: string;
 }
 
-const FeatureCard: React.FC<FeatureCardProps> = ({ icon: Icon, title, description, className }) => (
-  <Card className={cn("w-full shadow-lg hover:shadow-xl transition-all duration-300 ease-out border-primary/15 hover:border-accent/70 bg-card flex flex-col", className)}>
-    <CardHeader className="items-center text-center p-5 sm:p-6">
-      <div className="p-3.5 sm:p-4 bg-gradient-to-br from-accent to-accent/80 rounded-full mb-4 ring-2 ring-accent/30 shadow-md text-accent-foreground">
-        <Icon className="h-7 w-7 sm:h-8 sm:w-8" />
-      </div>
-      <CardTitle className="text-xl sm:text-2xl font-semibold text-primary">{title}</CardTitle>
-    </CardHeader>
-    <CardContent className="text-center text-sm sm:text-base text-muted-foreground leading-relaxed px-5 pb-6 sm:px-6 sm:pb-8 flex-grow">
-      {description}
-    </CardContent>
-  </Card>
-);
+const FeatureCard = React.memo(function FeatureCard({ icon: Icon, title, description, className }: FeatureCardProps) {
+  return (
+    <Card className={cn("w-full shadow-lg hover:shadow-xl transition-all duration-300 ease-out border-primary/15 hover:border-accent/70 bg-card flex flex-col", className)}>
+      <CardHeader className="items-center text-center p-5 sm:p-6">
+        <div className="p-3.5 sm:p-4 bg-gradient-to-br from-accent to-accent/80 rounded-full mb-4 ring-2 ring-accent/30 shadow-md text-accent-foreground">
+          <Icon className="h-7 w-7 sm:h-8 sm:w-8" />
+        </div>
+        <CardTitle className="text-xl sm:text-2xl font-semibold text-primary">{title}</CardTitle>
+      </CardHeader>
+      <CardContent className="text-center text-sm sm:text-base text-muted-foreground leading-relaxed px-5 pb-6 sm:px-6 sm:pb-8 flex-grow">
+        {description}
+      </CardContent>
+    </Card>
+  );
+});
 
 export default function FeaturesPage() {
   const features = [
@@ -179,3 +182,4 @@ export default function FeaturesPage() {
     </div>
   );
 }
+

@@ -72,22 +72,24 @@ export default function Navbar() {
     ? [{ href: "/dashboard", label: "Dashboard", icon: LayoutDashboard }, ...commonNavLinksBase]
     : commonNavLinksBase;
   
-  const NavLinkItem: React.FC<{ href: string; label: string; icon: React.ElementType; onClick?: () => void }> = ({ href, label, icon: Icon, onClick }) => (
-    <NextLink href={href} passHref legacyBehavior>
-      <Button
-        variant={pathname === href ? "secondary" : "ghost"}
-        size="sm"
-        className={cn(
-          "text-xs sm:text-sm w-full justify-start sm:w-auto",
-          pathname === href && "font-semibold ring-1 sm:ring-2 ring-primary/50"
-        )}
-        onClick={onClick}
-      >
-        <Icon className="mr-2 h-4 w-4" />
-        {label}
-      </Button>
-    </NextLink>
-  );
+  const NavLinkItem = React.memo(function NavLinkItem({ href, label, icon: Icon, onClick }: { href: string; label: string; icon: React.ElementType; onClick?: () => void }) {
+    return (
+      <NextLink href={href} passHref legacyBehavior>
+        <Button
+          variant={pathname === href ? "secondary" : "ghost"}
+          size="sm"
+          className={cn(
+            "text-xs sm:text-sm w-full justify-start sm:w-auto",
+            pathname === href && "font-semibold ring-1 sm:ring-2 ring-primary/50"
+          )}
+          onClick={onClick}
+        >
+          <Icon className="mr-2 h-4 w-4" />
+          {label}
+        </Button>
+      </NextLink>
+    );
+  });
   
   const AuthButtons: React.FC<{ isMobile?: boolean; onLinkClick?: () => void }> = ({ isMobile, onLinkClick }) => (
     <>
@@ -248,3 +250,4 @@ export default function Navbar() {
     </nav>
   );
 }
+

@@ -6,6 +6,7 @@ import NextLink from 'next/link';
 import { Check, Star, Users, Zap, TrendingUp, ShieldCheck, Package, ArrowRight, DollarSign, HelpCircle, MessageSquare } from 'lucide-react';
 import type { Metadata } from 'next';
 import { cn } from '@/lib/utils';
+import React from 'react'; // Import React
 
 export const metadata: Metadata = {
   title: 'ScholarAI Pricing - Unlock Your Research Potential',
@@ -37,41 +38,43 @@ interface PricingTierProps {
   tagline: string;
 }
 
-const TierCard: React.FC<PricingTierProps> = ({ name, price, priceDescription, features, ctaText, ctaLink, highlighted, icon: Icon, tagline }) => (
-  <Card className={cn(
-    "flex flex-col rounded-xl shadow-xl transition-all duration-300 ease-out hover:shadow-2xl hover:-translate-y-1 border-2",
-    highlighted ? "border-accent bg-accent/5 scale-105" : "border-primary/20 bg-card"
-  )}>
-    <CardHeader className="p-6 sm:p-8 text-center">
-      <div className={cn("inline-flex items-center justify-center p-3 sm:p-3.5 rounded-full mb-4 sm:mb-5 mx-auto ring-2 shadow-lg", highlighted ? "bg-accent text-accent-foreground ring-accent/50" : "bg-primary text-primary-foreground ring-primary/40")}>
-        <Icon className="h-7 w-7 sm:h-8 sm:h-8" />
-      </div>
-      <CardTitle className={cn("text-2xl sm:text-3xl font-bold tracking-tight", highlighted ? "text-accent-foreground" : "text-primary")}>{name}</CardTitle>
-      <p className={cn("text-sm sm:text-base mt-2", highlighted ? "text-accent-foreground/80" : "text-muted-foreground")}>{tagline}</p>
-      <div className="mt-4 sm:mt-5">
-        <span className={cn("text-4xl sm:text-5xl font-extrabold", highlighted ? "text-accent-foreground" : "text-foreground")}>{price}</span>
-        <span className={cn("text-sm font-medium ml-1.5", highlighted ? "text-accent-foreground/70" : "text-muted-foreground")}>{priceDescription}</span>
-      </div>
-    </CardHeader>
-    <CardContent className="flex-grow px-6 sm:px-8 pb-6 sm:pb-8">
-      <ul className="space-y-3 sm:space-y-3.5 text-sm sm:text-base">
-        {features.map((feature, index) => (
-          <li key={index} className="flex items-start">
-            <Check className={cn("h-5 w-5 mr-2.5 sm:mr-3 mt-0.5 flex-shrink-0", highlighted ? "text-accent" : "text-green-500")} />
-            <span className={highlighted ? "text-accent-foreground/90" : "text-foreground/80"}>{feature}</span>
-          </li>
-        ))}
-      </ul>
-    </CardContent>
-    <CardFooter className="p-6 sm:p-8 pt-0">
-      <Button asChild size="lg" className={cn("w-full text-base sm:text-lg py-3", highlighted ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-accent text-accent-foreground hover:bg-accent/90")}>
-        <NextLink href={ctaLink}>
-          {ctaText} <ArrowRight className="ml-2 h-5 w-5" />
-        </NextLink>
-      </Button>
-    </CardFooter>
-  </Card>
-);
+const TierCard = React.memo(function TierCard({ name, price, priceDescription, features, ctaText, ctaLink, highlighted, icon: Icon, tagline }: PricingTierProps) {
+  return (
+    <Card className={cn(
+      "flex flex-col rounded-xl shadow-xl transition-all duration-300 ease-out hover:shadow-2xl hover:-translate-y-1 border-2",
+      highlighted ? "border-accent bg-accent/5 scale-105" : "border-primary/20 bg-card"
+    )}>
+      <CardHeader className="p-6 sm:p-8 text-center">
+        <div className={cn("inline-flex items-center justify-center p-3 sm:p-3.5 rounded-full mb-4 sm:mb-5 mx-auto ring-2 shadow-lg", highlighted ? "bg-accent text-accent-foreground ring-accent/50" : "bg-primary text-primary-foreground ring-primary/40")}>
+          <Icon className="h-7 w-7 sm:h-8 sm:h-8" />
+        </div>
+        <CardTitle className={cn("text-2xl sm:text-3xl font-bold tracking-tight", highlighted ? "text-accent-foreground" : "text-primary")}>{name}</CardTitle>
+        <p className={cn("text-sm sm:text-base mt-2", highlighted ? "text-accent-foreground/80" : "text-muted-foreground")}>{tagline}</p>
+        <div className="mt-4 sm:mt-5">
+          <span className={cn("text-4xl sm:text-5xl font-extrabold", highlighted ? "text-accent-foreground" : "text-foreground")}>{price}</span>
+          <span className={cn("text-sm font-medium ml-1.5", highlighted ? "text-accent-foreground/70" : "text-muted-foreground")}>{priceDescription}</span>
+        </div>
+      </CardHeader>
+      <CardContent className="flex-grow px-6 sm:px-8 pb-6 sm:pb-8">
+        <ul className="space-y-3 sm:space-y-3.5 text-sm sm:text-base">
+          {features.map((feature, index) => (
+            <li key={index} className="flex items-start">
+              <Check className={cn("h-5 w-5 mr-2.5 sm:mr-3 mt-0.5 flex-shrink-0", highlighted ? "text-accent" : "text-green-500")} />
+              <span className={highlighted ? "text-accent-foreground/90" : "text-foreground/80"}>{feature}</span>
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+      <CardFooter className="p-6 sm:p-8 pt-0">
+        <Button asChild size="lg" className={cn("w-full text-base sm:text-lg py-3", highlighted ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-accent text-accent-foreground hover:bg-accent/90")}>
+          <NextLink href={ctaLink}>
+            {ctaText} <ArrowRight className="ml-2 h-5 w-5" />
+          </NextLink>
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+});
 
 export default function PricingPage() {
   const tiers: PricingTierProps[] = [
@@ -208,3 +211,4 @@ export default function PricingPage() {
     </div>
   );
 }
+
