@@ -10,7 +10,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.6.2",
@@ -57,10 +58,11 @@
     "next-themes": "^0.3.0",
     "nprogress": "^0.2.0",
     "patch-package": "^8.0.0",
-    "react": "^18.3.1",
+    "react": "18.3.1",
     "react-day-picker": "^8.10.1",
-    "react-dom": "^18.3.1",
+    "react-dom": "18.3.1",
     "react-hook-form": "^7.54.2",
+    "react-reconciler": "0.29.0",
     "recharts": "^2.15.1",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
@@ -77,5 +79,16 @@
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
+  },
+  "overrides": {
+    "@react-three/fiber": {
+      "react": "18.3.1",
+      "react-dom": "18.3.1",
+      "react-reconciler": "0.29.0"
+    },
+    "@react-three/drei": {
+      "react": "18.3.1",
+      "react-dom": "18.3.1"
+    }
   }
 }
