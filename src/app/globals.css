@@ -42,15 +42,15 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
 
-    /* Sidebar specific colors - adjusted for harmony */
-    --sidebar-background: 207 40% 8%; /* Darker blue-gray for sidebar */
-    --sidebar-foreground: 0 0% 92%; /* Lighter gray for sidebar text */
-    --sidebar-primary: 174 72% 58%; /* Teal for sidebar primary actions */
-    --sidebar-primary-foreground: 207 100% 12%; /* Deep blue for text on sidebar primary */
-    --sidebar-accent: 207 30% 18%; /* Slightly lighter dark blue-gray for sidebar accents */
-    --sidebar-accent-foreground: 0 0% 95%; /* Very light gray for text on sidebar accent */
-    --sidebar-border: 207 30% 25%; /* Darker border for sidebar elements */
-    --sidebar-ring: 174 72% 52%; /* Teal for sidebar focus rings */
+    /* Sidebar specific colors - Light Mode Version */
+    --sidebar-background: 210 50% 96%; /* Very light cool off-white */
+    --sidebar-foreground: 207 100% 25%; /* Dark, readable blue */
+    --sidebar-primary: 174 70% 50%; /* Teal (matching new accent) for primary actions */
+    --sidebar-primary-foreground: 0 0% 100%; /* White */
+    --sidebar-accent: 210 30% 90%; /* Light gray for hover/subtle accents */
+    --sidebar-accent-foreground: 207 100% 15%; /* Dark blue for text on sidebar accent */
+    --sidebar-border: 210 20% 85%; /* Soft border for sidebar elements */
+    --sidebar-ring: 174 72% 45%; /* Teal for sidebar focus rings */
   }
 
   .dark {
@@ -135,3 +135,4 @@
     @apply text-2xl font-bold tracking-tight text-primary sm:text-3xl md:text-4xl;
   }
 }
+
