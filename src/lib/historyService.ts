@@ -53,6 +53,18 @@ export function addResearchActivity(activityInput: Omit<ResearchActivityItem, 'i
   return newActivity;
 }
 
+export function setResearchHistory(history: ResearchActivityItem[]): void {
+  if (typeof window === 'undefined') {
+    return;
+  }
+  try {
+    const validatedHistory = history.slice(0, MAX_HISTORY_ITEMS); // Ensure we don't exceed max items on import
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(validatedHistory));
+  } catch (error) {
+    console.error("Error setting research history in localStorage:", error);
+  }
+}
+
 export function clearResearchHistory(): void {
   if (typeof window === 'undefined') {
     return;
@@ -63,3 +75,4 @@ export function clearResearchHistory(): void {
     console.error("Error clearing research history from localStorage:", error);
   }
 }
+

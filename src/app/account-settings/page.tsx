@@ -2,7 +2,7 @@
 // src/app/account-settings/page.tsx
 'use client';
 
-import React, { useState, useEffect, FormEvent } from 'react';
+import React, { useState, useEffect, FormEvent, useRef, ChangeEvent } from 'react';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged, sendEmailVerification, updatePassword, sendPasswordResetEmail, deleteUser, type User, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
@@ -24,13 +24,13 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Mail, Lock, UserCircle, Trash2, Palette, Bell, Settings2, ShieldAlert, LogOut, ChevronRight, ExternalLink, Edit3, ImageDown, AlertCircle, CheckCircle2, Sun, Moon, History, Settings as GeneralSettingsIcon, UserRoundCog, FileText, BookOpen, ClockIcon, Search, FileSignature } from 'lucide-react';
+import { Loader2, Mail, Lock, UserCircle, Trash2, Palette, Bell, Settings2, ShieldAlert, LogOut, ChevronRight, ExternalLink, Edit3, ImageDown, AlertCircle, CheckCircle2, Sun, Moon, History, Settings as GeneralSettingsIcon, UserRoundCog, FileText, BookOpen, ClockIcon, Search, FileSignature, Upload, Download, FileJson, Edit } from 'lucide-react'; // Added Upload, Download, FileJson
 import NextLink from 'next/link';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
 import type { ClassValue } from 'clsx';
-import { getResearchHistory, type ResearchActivityItem } from '@/lib/historyService';
+import { getResearchHistory, setResearchHistory, type ResearchActivityItem } from '@/lib/historyService'; // Added setResearchHistory
 
 
 const SettingsSection: React.FC<{ title: string; description?: string; icon?: React.ElementType; children: React.ReactNode; className?: string }> = ({ title, description, icon: Icon, children, className }) => (
@@ -61,6 +61,11 @@ export default function AccountSettingsPage() {
   const [activeTab, setActiveTab] = useState("general");
   
   const [researchHistoryItems, setResearchHistoryItems] = useState<ResearchActivityItem[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isImporting, setIsImporting] = useState(false);
+  const [showImportConfirmDialog, setShowImportConfirmDialog] = useState(false);
+  const [pendingImportData, setPendingImportData] = useState<ResearchActivityItem[] | null>(null);
+
 
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [newsletterSubscription, setNewsletterSubscription] = useState(false);
@@ -94,13 +99,13 @@ export default function AccountSettingsPage() {
       setIsLoading(false);
     });
     return () => unsubscribe();
-  }, [router, activeTab]); // Added activeTab to dependencies
+  }, [router, activeTab]); 
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
         if (activeTab === "history") {
           window.history.replaceState(null, '', "/account-settings#history");
-          setResearchHistoryItems(getResearchHistory()); // Refresh history when tab becomes active
+          setResearchHistoryItems(getResearchHistory()); 
         } else if (window.location.hash === "#history") { 
             window.history.replaceState(null, '', "/account-settings");
         }
@@ -208,6 +213,71 @@ export default function AccountSettingsPage() {
         setCurrentPasswordForDelete(''); 
     }
   };
+
+  const handleExportHistory = () => {
+    const history = getResearchHistory();
+    if (history.length === 0) {
+      toast({ title: "No History to Export", description: "Your research history is currently empty.", variant: "default" });
+      return;
+    }
+    const jsonString = JSON.stringify(history, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'scholarai_research_history.json';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast({ title: "History Exported", description: "Your research history has been downloaded.", variant: "default" });
+  };
+
+  const handleImportHistoryClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileImport = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const text = e.target?.result as string;
+        const importedData = JSON.parse(text) as ResearchActivityItem[];
+        // Basic validation
+        if (!Array.isArray(importedData) || !importedData.every(item => item.id && item.type && item.question && item.date)) {
+          throw new Error("Invalid history file format.");
+        }
+        setPendingImportData(importedData);
+        setShowImportConfirmDialog(true);
+      } catch (error: any) {
+        toast({ title: "Import Failed", description: `Error processing file: ${error.message}`, variant: "destructive" });
+      } finally {
+        setIsImporting(false);
+        if (fileInputRef.current) fileInputRef.current.value = ""; // Reset file input
+      }
+    };
+    reader.onerror = () => {
+      toast({ title: "Import Failed", description: "Could not read the selected file.", variant: "destructive" });
+      setIsImporting(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    };
+    reader.readAsText(file);
+  };
+  
+  const confirmImport = () => {
+    if (pendingImportData) {
+      setResearchHistory(pendingImportData);
+      setResearchHistoryItems(getResearchHistory()); // Refresh displayed history
+      toast({ title: "History Imported", description: "Your research history has been replaced.", variant: "default" });
+    }
+    setShowImportConfirmDialog(false);
+    setPendingImportData(null);
+  };
+
 
   const handleViewHistoryDetails = (item: ResearchActivityItem) => {
     let detailText = `Type: ${item.type}\nQuestion/Guidance: ${item.question}`;
@@ -416,7 +486,7 @@ export default function AccountSettingsPage() {
                 </Button>
               </SettingsSection>
 
-              <SettingsSection title="Interface Settings" icon={Settings2} description="Customize your ScholarAI experience. (Placeholder)">
+              <SettingsSection title="Interface Settings" icon={Edit} description="Customize your ScholarAI experience. (Placeholder)">
                  <div>
                     <Label htmlFor="itemsPerPage">Items Per Page (e.g., in results)</Label>
                     <Input id="itemsPerPage" type="number" value={itemsPerPage} onChange={(e) => setItemsPerPage(e.target.value)} placeholder="10" min="5" max="50" />
@@ -439,7 +509,22 @@ export default function AccountSettingsPage() {
         </TabsContent>
 
         <TabsContent value="history" className="mt-6 sm:mt-8">
-            <SettingsSection title="Your Research Journey" icon={History} description="Review your past research queries and generated reports stored locally in your browser.">
+            <SettingsSection 
+                title="Your Research Journey" 
+                icon={History} 
+                description="Review, export, or import your past research activity stored locally in your browser."
+            >
+                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 mb-6 pt-2">
+                    <Button onClick={handleExportHistory} variant="outline" className="w-full sm:w-auto" disabled={researchHistoryItems.length === 0}>
+                        <Download className="mr-2 h-4 w-4" /> Export History
+                    </Button>
+                    <input type="file" ref={fileInputRef} onChange={handleFileImport} accept=".json" className="hidden" />
+                    <Button onClick={handleImportHistoryClick} variant="outline" className="w-full sm:w-auto" disabled={isImporting}>
+                        {isImporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                        Import History
+                    </Button>
+                </div>
+                 <Separator className="mb-6"/>
                 {researchHistoryItems.length > 0 ? (
                     <div className="space-y-4">
                         {researchHistoryItems.map((item) => {
@@ -481,7 +566,7 @@ export default function AccountSettingsPage() {
                         );
                         })}
                          <p className="text-xs text-muted-foreground mt-6 text-center">
-                            Note: This history is stored in your browser and will be lost if you clear your browser data.
+                            Note: This history is stored in your browser and will be lost if you clear your browser data (unless exported). Max {50} items.
                         </p>
                     </div>
                 ) : (
@@ -496,6 +581,20 @@ export default function AccountSettingsPage() {
                         </Button>
                     </div>
                 )}
+                 <AlertDialog open={showImportConfirmDialog} onOpenChange={setShowImportConfirmDialog}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                        <AlertDialogTitle>Confirm History Import</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This will <span className="font-semibold text-destructive">replace</span> your current local research history with the content of the selected file. This action cannot be undone.
+                        </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setPendingImportData(null)}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmImport}>Yes, Replace History</AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </SettingsSection>
         </TabsContent>
       </Tabs>
@@ -508,3 +607,4 @@ export default function AccountSettingsPage() {
     </div>
   );
 }
+
