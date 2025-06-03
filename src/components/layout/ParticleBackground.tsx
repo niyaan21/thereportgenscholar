@@ -80,7 +80,7 @@ const ParticleBackground: React.FC = () => {
             color: linkColor,
             distance: 150,
             enable: true,
-            opacity: 0.2,
+            opacity: 0.3, // Increased link opacity
             width: 1,
           },
           move: {
@@ -96,18 +96,18 @@ const ParticleBackground: React.FC = () => {
           number: {
             density: {
               enable: true,
-              area: 1000,
+              area: 800, // Decreased area for more density or increase value
             },
-            value: 50, // Reduced number of particles
+            value: 80, // Increased number of particles
           },
           opacity: {
-            value: 0.3, // Slightly more visible particles
+            value: 0.4, // Increased particle opacity
           },
           shape: {
             type: 'circle',
           },
           size: {
-            value: { min: 1, max: 3 }, // Slightly larger particles
+            value: { min: 1, max: 3 }, 
           },
         },
         detectRetina: true,
@@ -121,3 +121,4 @@ const ParticleBackground: React.FC = () => {
 };
 
 export default ParticleBackground;
+

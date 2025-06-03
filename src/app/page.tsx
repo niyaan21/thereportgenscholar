@@ -399,7 +399,7 @@ export default function ScholarAIPage() {
                   value={queryFormInputValue}
                   onChange={setQueryFormInputValue}
                 />
-                {currentUser && <KeyFeaturesSection />}
+                <KeyFeaturesSection />
               </>
             )}
           </div>
@@ -591,3 +591,4 @@ export default function ScholarAIPage() {
     </Dialog>
   );
 }
+
