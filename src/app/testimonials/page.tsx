@@ -38,7 +38,7 @@ export default function TestimonialsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-        {testimonialsData.map((testimonial, index) => (
+        {Array.isArray(testimonialsData) && testimonialsData.map((testimonial, index) => (
           <TestimonialCard 
             key={index}
             quote={testimonial.quote}
@@ -49,6 +49,9 @@ export default function TestimonialsPage() {
             stars={testimonial.stars}
           />
         ))}
+        {!Array.isArray(testimonialsData) && (
+          <p className="text-center text-muted-foreground col-span-full">Testimonials data is currently unavailable.</p>
+        )}
       </div>
     </div>
   );

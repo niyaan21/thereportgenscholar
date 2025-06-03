@@ -16,6 +16,7 @@ export interface Testimonial {
   stars: number;
 }
 
+// Ensuring this is explicitly an array of Testimonial
 export const testimonialsData: Testimonial[] = [
   {
     quote: "ScholarAI has revolutionized how I approach literature reviews. The AI-driven synthesis saves me hours, allowing me to focus on critical analysis and writing. The report generation is a game-changer!",
@@ -65,7 +66,7 @@ export const testimonialsData: Testimonial[] = [
     avatarFallback: "DL",
     stars: 5,
   }
-];
+]; // Explicitly an array
 
 export const TestimonialCard: React.FC<Testimonial & {className?: string}> = ({ quote, name, title, avatarSrc, avatarFallback, stars, className }) => {
   return (
@@ -101,6 +102,3 @@ export const TestimonialCard: React.FC<Testimonial & {className?: string}> = ({ 
     </Card>
   );
 };
-
-// The TestimonialsSection default export is removed as it's no longer used on the homepage.
-// TestimonialCard and testimonialsData are exported for the dedicated testimonials page.
