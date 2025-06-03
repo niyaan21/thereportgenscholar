@@ -7,10 +7,10 @@ import { useActionState } from 'react';
 import NextLink from 'next/link';
 
 import HeroSection from '@/components/landing/HeroSection';
-// Removed HowItWorksSection, KeyFeaturesShowcase, FinalCTASection imports
-// import HowItWorksSection from '@/components/landing/HowItWorksSection';
-// import KeyFeaturesShowcase from '@/components/landing/KeyFeaturesShowcase';
-// import FinalCTASection from '@/components/landing/FinalCTASection';
+import HowItWorksSection from '@/components/landing/HowItWorksSection';
+import KeyFeaturesShowcase from '@/components/landing/KeyFeaturesShowcase';
+import FinalCTASection from '@/components/landing/FinalCTASection';
+import Simple3DElement from '@/components/common/Simple3DElement'; // New Import
 
 import QueryForm from '@/components/scholar-ai/QueryForm';
 import FormulatedQueriesDisplay from '@/components/scholar-ai/FormulatedQueriesDisplay';
@@ -339,7 +339,12 @@ export default function ScholarAIPage() {
               isAuthenticated={!!currentUser}
               authLoading={!authChecked}
             />
-            {/* Removed HowItWorksSection, KeyFeaturesShowcase, FinalCTASection from here */}
+             <section className="py-12 md:py-16 lg:py-20 bg-background/30">
+               <Simple3DElement className="w-full h-72 md:h-96 max-w-3xl mx-auto rounded-xl overflow-hidden shadow-2xl border border-border/40" />
+             </section>
+            <HowItWorksSection />
+            <KeyFeaturesShowcase />
+            <FinalCTASection />
           </div>
         );
         break;

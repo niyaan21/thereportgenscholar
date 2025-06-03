@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Canvas, useFrame, type ThreeElements } from '@react-three/fiber';
 import { OrbitControls, Box as DreiBox, Sphere as DreiSphere } from '@react-three/drei'; // Using Drei for easier shapes
 
@@ -48,6 +48,26 @@ function PulsingSphere(props: ThreeElements['mesh']) {
 }
 
 const Simple3DElement: React.FC<{className?: string}> = ({ className }) => {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    // Return a placeholder or null while not mounted
+    // to prevent SSR/hydration issues with the Canvas
+    return (
+      <div 
+        className={className || "w-full h-64 md:h-96 rounded-lg shadow-lg border border-border/30 bg-muted/30 flex items-center justify-center"}
+        aria-label="Loading 3D interactive element"
+      >
+        {/* You can add a more sophisticated loader here if needed */}
+        {/* <Loader2 className="h-8 w-8 animate-spin text-primary" /> */}
+      </div>
+    );
+  }
+
   return (
     <div className={className || "w-full h-64 md:h-96 rounded-lg overflow-hidden shadow-lg border border-border/30"}>
       <Canvas camera={{ position: [0, 0, 3], fov: 50 }}>
