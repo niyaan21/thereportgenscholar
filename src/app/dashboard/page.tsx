@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, LayoutDashboard, History, FileText, Settings, PlusCircle, BarChart2, ExternalLink, UserCircle, Info, BookOpen, Zap } from 'lucide-react';
+import { Loader2, LayoutDashboard, History, FileText, Settings, PlusCircle, BarChart2, ExternalLink, UserCircle, Info, BookOpen, Zap, UploadCloud } from 'lucide-react';
 import NextLink from 'next/link';
 import type { Metadata } from 'next'; // For potential future server component parent
 
@@ -122,12 +122,18 @@ export default function DashboardPage() {
             <PlusCircle className="mr-3 h-7 w-7 text-accent" />
             Quick Actions
         </h2>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4"> {/* Adjusted grid for 4 items */}
             <QuickActionCard 
                 title="Start New Research" 
                 href="/" 
                 icon={FileText}
                 description="Begin a new research exploration with your topic or question." 
+            />
+            <QuickActionCard 
+                title="Generate Report from File" 
+                href="/file-report" 
+                icon={UploadCloud}
+                description="Upload your document and provide guidance for a tailored report." 
             />
             <QuickActionCard 
                 title="View Documentation" 
@@ -184,3 +190,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+
