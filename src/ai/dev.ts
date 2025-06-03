@@ -7,3 +7,4 @@ import '@/ai/flows/summarize-research-papers.ts';
 import '@/ai/flows/generate-research-image.ts';
 import '@/ai/flows/generate-research-report.ts';
 import '@/ai/flows/generate-report-from-file.ts'; // Added new flow
+import '@/ai/flows/generate-daily-prompt-flow.ts'; // Added new daily prompt flow

@@ -7,6 +7,7 @@ import { summarizeResearchPapers, type SummarizeResearchPapersInput, type Summar
 import { generateResearchImage, type GenerateResearchImageInput, type GenerateResearchImageOutput } from '@/ai/flows/generate-research-image';
 import { generateResearchReport, type GenerateResearchReportInput, type GenerateResearchReportOutput } from '@/ai/flows/generate-research-report';
 import { generateReportFromFile, type GenerateReportFromFileInput, type GenerateReportFromFileOutput } from '@/ai/flows/generate-report-from-file'; // New import
+import { generateDailyPrompt, type GenerateDailyPromptOutput } from '@/ai/flows/generate-daily-prompt-flow'; // New import for daily prompt
 import { z } from 'zod';
 
 const formulateQuerySchema = z.object({
@@ -248,7 +249,6 @@ export async function handleGenerateReportAction(
   }
 }
 
-// New action for generating report from file
 const MAX_FILE_SIZE_MB = 5;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 const ALLOWED_FILE_TYPES = ['text/plain', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/markdown'];
@@ -293,7 +293,6 @@ export async function handleGenerateReportFromFileAction(
   const validatedQuery = validation.data.guidanceQuery;
 
   try {
-    // Convert file to data URI
     const arrayBuffer = await validatedFile.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     const fileDataUri = `data:${validatedFile.type};base64,${buffer.toString('base64')}`;
@@ -321,6 +320,33 @@ export async function handleGenerateReportFromFileAction(
       researchReport: null,
       originalGuidance: validatedQuery,
       errors: null,
+    };
+  }
+}
+
+export interface GenerateDailyPromptActionState {
+  success: boolean;
+  message: string;
+  dailyPrompt: GenerateDailyPromptOutput | null;
+  error?: string | null;
+}
+
+export async function handleGenerateDailyPromptAction(): Promise<GenerateDailyPromptActionState> {
+  try {
+    const result = await generateDailyPrompt();
+    return {
+      success: true,
+      message: "Daily prompt generated successfully.",
+      dailyPrompt: result,
+    };
+  } catch (error) {
+    console.error("Error generating daily prompt:", error);
+    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
+    return {
+      success: false,
+      message: `Failed to generate daily prompt: ${errorMessage}`,
+      dailyPrompt: null,
+      error: errorMessage,
     };
   }
 }

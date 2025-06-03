@@ -2,20 +2,24 @@
 // src/app/dashboard/page.tsx
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react'; // Added useMemo
+import React, { useState, useEffect, useMemo, useCallback } from 'react'; 
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, LayoutDashboard, History, FileText, Settings, PlusCircle, BarChart2, ExternalLink, UserCircle, Info, BookOpen, Zap, UploadCloud, ClockIcon, Search, FileSignature, Activity, Filter as FilterIcon, PieChart as PieChartIcon } from 'lucide-react';
+import { Loader2, LayoutDashboard, History, FileText, Settings, PlusCircle, BarChart2, ExternalLink, UserCircle, Info, BookOpen, Zap, UploadCloud, ClockIcon, Search, FileSignature, Activity, Filter as FilterIcon, PieChart as PieChartIcon, Lightbulb, RefreshCw, AlertCircleIcon } from 'lucide-react';
 import NextLink from 'next/link';
 import type { Metadata } from 'next';
 import { getResearchHistory, type ResearchActivityItem } from '@/lib/historyService';
 import { cn } from '@/lib/utils';
 import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent, RechartsPrimitive } from "@/components/ui/chart";
 import type { ChartConfig } from "@/components/ui/chart";
+import { handleGenerateDailyPromptAction, type GenerateDailyPromptActionState } from '@/app/actions';
+import type { GenerateDailyPromptOutput } from '@/ai/flows/generate-daily-prompt-flow';
+import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
 
 
 const DashboardStatCard = React.memo(function DashboardStatCard({ title, value, icon: Icon, description, className }: { title: string; value: string; icon: React.ElementType; description: string, className?: string }) {
@@ -32,6 +36,8 @@ const DashboardStatCard = React.memo(function DashboardStatCard({ title, value, 
     </Card>
   );
 });
+DashboardStatCard.displayName = "DashboardStatCard";
+
 
 const QuickActionCard = React.memo(function QuickActionCard({ title, href, icon: Icon, description }: { title: string; href: string; icon: React.ElementType; description: string }) {
  return (
@@ -57,6 +63,7 @@ const QuickActionCard = React.memo(function QuickActionCard({ title, href, icon:
   </NextLink>
  );
 });
+QuickActionCard.displayName = "QuickActionCard";
 
 
 type ActivityFilterType = 'all' | 'query-formulation' | 'report-generation' | 'file-report-generation';
@@ -67,7 +74,56 @@ export default function DashboardPage() {
   const [allActivities, setAllActivities] = useState<ResearchActivityItem[]>([]);
   const [stats, setStats] = useState({ sessions: 0, reports: 0, activities: 0 });
   const [activityFilter, setActivityFilter] = useState<ActivityFilterType>('all');
+  
+  const [dailyPrompt, setDailyPrompt] = useState<GenerateDailyPromptOutput | null>(null);
+  const [dailyPromptLoading, setDailyPromptLoading] = useState(true);
+  const [dailyPromptError, setDailyPromptError] = useState<string | null>(null);
+
   const router = useRouter();
+  const { toast } = useToast();
+
+  const fetchDailyPrompt = useCallback(async () => {
+    if (!currentUser) return;
+    setDailyPromptLoading(true);
+    setDailyPromptError(null);
+    try {
+      const result = await handleGenerateDailyPromptAction();
+      if (result.success && result.dailyPrompt) {
+        setDailyPrompt(result.dailyPrompt);
+      } else {
+        setDailyPromptError(result.message || "Failed to fetch daily prompt.");
+        toast({ title: "Error Fetching Prompt", description: result.message, variant: "destructive" });
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
+      setDailyPromptError(errorMessage);
+      toast({ title: "Error Fetching Prompt", description: errorMessage, variant: "destructive" });
+    } finally {
+      setDailyPromptLoading(false);
+    }
+  }, [currentUser, toast]);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setCurrentUser(user);
+        const history = getResearchHistory();
+        setAllActivities(history);
+        
+        const uniqueSessions = new Set(history.filter(item => item.type === 'query-formulation').map(item => item.question)).size;
+        const reportCount = history.filter(item => item.type === 'report-generation' || item.type === 'file-report-generation').length;
+        setStats({ sessions: uniqueSessions, reports: reportCount, activities: history.length });
+        
+        fetchDailyPrompt();
+
+      } else {
+        router.push('/login'); 
+      }
+      setIsLoading(false);
+    });
+    return () => unsubscribe();
+  }, [router, fetchDailyPrompt]);
+
 
   const activityChartData = useMemo(() => {
     if (!allActivities.length) return [];
@@ -91,25 +147,6 @@ export default function DashboardPage() {
     fileReports: { label: "File Reports", color: "hsl(var(--chart-3))" },
   } as ChartConfig), []);
 
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setCurrentUser(user);
-        const history = getResearchHistory();
-        setAllActivities(history);
-        
-        const uniqueSessions = new Set(history.filter(item => item.type === 'query-formulation').map(item => item.question)).size;
-        const reportCount = history.filter(item => item.type === 'report-generation' || item.type === 'file-report-generation').length;
-        setStats({ sessions: uniqueSessions, reports: reportCount, activities: history.length });
-
-      } else {
-        router.push('/login'); 
-      }
-      setIsLoading(false);
-    });
-    return () => unsubscribe();
-  }, [router]);
 
   const filteredActivities = activityFilter === 'all' 
     ? allActivities 
@@ -162,6 +199,45 @@ export default function DashboardPage() {
           <DashboardStatCard title="Total Activities Logged" value={stats.activities.toString()} icon={Activity} description="Total interactions recorded." className="bg-card/80 backdrop-blur-sm"/>
         </div>
          <p className="text-xs text-muted-foreground mt-3 text-center sm:text-left">Data reflects activity stored locally in this browser.</p>
+      </section>
+
+      <section className="mb-8 sm:mb-10">
+        <h2 className="text-2xl sm:text-3xl font-semibold text-primary mb-4 sm:mb-6 flex items-center">
+          <Lightbulb className="mr-3 h-7 w-7 text-accent" />
+          Research Spark
+        </h2>
+        <Card className="shadow-lg bg-card/80 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="text-xl font-medium text-primary/90">Prompt of the Day</CardTitle>
+            <CardDescription className="text-sm">Get inspired with a novel research question.</CardDescription>
+          </CardHeader>
+          <CardContent className="min-h-[100px]">
+            {dailyPromptLoading && (
+              <div className="flex items-center justify-center h-full">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            )}
+            {dailyPromptError && !dailyPromptLoading && (
+              <Alert variant="destructive" className="bg-destructive/10">
+                <AlertCircleIcon className="h-5 w-5" />
+                <AlertTitle>Error Loading Prompt</AlertTitle>
+                <AlertDescription>{dailyPromptError}</AlertDescription>
+              </Alert>
+            )}
+            {dailyPrompt && !dailyPromptLoading && !dailyPromptError && (
+              <div>
+                <p className="text-lg text-foreground/90 italic">"{dailyPrompt.prompt}"</p>
+                <Badge variant="outline" className="mt-3 bg-secondary/50 border-secondary text-secondary-foreground">{dailyPrompt.category}</Badge>
+              </div>
+            )}
+          </CardContent>
+          <CardFooter>
+            <Button variant="outline" onClick={fetchDailyPrompt} disabled={dailyPromptLoading || !currentUser} className="ml-auto">
+              <RefreshCw className={cn("mr-2 h-4 w-4", dailyPromptLoading && "animate-spin")} />
+              {dailyPromptLoading ? 'Refreshing...' : 'New Spark'}
+            </Button>
+          </CardFooter>
+        </Card>
       </section>
       
       {activityChartData.length > 0 && (
@@ -351,4 +427,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
