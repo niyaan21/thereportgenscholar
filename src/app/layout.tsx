@@ -7,6 +7,7 @@ import Navbar from '@/components/layout/Navbar';
 import ParticleBackground from '@/components/layout/ParticleBackground';
 import { ThemeProvider } from 'next-themes';
 import Footer from '@/components/layout/Footer'; // New import
+import PageProgressBar from '@/components/layout/PageProgressBar'; // Added import
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -69,6 +70,7 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <PageProgressBar /> {/* Added PageProgressBar */}
           <ParticleBackground />
           <div className="relative z-10 flex flex-col min-h-screen">
             <Navbar />
