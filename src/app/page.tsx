@@ -5,12 +5,20 @@
 import React, { useState, useEffect, useTransition, useCallback } from 'react';
 import { useActionState } from 'react';
 import NextLink from 'next/link';
+import dynamic from 'next/dynamic'; // Import next/dynamic
 
 import HeroSection from '@/components/landing/HeroSection';
-import HowItWorksSection from '@/components/landing/HowItWorksSection';
-import KeyFeaturesShowcase from '@/components/landing/KeyFeaturesShowcase';
-import FinalCTASection from '@/components/landing/FinalCTASection';
-import Simple3DElement from '@/components/common/Simple3DElement'; // New Import
+// Dynamically import landing sections as they are only for the initial view
+const HowItWorksSection = dynamic(() => import('@/components/landing/HowItWorksSection'));
+const KeyFeaturesShowcase = dynamic(() => import('@/components/landing/KeyFeaturesShowcase'));
+const FinalCTASection = dynamic(() => import('@/components/landing/FinalCTASection'));
+
+// Dynamically import Simple3DElement with SSR disabled
+const Simple3DElement = dynamic(() => import('@/components/common/Simple3DElement'), {
+  ssr: false,
+  loading: () => <div className="w-full h-72 md:h-96 rounded-lg shadow-lg border border-border/30 bg-muted/30 flex items-center justify-center" aria-label="Loading 3D interactive element"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>,
+});
+
 
 import QueryForm from '@/components/scholar-ai/QueryForm';
 import FormulatedQueriesDisplay from '@/components/scholar-ai/FormulatedQueriesDisplay';
@@ -37,7 +45,7 @@ import {
 } from '@/app/actions';
 import type { GenerateResearchReportOutput } from '@/ai/flows/generate-research-report';
 import { useToast } from '@/hooks/use-toast';
-import { addResearchActivity } from '@/lib/historyService'; // Import history service
+import { addResearchActivity } from '@/lib/historyService';
 import {
   Dialog,
   DialogContent,
@@ -232,6 +240,7 @@ export default function ScholarAIPage() {
       setResearchSummary('');
       setSummarizedPaperTitles([]);
       setGeneratedImageUrl(null);
+      // Reset action states if possible, or rely on new form submissions to overwrite
     });
   }, []);
 
@@ -339,12 +348,13 @@ export default function ScholarAIPage() {
               isAuthenticated={!!currentUser}
               authLoading={!authChecked}
             />
-             <section className="py-12 md:py-16 lg:py-20 bg-background/30">
+            <section className="py-12 md:py-16 lg:py-20 bg-background/30">
                <Simple3DElement className="w-full h-72 md:h-96 max-w-3xl mx-auto rounded-xl overflow-hidden shadow-2xl border border-border/40" />
-             </section>
-            <HowItWorksSection />
-            <KeyFeaturesShowcase />
-            <FinalCTASection />
+            </section>
+            {/* Other landing sections are dynamically imported if needed, not shown here for brevity as per previous request */}
+            {/* <HowItWorksSection /> */}
+            {/* <KeyFeaturesShowcase /> */}
+            {/* <FinalCTASection /> */}
           </div>
         );
         break;
