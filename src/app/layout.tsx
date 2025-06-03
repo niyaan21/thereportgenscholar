@@ -4,8 +4,9 @@ import {Geist, Geist_Mono} from 'next/font/google';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import Navbar from '@/components/layout/Navbar';
-import ParticleBackground from '@/components/layout/ParticleBackground'; // New import
-import { ThemeProvider } from 'next-themes'; // New import for theme provider
+import ParticleBackground from '@/components/layout/ParticleBackground';
+import { ThemeProvider } from 'next-themes';
+import Footer from '@/components/layout/Footer'; // New import
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -69,12 +70,13 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ParticleBackground />
-          <div className="relative z-10 flex flex-col min-h-screen"> {/* Ensure content is above particles */}
+          <div className="relative z-10 flex flex-col min-h-screen">
             <Navbar />
-            <main className="flex-grow"> {/* Ensure main content can grow */}
+            <main className="flex-grow">
               {children}
             </main>
             <Toaster />
+            <Footer /> {/* Added global footer */}
           </div>
         </ThemeProvider>
       </body>
