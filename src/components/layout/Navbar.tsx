@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import NextLink from 'next/link';
-import { BookText, UserPlus, LogIn, Home, Palette, Settings, Moon, Sun, Check, LogOut, Info, BookOpenText, Code2, Menu, X as CloseIcon, UserCircle, ChevronDown, Sparkles, FileText as FeaturesIcon, Settings2 as AccountSettingsIcon, LayoutDashboard, DollarSign, MessageSquare } from 'lucide-react';
+import { BookText, UserPlus, LogIn, Home, Palette, Settings, Moon, Sun, Check, LogOut, Info, BookOpenText, Code2, Menu, X as CloseIcon, UserCircle, ChevronDown, Sparkles, FileText as FeaturesIcon, Settings2 as AccountSettingsIcon, LayoutDashboard, DollarSign, MessageSquare, MessageSquareQuote } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -62,6 +62,7 @@ export default function Navbar() {
     { href: "/", label: "Home", icon: Home },
     { href: "/features", label: "Features", icon: Sparkles },
     { href: "/pricing", label: "Pricing", icon: DollarSign },
+    { href: "/testimonials", label: "Testimonials", icon: MessageSquareQuote },
     { href: "/about", label: "About", icon: Info },
     { href: "/docs", label: "Docs", icon: BookOpenText },
     { href: "/contact", label: "Contact", icon: MessageSquare },
