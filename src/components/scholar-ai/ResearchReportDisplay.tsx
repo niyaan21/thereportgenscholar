@@ -2,18 +2,19 @@
 // src/components/scholar-ai/ResearchReportDisplay.tsx
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react'; // Added useState
 import type { GenerateResearchReportOutput } from '@/ai/flows/generate-research-report';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { FileText, BookOpen, ListChecks, MessageSquareQuote, SearchCode, Lightbulb, AlertTriangle, ThumbsUp, Telescope, Edit3, BarChartHorizontalBig, Users, ShieldCheck, BookCopy, BookMarked, TrendingUp, FileJson, GanttChartSquare, PieChartIcon, LineChartIcon, BarChartIcon, ScatterChartIcon, Brain, LightbulbIcon, MaximizeIcon, Settings, FileQuestion, Activity, Library, UsersRound, ShieldAlert, ClipboardList, Milestone, Scale, GitBranch, DownloadCloud, Share2Icon, BookText, FileType, Image as ImageIconLucide } from 'lucide-react';
+import { FileText, BookOpen, ListChecks, MessageSquareQuote, SearchCode, Lightbulb, AlertTriangle, ThumbsUp, Telescope, Edit3, BarChartHorizontalBig, Users, ShieldCheck, BookCopy, BookMarked, TrendingUp, FileJson, GanttChartSquare, PieChartIcon, LineChartIcon, BarChartIcon, ScatterChartIcon, Brain, LightbulbIcon, MaximizeIcon, Settings, FileQuestion, Activity, Library, UsersRound, ShieldAlert, ClipboardList, Milestone, Scale, GitBranch, DownloadCloud, Share2Icon, BookText, FileType, Image as ImageIconLucide, Loader2 } from 'lucide-react'; // Added Loader2
 import NextImage from 'next/image';
 import { cn } from '@/lib/utils';
 import PlaceholderChart from './PlaceholderChart';
 import { Button } from '@/components/ui/button';
 import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import { useToast } from '@/hooks/use-toast';
 
 export interface ResearchReportDisplayProps {
   report: GenerateResearchReportOutput;
@@ -41,6 +42,8 @@ const Section: React.FC<{ title: string; icon?: React.ReactNode; children: React
 );
 
 const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report, originalQuestion, generatedImageUrl, onOpenImagePreview }: ResearchReportDisplayProps) {
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const { toast } = useToast();
 
   const renderParagraphs = (text: string | undefined | null): JSX.Element[] | JSX.Element => {
     if (!text) return <p className="italic text-muted-foreground my-3 sm:my-3.5 text-sm sm:text-base">Content for this section was not provided.</p>;
@@ -113,220 +116,259 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
     URL.revokeObjectURL(url);
   };
 
-  const handleDownloadReportPdf = () => {
+  const handleDownloadReportPdf = async () => {
+    setIsGeneratingPdf(true);
+    toast({
+      title: "🚀 Generating PDF Report",
+      description: "Please wait, this may take a few moments. Ensure relevant sections are expanded for chart inclusion.",
+      duration: 7000,
+    });
+
     const doc = new jsPDF({ unit: 'pt', format: 'a4' });
     let yPosition = 40;
     const pageHeight = doc.internal.pageSize.height;
     const pageWidth = doc.internal.pageSize.getWidth();
     const margin = 40;
     const contentWidth = pageWidth - 2 * margin;
-    const lineHeight = 14; // Base line height for 10pt font
+    const lineHeight = 14;
 
-    const addTextWithBreaks = (text: string, fontSize: number, styles: { bold?: boolean, italic?: boolean, color?: string } = {}, indent = 0) => {
-      if (!text || text.trim() === "") {
-        yPosition += lineHeight /2; // Add some space even for empty content to maintain flow
-        return;
-      }
-      doc.setFontSize(fontSize);
-      doc.setFont(undefined, styles.bold ? 'bold' : (styles.italic ? 'italic' : 'normal'));
-      if (styles.color) doc.setTextColor(styles.color);
-      else doc.setTextColor(50, 50, 50); // Default text color
+    const addTextToPdf = (text: string, fontSize: number, styles: { bold?: boolean, italic?: boolean, color?: string } = {}, indent = 0) => {
+        if (!text || text.trim() === "") {
+            if (yPosition + lineHeight > pageHeight - margin) { doc.addPage(); yPosition = margin; }
+            yPosition += lineHeight / 2; return;
+        }
+        doc.setFontSize(fontSize);
+        doc.setFont(undefined, styles.bold ? 'bold' : (styles.italic ? 'italic' : 'normal'));
+        if (styles.color) doc.setTextColor(styles.color); else doc.setTextColor(50, 50, 50);
 
-      // Split by double newlines (paragraph breaks) or newlines followed by list markers
-      const splitText = text.split(/\n\s*\n|\n(?=\s*(?:•|-|\*)\s)|\n(?=\s*\d+\.\s)/);
-
-      splitText.forEach(paragraphText => {
-        if (paragraphText.trim() === "") return;
-
-        // Handle list items
-        if (paragraphText.match(/^(\s*(?:•|-|\*)\s|[ \t]*\d+\.\s+)/m)) {
-            const listItems = paragraphText.split('\n').map(item => item.trim()).filter(item => item);
-            listItems.forEach((item, itemIndex) => {
-                const itemMarker = item.match(/^\d+\.\s+/) ? `${itemIndex + 1}. ` : '• ';
-                const itemContent = item.replace(/^\s*(?:•|-|\*|\d+\.)\s*/, '');
-                const lines = doc.splitTextToSize(itemMarker + itemContent, contentWidth - indent - (itemMarker.length * (fontSize * 0.5))); // Adjust for marker width
-                 lines.forEach((line: string) => {
-                    if (yPosition + lineHeight > pageHeight - margin) {
-                        doc.addPage();
-                        yPosition = margin;
-                    }
-                    // Indent list item content slightly more than the marker
-                    doc.text(line, margin + indent + (itemMarker.length > 2 ? 0 : 10) , yPosition);
+        const splitText = text.split(/\n\s*\n|\n(?=\s*(?:•|-|\*)\s)|\n(?=\s*\d+\.\s)/);
+        splitText.forEach(paragraphText => {
+            if (paragraphText.trim() === "") return;
+            if (paragraphText.match(/^(\s*(?:•|-|\*)\s|[ \t]*\d+\.\s+)/m)) {
+                const listItems = paragraphText.split('\n').map(item => item.trim()).filter(item => item);
+                listItems.forEach((item, itemIndex) => {
+                    const itemMarker = item.match(/^\d+\.\s+/) ? `${itemIndex + 1}. ` : '• ';
+                    const itemContent = item.replace(/^\s*(?:•|-|\*|\d+\.)\s*/, '');
+                    const lines = doc.splitTextToSize(itemMarker + itemContent, contentWidth - indent - (itemMarker.length * (fontSize * 0.5)));
+                    lines.forEach((line: string) => {
+                        if (yPosition + lineHeight > pageHeight - margin) { doc.addPage(); yPosition = margin; }
+                        doc.text(line, margin + indent + (itemMarker.length > 2 ? 0 : 10), yPosition);
+                        yPosition += lineHeight;
+                    });
+                });
+                yPosition += lineHeight / 2;
+            } else {
+                const lines = doc.splitTextToSize(paragraphText, contentWidth - indent);
+                lines.forEach((line: string) => {
+                    if (yPosition + lineHeight > pageHeight - margin) { doc.addPage(); yPosition = margin; }
+                    doc.text(line, margin + indent, yPosition);
                     yPosition += lineHeight;
                 });
-            });
-             yPosition += lineHeight / 2; // Space after list block
-        } else { // Handle regular paragraphs
-            const lines = doc.splitTextToSize(paragraphText, contentWidth - indent);
-            lines.forEach((line: string) => {
-                if (yPosition + lineHeight > pageHeight - margin) {
-                    doc.addPage();
-                    yPosition = margin;
-                }
-                doc.text(line, margin + indent, yPosition);
-                yPosition += lineHeight;
-            });
-            yPosition += lineHeight / 2; // Space after paragraph
-        }
-      });
-      doc.setTextColor(50, 50, 50); // Reset text color
+                yPosition += lineHeight / 2;
+            }
+        });
+        doc.setTextColor(50, 50, 50);
     };
-
-
-    const generateRemainingPdfContent = (
-      docInstance: jsPDF, 
-      addTextFn: typeof addTextWithBreaks, 
-      currentYPos: number, 
-      _lineHeight: number, 
-      _pageHeight: number, 
-      _margin: number, 
-      // _contentWidth is not used here, relying on the outer scope's contentWidth
-    ) => {
-      yPosition = currentYPos; 
-
-      const localAddSection = (title: string, content?: string | any[] | null, renderFn?: (item: any, index: number) => void) => {
-         const isOptionalAndEmpty = (
-            ["Acknowledged Limitations", "Future Research Avenues", "Ethical Considerations & Impact", "Supplementary Appendices", "Glossary of Key Terms"].includes(title) &&
-            (!content || (Array.isArray(content) && content.length === 0)) &&
-            !renderFn
-        );
-
-        if (isOptionalAndEmpty) {
-            return; // Skip empty optional sections
-        }
-        
-        if (yPosition + _lineHeight * 3 > _pageHeight - _margin) { // Check space for section title
-          docInstance.addPage();
-          yPosition = _margin;
-        }
-        addTextFn(title, 14, { bold: true }); // Section title style
-
-        if (typeof content === 'string') {
-          addTextFn(content, 10); // Default content style
-        } else if (Array.isArray(content) && renderFn) {
-          if (content.length > 0) {
-             content.forEach(renderFn);
-          } else {
-             addTextFn("No items to display in this list.", 10, {italic: true});
-          }
-        } else if (typeof content === 'string' && content.trim() === "") {
-           addTextFn("Content for this section was not provided.", 10, {italic: true});
-        } else if (!content && !renderFn) {
-           addTextFn("Content for this section was not provided.", 10, {italic: true});
-        }
-        yPosition += _lineHeight; // Space after section content
-      };
-
-      localAddSection("Executive Summary", report.executiveSummary);
-      localAddSection("Introduction & Background", report.introduction);
-      localAddSection("Comprehensive Literature Review", report.literatureReview);
-
-      localAddSection("Key Themes & In-Depth Discussion", report.keyThemes, (theme: any, index: number) => {
-        addTextFn(`${index + 1}. ${theme.theme}`, 12, { bold: true });
-        addTextFn(theme.discussion, 10, {}, 15); // Indent theme discussion
-        yPosition += _lineHeight;
-      });
-
-      localAddSection("Detailed Research Methodology", report.detailedMethodology);
-
-      localAddSection("Results Presentation & Analysis", report.resultsAndAnalysis, (result: any, index: number) => {
-        addTextFn(result.sectionTitle, 12, { bold: true });
-        addTextFn(result.content, 10, {}, 15); // Indent result content
-        if (result.chartSuggestion && result.chartSuggestion.type !== 'none') {
-          yPosition += _lineHeight / 2;
-          const chartTitle = result.chartSuggestion.title || `${result.chartSuggestion.type.charAt(0).toUpperCase() + result.chartSuggestion.type.slice(1)} Chart`;
-          addTextFn(
-            `[Chart Placeholder] Visual Aid: ${chartTitle}. Type: ${result.chartSuggestion.type}. Data: ${result.chartSuggestion.dataDescription}. (Interactive chart available in web application.)`,
-            9, { italic: true, color: "#006699" }, 20 // Indent chart placeholder text
-          );
-          yPosition += _lineHeight * 1.5; // Extra space after chart placeholder
-        }
-      });
-
-      localAddSection("Holistic Discussion of Findings", report.discussion);
-      localAddSection("Concluding Remarks & Implications", report.conclusion);
-      
-      // Optional sections, only add if content exists
-      if (report.limitations && report.limitations.trim() !== "") localAddSection("Acknowledged Limitations", report.limitations);
-      if (report.futureWork && report.futureWork.trim() !== "") localAddSection("Future Research Avenues", report.futureWork);
-      if (report.ethicalConsiderations && report.ethicalConsiderations.trim() !== "") localAddSection("Ethical Considerations & Impact", report.ethicalConsiderations);
-
-      if (report.references && report.references.length > 0) {
-          localAddSection("References (AI Synthesized)", report.references, (ref: string, index: number) => {
-              addTextFn(`${index + 1}. ${ref}`, 9, {}, 15); // Indent references
-               yPosition += _lineHeight/2;
-          });
-      }
-
-      if (report.appendices && report.appendices.length > 0) {
-          localAddSection("Supplementary Appendices", report.appendices, (appendix: any, index: number) => {
-              addTextFn(appendix.title, 12, { bold: true });
-              addTextFn(appendix.content, 10, {}, 15); // Indent appendix content
-               yPosition += _lineHeight;
-          });
-      }
-
-      if (report.glossary && report.glossary.length > 0) {
-          localAddSection("Glossary of Key Terms", report.glossary, (item: any, index: number) => {
-              addTextFn(`${item.term}:`, 9, { bold: true });
-              addTextFn(item.definition, 9, {}, 15); // Indent glossary definition
-               yPosition += _lineHeight/2;
-          });
-      }
-    };
-
-
-    // Main PDF generation logic starts here
-    addTextWithBreaks(report.title || "Generated Research Report", 18, { bold: true });
-    yPosition += lineHeight; // Extra space after main title
-
-    addTextWithBreaks(`Original Research Question: ${originalQuestion}`, 11, { italic: true, color: "#555555" });
-    yPosition += lineHeight * 1.5; // Extra space after research question
-
-    if (generatedImageUrl && generatedImageUrl.startsWith('data:image/')) {
-      try {
-        const MimeTypeMatch = generatedImageUrl.match(/data:(image\/[^;]+);/);
-        const format = MimeTypeMatch ? MimeTypeMatch[1].split('/')[1].toUpperCase() : 'PNG';
-
-        const img = new window.Image(); 
+    
+    const addImageToPdf = async (imageDataUri: string, format: string) => {
+      return new Promise<void>((resolve, reject) => {
+        const img = new window.Image();
         img.onload = () => {
-          const imgWidth = contentWidth * 0.75; // Adjust image width as needed
-          const imgHeight = (img.height * imgWidth) / img.width;
+          const imgWidthOriginal = img.width;
+          const imgHeightOriginal = img.height;
+          let imgWidthPdf = contentWidth * 0.75;
+          let imgHeightPdf = (imgHeightOriginal * imgWidthPdf) / imgWidthOriginal;
 
-          if (yPosition + imgHeight > pageHeight - margin - 20) { // Check space for image
-            doc.addPage();
-            yPosition = margin;
+          if (imgHeightPdf > pageHeight * 0.4) { // Limit image height
+            imgHeightPdf = pageHeight * 0.4;
+            imgWidthPdf = (imgWidthOriginal * imgHeightPdf) / imgHeightOriginal;
           }
-          addTextWithBreaks("Conceptual Visualization:", 12, { bold: true });
-          yPosition += lineHeight / 2;
-          doc.addImage(generatedImageUrl, format, margin + (contentWidth * 0.125), yPosition, imgWidth, imgHeight);
-          yPosition += imgHeight + lineHeight * 1.5; // Space after image
+           if (imgWidthPdf > contentWidth) {
+            imgWidthPdf = contentWidth;
+            imgHeightPdf = (imgHeightOriginal * imgWidthPdf) / imgWidthOriginal;
+          }
 
-          // Generate rest of the PDF content after image is potentially added
-          generateRemainingPdfContent(doc, addTextWithBreaks, yPosition, lineHeight, pageHeight, margin);
-          doc.save(`ScholarAI_Report_${report.title?.replace(/[^\w\s]/gi, '').replace(/\s+/g, '_') || 'Untitled'}.pdf`);
+
+          if (yPosition + imgHeightPdf > pageHeight - margin - 20) { doc.addPage(); yPosition = margin; }
+          doc.addImage(imageDataUri, format.toUpperCase(), margin + (contentWidth - imgWidthPdf) / 2, yPosition, imgWidthPdf, imgHeightPdf);
+          yPosition += imgHeightPdf + lineHeight * 1.5;
+          resolve();
         };
         img.onerror = () => {
           console.error("Error loading image for PDF.");
-          addTextWithBreaks("[Error embedding conceptual visualization in PDF. Please view on web.]", 10, {italic: true, color: "#AA0000"});
+          addTextToPdf("[Error embedding image in PDF. Please view on web.]", 10, {italic: true, color: "#AA0000"});
           yPosition += lineHeight * 1.5;
-          // Generate rest of the PDF content even if image fails
-          generateRemainingPdfContent(doc, addTextWithBreaks, yPosition, lineHeight, pageHeight, margin);
-          doc.save(`ScholarAI_Report_${report.title?.replace(/[^\w\s]/gi, '').replace(/\s+/g, '_') || 'Untitled'}.pdf`);
-        }
-        img.src = generatedImageUrl; // This triggers onload or onerror
-        return; // IMPORTANT: Return here because PDF saving is now async within onload/onerror
+          resolve(); // Resolve even on error to continue PDF generation
+        };
+        img.src = imageDataUri;
+      });
+    };
 
-      } catch (e) {
-        console.error("Error processing image for PDF:", e);
-        addTextWithBreaks("[Error embedding conceptual visualization in PDF. Please view on web.]", 10, {italic: true, color: "#AA0000"});
-         yPosition += lineHeight * 1.5;
-      }
+
+    addTextToPdf(report.title || "Generated Research Report", 18, { bold: true });
+    yPosition += lineHeight;
+    addTextToPdf(`Original Research Question: ${originalQuestion}`, 11, { italic: true, color: "#555555" });
+    yPosition += lineHeight * 1.5;
+
+    if (generatedImageUrl && generatedImageUrl.startsWith('data:image/')) {
+        addTextToPdf("Conceptual Visualization:", 12, { bold: true });
+        yPosition += lineHeight / 2;
+        const MimeTypeMatch = generatedImageUrl.match(/data:(image\/[^;]+);/);
+        await addImageToPdf(generatedImageUrl, MimeTypeMatch ? MimeTypeMatch[1].split('/')[1] : 'PNG');
+    }
+    
+    // Function to add sections, now async to handle chart captures
+    const addPdfSection = async (title: string, content?: string | any[] | null, renderFn?: (item: any, index: number, doc: jsPDF, currentY: number, addTextFn: typeof addTextToPdf) => Promise<number>) => {
+        const isOptionalAndEmpty = (["Acknowledged Limitations", "Future Research Avenues", "Ethical Considerations & Impact", "Supplementary Appendices", "Glossary of Key Terms"].includes(title) && (!content || (Array.isArray(content) && content.length === 0)) && !renderFn);
+        if (isOptionalAndEmpty) return;
+
+        if (yPosition + lineHeight * 3 > pageHeight - margin) { doc.addPage(); yPosition = margin; }
+        addTextToPdf(title, 14, { bold: true });
+
+        if (typeof content === 'string') {
+            addTextToPdf(content, 10);
+        } else if (Array.isArray(content) && renderFn) {
+            if (content.length > 0) {
+                for (let i = 0; i < content.length; i++) {
+                    yPosition = await renderFn(content[i], i, doc, yPosition, addTextToPdf);
+                }
+            } else {
+                addTextToPdf("No items to display in this list.", 10, { italic: true });
+            }
+        } else if ((typeof content === 'string' && content.trim() === "") || (!content && !renderFn)) {
+            addTextToPdf("Content for this section was not provided.", 10, { italic: true });
+        }
+        yPosition += lineHeight;
+    };
+
+    await addPdfSection("Executive Summary", report.executiveSummary);
+    await addPdfSection("Introduction & Background", report.introduction);
+    await addPdfSection("Comprehensive Literature Review", report.literatureReview);
+
+    await addPdfSection("Key Themes & In-Depth Discussion", report.keyThemes, async (theme: any, index: number, docRef, currentY, addTextFn) => {
+        yPosition = currentY; // Ensure yPosition is managed correctly
+        addTextFn(`${index + 1}. ${theme.theme}`, 12, { bold: true });
+        addTextFn(theme.discussion, 10, {}, 15);
+        yPosition += lineHeight;
+        return yPosition;
+    });
+
+    await addPdfSection("Detailed Research Methodology", report.detailedMethodology);
+
+    // Results and Analysis with Chart Embedding
+    const resultsSectionTitle = "Results Presentation & Analysis";
+    if (yPosition + lineHeight * 3 > pageHeight - margin) { doc.addPage(); yPosition = margin; }
+    addTextToPdf(resultsSectionTitle, 14, { bold: true });
+    
+    if (report.resultsAndAnalysis && report.resultsAndAnalysis.length > 0) {
+        for (let i = 0; i < report.resultsAndAnalysis.length; i++) {
+            const result = report.resultsAndAnalysis[i];
+            addTextToPdf(result.sectionTitle, 12, { bold: true });
+            addTextToPdf(result.content, 10, {}, 15);
+
+            if (result.chartSuggestion && result.chartSuggestion.type !== 'none' && result.chartSuggestion.data && result.chartSuggestion.data.length > 0) {
+                const chartElementId = `pdf-chart-results-${i}`;
+                const chartElement = document.getElementById(chartElementId);
+                if (chartElement) {
+                    try {
+                        if (yPosition + (pageHeight * 0.3) > pageHeight - margin) { doc.addPage(); yPosition = margin; } // Check space for chart
+                        const canvas = await html2canvas(chartElement, { scale: 1.5, backgroundColor: '#FFFFFF', logging: false, useCORS: true });
+                        const imgData = canvas.toDataURL('image/png');
+                        
+                        const chartImg = new window.Image();
+                        const chartLoadPromise = new Promise<void>(resolve => {
+                            chartImg.onload = () => {
+                                const chartImgWidthOriginal = chartImg.width;
+                                const chartImgHeightOriginal = chartImg.height;
+                                let chartImgWidthPdf = contentWidth * 0.8; // Chart can be wider
+                                let chartImgHeightPdf = (chartImgHeightOriginal * chartImgWidthPdf) / chartImgWidthOriginal;
+
+                                if (chartImgHeightPdf > pageHeight * 0.4) {
+                                    chartImgHeightPdf = pageHeight * 0.4;
+                                    chartImgWidthPdf = (chartImgWidthOriginal * chartImgHeightPdf) / chartImgHeightOriginal;
+                                }
+                                if (chartImgWidthPdf > contentWidth) {
+                                   chartImgWidthPdf = contentWidth;
+                                   chartImgHeightPdf = (chartImgHeightOriginal * chartImgWidthPdf) / chartImgWidthOriginal;
+                                }
+
+
+                                if (yPosition + chartImgHeightPdf > pageHeight - margin) { doc.addPage(); yPosition = margin; }
+                                doc.addImage(imgData, 'PNG', margin + (contentWidth - chartImgWidthPdf) / 2, yPosition, chartImgWidthPdf, chartImgHeightPdf);
+                                yPosition += chartImgHeightPdf + lineHeight;
+                                resolve();
+                            };
+                            chartImg.onerror = () => {
+                                addTextToPdf(`[Chart: ${result.chartSuggestion.title || 'Chart'} - Could not render image. View in web app.]`, 9, { italic: true, color: "#AA0000" }, 20);
+                                yPosition += lineHeight * 1.5;
+                                resolve();
+                            };
+                            chartImg.src = imgData;
+                        });
+                        await chartLoadPromise;
+
+                    } catch (e) {
+                        console.error(`Error capturing chart ${chartElementId}:`, e);
+                        addTextToPdf(`[Chart: ${result.chartSuggestion.title || 'Chart'} - Error during capture. View in web app.]`, 9, { italic: true, color: "#AA0000" }, 20);
+                        yPosition += lineHeight * 1.5;
+                    }
+                } else {
+                    addTextToPdf(`[Chart: ${result.chartSuggestion.title || 'Chart'} - Not embedded. Ensure section is expanded in web view to include in PDF.]`, 9, { italic: true, color: "#006699" }, 20);
+                    yPosition += lineHeight * 1.5;
+                }
+            }
+            yPosition += lineHeight;
+        }
+    } else {
+        addTextToPdf("Content for this section was not provided.", 10, { italic: true });
+    }
+     yPosition += lineHeight;
+
+
+    await addPdfSection("Holistic Discussion of Findings", report.discussion);
+    await addPdfSection("Concluding Remarks & Implications", report.conclusion);
+    
+    if (report.limitations && report.limitations.trim() !== "") await addPdfSection("Acknowledged Limitations", report.limitations);
+    if (report.futureWork && report.futureWork.trim() !== "") await addPdfSection("Future Research Avenues", report.futureWork);
+    if (report.ethicalConsiderations && report.ethicalConsiderations.trim() !== "") await addPdfSection("Ethical Considerations & Impact", report.ethicalConsiderations);
+
+    if (report.references && report.references.length > 0) {
+        await addPdfSection("References (AI Synthesized)", report.references, async (ref: string, index: number, docRef, currentY, addTextFn) => {
+            yPosition = currentY;
+            addTextFn(`${index + 1}. ${ref}`, 9, {}, 15);
+            yPosition += lineHeight / 2;
+            return yPosition;
+        });
     }
 
-    // If no image or image processing failed before async callbacks, generate content and save
-    generateRemainingPdfContent(doc, addTextWithBreaks, yPosition, lineHeight, pageHeight, margin);
+    if (report.appendices && report.appendices.length > 0) {
+        await addPdfSection("Supplementary Appendices", report.appendices, async (appendix: any, index: number, docRef, currentY, addTextFn) => {
+            yPosition = currentY;
+            addTextFn(appendix.title, 12, { bold: true });
+            addTextFn(appendix.content, 10, {}, 15);
+            yPosition += lineHeight;
+            return yPosition;
+        });
+    }
+
+    if (report.glossary && report.glossary.length > 0) {
+        await addPdfSection("Glossary of Key Terms", report.glossary, async (item: any, index: number, docRef, currentY, addTextFn) => {
+            yPosition = currentY;
+            addTextFn(`${item.term}:`, 9, { bold: true });
+            addTextFn(item.definition, 9, {}, 15);
+            yPosition += lineHeight / 2;
+            return yPosition;
+        });
+    }
+
     doc.save(`ScholarAI_Report_${report.title?.replace(/[^\w\s]/gi, '').replace(/\s+/g, '_') || 'Untitled'}.pdf`);
+    setIsGeneratingPdf(false);
+    toast({
+      title: "✅ PDF Report Downloaded!",
+      description: "Your report has been generated successfully.",
+      variant: 'default',
+      duration: 5000,
+    });
   }
 
   return (
@@ -348,11 +390,12 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
             </CardDescription>
           </div>
            <div className="flex-shrink-0 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 mt-3 sm:mt-0 self-stretch sm:self-center w-full sm:w-auto">
-             <Button variant="outline" size="sm" onClick={handleDownloadReportJson} className="bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-md sm:rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm group w-full sm:w-auto">
+             <Button variant="outline" size="sm" onClick={handleDownloadReportJson} disabled={isGeneratingPdf} className="bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-md sm:rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm group w-full sm:w-auto">
                 <FileJson size={16} className="mr-1.5 sm:mr-2 group-hover:animate-pulse" /> Download JSON
              </Button>
-             <Button variant="outline" size="sm" onClick={handleDownloadReportPdf} className="bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-md sm:rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm group w-full sm:w-auto">
-                <FileType size={16} className="mr-1.5 sm:mr-2 group-hover:animate-pulse" /> Download PDF
+             <Button variant="outline" size="sm" onClick={handleDownloadReportPdf} disabled={isGeneratingPdf} className="bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-md sm:rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm group w-full sm:w-auto">
+                {isGeneratingPdf ? <Loader2 size={16} className="mr-1.5 sm:mr-2 animate-spin"/> : <FileType size={16} className="mr-1.5 sm:mr-2 group-hover:animate-pulse" />} 
+                {isGeneratingPdf ? "Generating..." : "Download PDF"}
              </Button>
            </div>
         </div>
@@ -432,7 +475,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
                           {result.chartSuggestion.type !== 'bar' && result.chartSuggestion.type !== 'line' && result.chartSuggestion.type !== 'pie' && result.chartSuggestion.type !== 'scatter' && <ImageIconLucide className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-2.5 text-muted-foreground/80" />}
                           Suggested Visualization: {result.chartSuggestion.title || result.chartSuggestion.type.charAt(0).toUpperCase() + result.chartSuggestion.type.slice(1) + " Chart"}
                         </h5>
-                        <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3 italic">Description: {result.chartSuggestion.dataDescription}</p>
+                         {result.chartSuggestion.dataDescription && <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3 italic">Description: {result.chartSuggestion.dataDescription}</p>}
                         {(result.chartSuggestion.xAxisLabel || result.chartSuggestion.yAxisLabel) && (
                            <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3">
                             {result.chartSuggestion.xAxisLabel && `X-axis: ${result.chartSuggestion.xAxisLabel}. `}
@@ -441,8 +484,12 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
                         )}
                         <PlaceholderChart
                           chartType={result.chartSuggestion.type}
-                          title={result.chartSuggestion.title || "Sample Chart"}
+                          title={result.chartSuggestion.title}
                           description={result.chartSuggestion.dataDescription}
+                          chartData={result.chartSuggestion.data}
+                          seriesDataKeysConfig={result.chartSuggestion.seriesDataKeys}
+                          categoryDataKeyConfig={result.chartSuggestion.categoryDataKey}
+                          pdfChartId={`pdf-chart-results-${index}`} // Assign ID for PDF capture
                         />
                       </div>
                     )}
@@ -522,4 +569,3 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
 });
 ResearchReportDisplay.displayName = 'ResearchReportDisplay';
 export default ResearchReportDisplay;
-

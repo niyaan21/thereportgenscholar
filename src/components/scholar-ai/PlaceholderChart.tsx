@@ -1,3 +1,4 @@
+
 // src/components/scholar-ai/PlaceholderChart.tsx
 'use client';
 
@@ -33,14 +34,14 @@ import { cn } from '@/lib/utils';
 
 interface PlaceholderChartProps {
   chartType: 'bar' | 'line' | 'pie' | 'scatter' | 'none';
-  title?: string; // Made title optional
-  description?: string; // Made description optional
+  title?: string;
+  description?: string;
   chartData?: Array<Record<string, any>>;
   seriesDataKeysConfig?: Array<{ key: string, label: string }>;
   categoryDataKeyConfig?: string;
+  pdfChartId?: string; // New prop for PDF capture
 }
 
-// Default title and description if not provided by AI
 const DEFAULT_CHART_TITLE = "Illustrative Data Visualization";
 const DEFAULT_CHART_DESCRIPTION = "This chart visualizes AI-generated sample data related to the report section.";
 
@@ -51,6 +52,7 @@ export default function PlaceholderChart({
   chartData,
   seriesDataKeysConfig,
   categoryDataKeyConfig,
+  pdfChartId, // Destructure new prop
 }: PlaceholderChartProps) {
 
   const displayTitle = title || DEFAULT_CHART_TITLE;
@@ -58,7 +60,7 @@ export default function PlaceholderChart({
 
   if (chartType === 'none') {
     return (
-      <Card className="border-dashed border-border/40 bg-secondary/20 mt-3 shadow-sm flex items-center justify-center h-[260px] rounded-xl">
+      <Card id={pdfChartId} className="border-dashed border-border/40 bg-secondary/20 mt-3 shadow-sm flex items-center justify-center h-[260px] rounded-xl">
         <CardContent className="p-4 text-center">
           <ImageIconLucide className="h-10 w-10 text-muted-foreground mx-auto mb-2.5" />
           <p className="text-sm font-medium text-muted-foreground">No Visual Chart Suggested</p>
@@ -68,7 +70,6 @@ export default function PlaceholderChart({
     );
   }
 
-  // Validate required data for rendering a chart
   const hasValidChartData = chartData && chartData.length > 0;
   const hasValidSeriesKeys = seriesDataKeysConfig && seriesDataKeysConfig.length > 0;
   const hasValidCategoryKey = categoryDataKeyConfig && categoryDataKeyConfig.trim() !== '';
@@ -82,7 +83,7 @@ export default function PlaceholderChart({
 
   if (dataError) {
     return (
-      <Card className="border-dashed border-destructive/40 bg-destructive/10 mt-3 shadow-sm flex flex-col items-center justify-center h-[260px] rounded-xl">
+      <Card id={pdfChartId} className="border-dashed border-destructive/40 bg-destructive/10 mt-3 shadow-sm flex flex-col items-center justify-center h-[260px] rounded-xl">
         <CardHeader className="pt-4 pb-2 px-4 text-center">
             <div className="mx-auto bg-destructive/20 p-2 rounded-full w-fit">
                 <AlertCircle className="h-7 w-7 text-destructive" />
@@ -97,27 +98,24 @@ export default function PlaceholderChart({
     );
   }
 
-  // Dynamically generate chartConfig for ShadCN ChartContainer
   const dynamicChartConfig: ChartConfig = {};
   seriesDataKeysConfig!.forEach((series, index) => {
     dynamicChartConfig[series.key] = {
       label: series.label,
-      color: `hsl(var(--chart-${(index % 5) + 1}))`, // Cycle through 5 theme chart colors
+      color: `hsl(var(--chart-${(index % 5) + 1}))`,
     };
   });
-   // For scatter, if categoryDataKeyConfig is 'x', use seriesDataKeysConfig[0] for 'y' for config
   if (chartType === 'scatter' && categoryDataKeyConfig && seriesDataKeysConfig && seriesDataKeysConfig.length > 0) {
-    if (!dynamicChartConfig[categoryDataKeyConfig]) { // Add x-axis if not already a series
+    if (!dynamicChartConfig[categoryDataKeyConfig]) {
         dynamicChartConfig[categoryDataKeyConfig] = { label: categoryDataKeyConfig, color: `hsl(var(--chart-1))`};
     }
-    if (!dynamicChartConfig[seriesDataKeysConfig[0].key]) { // Add y-axis if not already a series (it should be)
+    if (!dynamicChartConfig[seriesDataKeysConfig[0].key]) {
         dynamicChartConfig[seriesDataKeysConfig[0].key] = { label: seriesDataKeysConfig[0].label, color: `hsl(var(--chart-2))`};
     }
-     if (seriesDataKeysConfig.length > 1 && !dynamicChartConfig[seriesDataKeysConfig[1].key]) { // Add z-axis if present
+     if (seriesDataKeysConfig.length > 1 && !dynamicChartConfig[seriesDataKeysConfig[1].key]) {
         dynamicChartConfig[seriesDataKeysConfig[1].key] = { label: seriesDataKeysConfig[1].label, color: `hsl(var(--chart-3))`};
     }
   }
-
 
   let ChartComponent;
 
@@ -131,7 +129,7 @@ export default function PlaceholderChart({
             tickLine={false}
             tickMargin={10}
             axisLine={false}
-            tickFormatter={(value) => typeof value === 'string' ? value.slice(0, 10) : value} // Shorten long labels
+            tickFormatter={(value) => typeof value === 'string' ? value.slice(0, 10) : value}
             className="text-xs fill-muted-foreground"
           />
           <YAxis tickLine={false} axisLine={false} className="text-xs fill-muted-foreground" />
@@ -170,8 +168,8 @@ export default function PlaceholderChart({
           <ChartTooltip content={<ChartTooltipContent nameKey={seriesDataKeysConfig![0].label} hideLabel />} />
           <Pie
             data={chartData}
-            dataKey={seriesDataKeysConfig![0].key} // First series key is the value
-            nameKey={categoryDataKeyConfig}         // Category key is the name for segments
+            dataKey={seriesDataKeysConfig![0].key}
+            nameKey={categoryDataKeyConfig}
             cx="50%"
             cy="50%"
             innerRadius={55}
@@ -198,7 +196,6 @@ export default function PlaceholderChart({
       );
       break;
     case 'scatter':
-      // Expects categoryDataKeyConfig for X-axis, seriesDataKeysConfig[0].key for Y-axis, seriesDataKeysConfig[1].key for Z-axis (optional)
       const xKey = categoryDataKeyConfig!;
       const yKey = seriesDataKeysConfig![0].key;
       const zKey = seriesDataKeysConfig!.length > 1 ? seriesDataKeysConfig![1].key : undefined;
@@ -232,9 +229,8 @@ export default function PlaceholderChart({
     default: iconForTitle = <TrendingUp className="h-4 w-4 text-inherit" />;
   }
 
-
   return (
-    <Card className={cn("border-dashed border-accent/50 bg-accent/10 mt-3 shadow-md hover:shadow-accent/20 transition-shadow duration-300 rounded-xl", {"animate-pulse": !ChartComponent})}>
+    <Card id={pdfChartId} className={cn("border-dashed border-accent/50 bg-accent/10 mt-3 shadow-md hover:shadow-accent/20 transition-shadow duration-300 rounded-xl", {"animate-pulse": !ChartComponent})}>
       <CardHeader className="p-4 pb-2">
         <CardTitle className="text-base font-semibold text-accent-foreground flex items-center gap-2">
           {iconForTitle}
@@ -242,7 +238,7 @@ export default function PlaceholderChart({
         </CardTitle>
         <CardDescription className="text-xs text-accent-foreground/80 leading-snug">{displayDescription}</CardDescription>
       </CardHeader>
-      <CardContent className="p-2 pt-0 h-[270px] min-h-[270px]"> {/* Ensure min height for container */}
+      <CardContent className="p-2 pt-0 h-[270px] min-h-[270px]">
         <ChartContainer config={dynamicChartConfig} className="w-full h-full">
           {ChartComponent}
         </ChartContainer>
