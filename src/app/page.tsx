@@ -7,9 +7,10 @@ import { useActionState } from 'react';
 import NextLink from 'next/link';
 
 import HeroSection from '@/components/landing/HeroSection';
-import HowItWorksSection from '@/components/landing/HowItWorksSection';
-import KeyFeaturesShowcase from '@/components/landing/KeyFeaturesShowcase';
-import FinalCTASection from '@/components/landing/FinalCTASection';
+// Removed HowItWorksSection, KeyFeaturesShowcase, FinalCTASection imports
+// import HowItWorksSection from '@/components/landing/HowItWorksSection';
+// import KeyFeaturesShowcase from '@/components/landing/KeyFeaturesShowcase';
+// import FinalCTASection from '@/components/landing/FinalCTASection';
 
 import QueryForm from '@/components/scholar-ai/QueryForm';
 import FormulatedQueriesDisplay from '@/components/scholar-ai/FormulatedQueriesDisplay';
@@ -338,9 +339,7 @@ export default function ScholarAIPage() {
               isAuthenticated={!!currentUser}
               authLoading={!authChecked}
             />
-            <HowItWorksSection />
-            <KeyFeaturesShowcase />
-            <FinalCTASection />
+            {/* Removed HowItWorksSection, KeyFeaturesShowcase, FinalCTASection from here */}
           </div>
         );
         break;
