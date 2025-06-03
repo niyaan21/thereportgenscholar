@@ -3,7 +3,7 @@
 'use client';
 
 import React, { useState, useEffect, useTransition, useCallback } from 'react';
-import { useActionState } from 'react'; 
+import { useActionState } from 'react';
 import NextLink from 'next/link';
 
 import HeroSection from '@/components/landing/HeroSection';
@@ -40,9 +40,9 @@ import { addResearchActivity } from '@/lib/historyService'; // Import history se
 import {
   Dialog,
   DialogContent,
-  DialogHeader, 
-  DialogTitle, 
-  DialogDescription, 
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog"
 import NextImage from 'next/image';
@@ -85,25 +85,25 @@ const initialReportActionState: GenerateReportActionState = {
 
 export default function ScholarAIPage() {
   const [appState, setAppState] = useState<AppState>('initial');
-  const [researchQuestion, setResearchQuestion] = useState<string>(''); 
-  const [queryFormInputValue, setQueryFormInputValue] = useState<string>(''); 
-  
+  const [researchQuestion, setResearchQuestion] = useState<string>('');
+  const [queryFormInputValue, setQueryFormInputValue] = useState<string>('');
+
   const [formulatedQueries, setFormulatedQueries] = useState<string[]>([]);
   const [researchSummary, setResearchSummary] = useState<string>('');
   const [summarizedPaperTitles, setSummarizedPaperTitles] = useState<string[]>([]);
-  
+
   const [_isTransitionPending, startTransition] = useTransition();
 
   const [formulateQueryState, formulateQueryFormAction, isFormulatingQueries] = useActionState(handleFormulateQueryAction, initialFormulateQueryActionState);
   const [synthesizeResearchState, synthesizeResearchFormAction, isSynthesizingResearch] = useActionState(handleSynthesizeResearchAction, initialSynthesizeResearchActionState);
   const [imageActionState, imageFormAction, isImageGenerating] = useActionState(handleGenerateImageAction, initialImageActionState);
   const [reportActionState, reportFormAction, isReportGenerating] = useActionState(handleGenerateReportAction, initialReportActionState);
-  
+
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
   const [isImagePreviewDialogOpen, setIsImagePreviewDialogOpen] = useState(false);
-  
+
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [authChecked, setAuthChecked] = useState(false); 
+  const [authChecked, setAuthChecked] = useState(false);
 
   const { toast } = useToast();
 
@@ -117,7 +117,7 @@ export default function ScholarAIPage() {
 
   const handleQueriesFormulatedCallback = useCallback((queries: string[], question: string) => {
     startTransition(() => {
-      setResearchQuestion(question); 
+      setResearchQuestion(question);
       setQueryFormInputValue(question);
       setFormulatedQueries(queries);
       setAppState('queries_formulated');
@@ -136,7 +136,7 @@ export default function ScholarAIPage() {
     });
   }, []);
 
-  
+
   useEffect(() => {
     if (!isFormulatingQueries && formulateQueryState.message) {
       if (formulateQueryState.success && formulateQueryState.formulatedQueries && formulateQueryState.originalQuestion) {
@@ -169,22 +169,22 @@ export default function ScholarAIPage() {
 
 
   useEffect(() => {
-    if (imageActionState.message && !isImageGenerating) { 
+    if (imageActionState.message && !isImageGenerating) {
       if (imageActionState.success && imageActionState.imageDataUri) {
         setGeneratedImageUrl(imageActionState.imageDataUri);
-        toast({ 
-          title: "🖼️ Visual Concept Generated!", 
-          description: imageActionState.message, 
-          variant: 'default', 
+        toast({
+          title: "🖼️ Visual Concept Generated!",
+          description: imageActionState.message,
+          variant: 'default',
           duration: 5000,
           action: (
             <ToastAction altText="View Image" onClick={(e) => {
-              e.preventDefault(); 
+              e.preventDefault();
               setIsImagePreviewDialogOpen(true);
             }}>View</ToastAction>
           )
         });
-      } else if (!imageActionState.success) { 
+      } else if (!imageActionState.success) {
         let fullErrorMessage = imageActionState.message;
         if (imageActionState.errors?.topic) {
             fullErrorMessage += ` Details: ${imageActionState.errors.topic.join(' ')}`;
@@ -195,9 +195,9 @@ export default function ScholarAIPage() {
   }, [imageActionState, isImageGenerating, toast, setIsImagePreviewDialogOpen]);
 
   useEffect(() => {
-    if (reportActionState.message && !isReportGenerating) { 
+    if (reportActionState.message && !isReportGenerating) {
       if (reportActionState.success && reportActionState.researchReport) {
-        setAppState('report_generated'); 
+        setAppState('report_generated');
         toast({ title: "📜 Research Report Generated!", description: reportActionState.message, variant: 'default', duration: 7000,
           action: <ToastAction altText="View Report" onClick={() => document.getElementById('research-report-section')?.scrollIntoView({ behavior: 'smooth' })}>Jump to Report</ToastAction>
         });
@@ -209,7 +209,7 @@ export default function ScholarAIPage() {
             executiveSummarySnippet: reportActionState.researchReport.executiveSummary?.substring(0, 150) + (reportActionState.researchReport.executiveSummary && reportActionState.researchReport.executiveSummary.length > 150 ? '...' : '')
           });
         }
-      } else if (!reportActionState.success) { 
+      } else if (!reportActionState.success) {
         let fullErrorMessage = reportActionState.message;
         if (reportActionState.errors) {
           const errorDetails = Object.values(reportActionState.errors).flat().join(' ');
@@ -231,7 +231,6 @@ export default function ScholarAIPage() {
       setResearchSummary('');
       setSummarizedPaperTitles([]);
       setGeneratedImageUrl(null);
-      // Reset action states if needed
     });
   }, []);
 
@@ -241,22 +240,22 @@ export default function ScholarAIPage() {
         setAppState('summary_generated');
       } else if (appState === 'summary_generated') {
         setAppState('queries_formulated');
-        setResearchSummary(''); 
+        setResearchSummary('');
         setSummarizedPaperTitles([]);
       } else if (appState === 'queries_formulated') {
         setAppState('initial');
-        setQueryFormInputValue(researchQuestion); 
+        setQueryFormInputValue(researchQuestion);
       }
     });
   }, [appState, researchQuestion]);
-  
+
   const handleGenerateImageForTopic = useCallback(() => {
      if (!currentUser) {
       toast({ title: "Authentication Required", description: "Please log in or sign up to generate images.", variant: "destructive", duration: 5000 });
       return;
     }
-    let topicForImage = researchQuestion.trim(); 
-    
+    let topicForImage = researchQuestion.trim();
+
     if (!topicForImage || topicForImage.length < 5) {
       toast({
         title: "🚫 Cannot Generate Image",
@@ -267,13 +266,13 @@ export default function ScholarAIPage() {
       return;
     }
 
-    if (topicForImage.length > 195) { 
-      topicForImage = topicForImage.substring(0, 195) + "..."; 
+    if (topicForImage.length > 195) {
+      topicForImage = topicForImage.substring(0, 195) + "...";
     }
 
     startTransition(() => {
       const formData = new FormData();
-      formData.append('topic', topicForImage); 
+      formData.append('topic', topicForImage);
       imageFormAction(formData);
     });
   }, [researchQuestion, imageFormAction, toast, currentUser]);
@@ -310,7 +309,7 @@ export default function ScholarAIPage() {
 
   const isLoading = isFormulatingQueries || isSynthesizingResearch || isImageGenerating || isReportGenerating;
   const isFormDisabled = (!currentUser && authChecked) || isLoading;
-  
+
   const ActionButton: React.FC<React.ComponentProps<typeof Button> & { icon?: React.ElementType, isProcessing?: boolean, label: string, pending?: boolean }> = ({ icon: Icon, isProcessing, pending, label, children, ...props }) => (
     <Button {...props} disabled={isLoading || isProcessing || pending || props.disabled || (!currentUser && authChecked)} className={cn("shadow-lg hover:shadow-xl transition-all duration-300 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex items-center justify-center group w-full sm:w-auto text-base py-3", props.className)}>
       {(isProcessing || pending) ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : (Icon && <Icon className="mr-2.5 h-5 w-5" />)}
@@ -326,9 +325,9 @@ export default function ScholarAIPage() {
       case 'initial':
         content = (
           <div key="initial" className={cn("w-full", animationClasses)}>
-            <HeroSection 
+            <HeroSection
               queryFormSlot={
-                <QueryForm 
+                <QueryForm
                   formAction={formulateQueryFormAction}
                   isBusy={isFormulatingQueries || (!currentUser && authChecked)}
                   isDisabled={!currentUser && authChecked}
@@ -390,9 +389,9 @@ export default function ScholarAIPage() {
           <div key="summary" className={cn("w-full space-y-6 md:space-y-8", animationClasses)}>
             <ResearchSummaryDisplay
               summary={researchSummary}
-              originalQuestion={researchQuestion} 
+              originalQuestion={researchQuestion}
               summarizedPaperTitles={summarizedPaperTitles}
-              onGenerateImage={handleGenerateImageForTopic} 
+              onGenerateImage={handleGenerateImageForTopic}
               generatedImageUrl={generatedImageUrl}
               isGeneratingImage={isImageGenerating}
               onOpenImagePreview={openImagePreviewDialog}
@@ -426,9 +425,9 @@ export default function ScholarAIPage() {
         content = (
           <div key="report" className={cn("w-full space-y-6 md:space-y-8", animationClasses)} id="research-report-section">
             {reportActionState.researchReport && (
-              <ResearchReportDisplay 
-                report={reportActionState.researchReport} 
-                originalQuestion={researchQuestion} 
+              <ResearchReportDisplay
+                report={reportActionState.researchReport}
+                originalQuestion={researchQuestion}
                 generatedImageUrl={generatedImageUrl}
                 onOpenImagePreview={openImagePreviewDialog}
               />
@@ -470,17 +469,17 @@ export default function ScholarAIPage() {
         <button className="hidden">Hidden Dialog Trigger for Programmatic Control</button>
       </DialogTrigger>
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/10 to-background flex flex-col overflow-x-hidden antialiased selection:bg-accent/20 selection:text-accent-foreground">
-      
+
       <main className={cn(
         "flex-grow",
-        appState === 'initial' ? 
-          "w-full md:py-0" : // For initial state (landing page), main takes full width and no vertical padding from main itself
-          "container mx-auto px-4 sm:px-6 py-8 sm:py-10 md:py-12" // For workflow states, use container with padding
+        appState === 'initial' ?
+          "w-full" : 
+          "container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12"
       )}>
         <div className={cn(
-          appState === 'initial' ? 
-            "w-full" : // Inner div also full width if landing sections handle their own container
-            "max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto" // Constrained width for workflow steps
+          appState === 'initial' ?
+            "w-full" : 
+            "max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto"
         )}>
             {renderCurrentStep()}
         </div>
@@ -492,11 +491,11 @@ export default function ScholarAIPage() {
             <DialogDescription className="sr-only">Full-size view of the generated image.</DialogDescription>
         </DialogHeader>
         {generatedImageUrl && (
-          <NextImage 
-            src={generatedImageUrl} 
-            alt="Full-size conceptual visualization" 
-            width={1200} 
-            height={1200} 
+          <NextImage
+            src={generatedImageUrl}
+            alt="Full-size conceptual visualization"
+            width={1200}
+            height={1200}
             className="rounded-lg sm:rounded-xl object-contain w-full h-auto max-h-[85svh] shadow-2xl bg-black/50 backdrop-blur-md"
             data-ai-hint="research concept fullsize"
           />
@@ -505,4 +504,3 @@ export default function ScholarAIPage() {
     </Dialog>
   );
 }
-

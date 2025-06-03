@@ -56,15 +56,15 @@ const features = [
 const FeatureCard: React.FC<{ icon: React.ElementType; title: string; description: string; color: string; bgColor: string; index: number }> = ({ icon: Icon, title, description, color, bgColor, index }) => {
   const cardVariants = {
     hidden: { opacity: 0, y: 20, scale: 0.95 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
+    visible: {
+      opacity: 1,
+      y: 0,
       scale: 1,
-      transition: { 
-        delay: index * 0.1, 
-        duration: 0.5, 
-        ease: "easeOut" 
-      } 
+      transition: {
+        delay: index * 0.1,
+        duration: 0.5,
+        ease: "easeOut"
+      }
     },
   };
 
@@ -91,19 +91,19 @@ const FeatureCard: React.FC<{ icon: React.ElementType; title: string; descriptio
 export default function KeyFeaturesShowcase() {
   const sectionVariants = {
     hidden: { opacity: 0 },
-    visible: { 
-      opacity: 1, 
-      transition: { 
+    visible: {
+      opacity: 1,
+      transition: {
         staggerChildren: 0.1,
-        delayChildren: 0.2, 
-        duration: 0.5 
-      } 
+        delayChildren: 0.2,
+        duration: 0.5
+      }
     },
   };
 
   return (
     <section className="w-full py-16 md:py-24 lg:py-32 bg-gradient-to-b from-background via-secondary/10 to-background">
-      <div className="container px-4 md:px-6">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -117,13 +117,13 @@ export default function KeyFeaturesShowcase() {
           >
             <Sparkles className="inline-block h-4 w-4 mr-2 -mt-0.5" /> Core Capabilities
           </motion.div>
-          <motion.h2 
+          <motion.h2
             variants={{ hidden: { opacity: 0, y: -15 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, delay: 0.1, ease: "easeOut"}}}}
             className="text-3xl font-extrabold tracking-tight text-primary sm:text-4xl md:text-5xl"
           >
             Why Choose ScholarAI?
           </motion.h2>
-          <motion.p 
+          <motion.p
             variants={{ hidden: { opacity: 0, y: -10 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, delay: 0.2, ease: "easeOut"}}}}
             className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground sm:text-xl"
           >

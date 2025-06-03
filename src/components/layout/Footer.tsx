@@ -14,8 +14,8 @@ export default function Footer() {
   }, []);
 
   return (
-    <footer className="py-8 sm:py-10 px-4 md:px-8 border-t-2 border-border/50 bg-background mt-auto">
-      <div className="container mx-auto text-center text-xs sm:text-sm text-muted-foreground">
+    <footer className="py-8 sm:py-10 border-t-2 border-border/50 bg-background mt-auto">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs sm:text-sm text-muted-foreground">
         <div className="flex flex-wrap justify-center items-center gap-x-4 gap-y-2 mb-3">
           <NextLink href="/about" className="hover:text-accent hover:underline">About</NextLink>
           <NextLink href="/features" className="hover:text-accent hover:underline">Features</NextLink>

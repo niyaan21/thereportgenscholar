@@ -38,20 +38,20 @@ const steps = [
 export default function HowItWorksSection() {
   const FADE_IN_ANIMATION_VARIANTS = {
     hidden: { opacity: 0, y: 20 },
-    visible: (i: number) => ({ 
-      opacity: 1, 
-      y: 0, 
-      transition: { 
-        delay: i * 0.15, 
-        duration: 0.6, 
-        ease: "easeOut" 
-      } 
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: i * 0.15,
+        duration: 0.6,
+        ease: "easeOut"
+      }
     }),
   };
 
   return (
     <section className="w-full py-16 md:py-24 lg:py-32 bg-background">
-      <div className="container px-4 md:px-6">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -61,14 +61,14 @@ export default function HowItWorksSection() {
           }}
           className="text-center mb-12 md:mb-16"
         >
-          <motion.h2 
-            variants={FADE_IN_ANIMATION_VARIANTS} 
+          <motion.h2
+            variants={FADE_IN_ANIMATION_VARIANTS}
             className="text-3xl font-extrabold tracking-tight text-primary sm:text-4xl md:text-5xl"
           >
             How ScholarAI Works
           </motion.h2>
-          <motion.p 
-            variants={FADE_IN_ANIMATION_VARIANTS} 
+          <motion.p
+            variants={FADE_IN_ANIMATION_VARIANTS}
             className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground sm:text-xl"
           >
             Streamline your research process in four simple, AI-powered steps.
@@ -79,14 +79,14 @@ export default function HowItWorksSection() {
           {steps.slice(0, -1).map((_, index) => (
             <motion.div
               key={`line-${index}`}
-              initial={{ opacity: 0 }} // Start with opacity 0 for fade-in
+              initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
-              transition={{ delay: (index * 0.15) + 0.5, duration: 0.6, ease: "easeInOut" }} // Slightly delay line animation
+              transition={{ delay: (index * 0.15) + 0.5, duration: 0.6, ease: "easeInOut" }}
               viewport={{ once: true }}
-              className="hidden lg:block absolute top-1/2 -translate-y-1/2" // Vertical centering handled here
+              className="hidden lg:block absolute top-1/2 -translate-y-1/2"
               style={{
-                 left: `${(index * 25) + 12.5}%`, // Start of the line (center of the (index)th card)
-                 width: '25%', // Length of the line (to reach the center of the (index+1)th card)
+                 left: `${(index * 25) + 12.5}%`,
+                 width: '25%',
                  zIndex: 0,
               }}
             >
@@ -104,7 +104,7 @@ export default function HowItWorksSection() {
               whileInView="visible"
               viewport={{ once: true, amount: 0.3 }}
               variants={FADE_IN_ANIMATION_VARIANTS}
-              className="z-10" // Ensure cards are above the lines
+              className="z-10"
             >
               <Card className="h-full text-center shadow-lg hover:shadow-xl transition-shadow duration-300 border-primary/15 hover:border-accent/60 bg-card flex flex-col">
                 <CardHeader className="items-center">
@@ -126,4 +126,3 @@ export default function HowItWorksSection() {
     </section>
   );
 }
-

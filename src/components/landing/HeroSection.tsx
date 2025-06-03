@@ -23,7 +23,7 @@ export default function HeroSection({ queryFormSlot, isAuthenticated, authLoadin
 
   return (
     <section className="w-full py-16 md:py-24 lg:py-32 text-center relative overflow-hidden">
-      <div 
+      <div
         className="absolute inset-0 -z-10 opacity-15 dark:opacity-25"
         style={{
           backgroundImage:
@@ -33,7 +33,7 @@ export default function HeroSection({ queryFormSlot, isAuthenticated, authLoadin
           filter: "blur(60px)",
         }}
       />
-      <div className="container px-4 md:px-6 relative z-10">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.div
           initial="hidden"
           animate="visible"
@@ -60,7 +60,7 @@ export default function HeroSection({ queryFormSlot, isAuthenticated, authLoadin
         >
           {queryFormSlot}
         </motion.div>
-        
+
         <motion.div
             initial="hidden"
             animate="visible"
@@ -68,21 +68,18 @@ export default function HeroSection({ queryFormSlot, isAuthenticated, authLoadin
             transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
             className="mt-8 flex flex-col sm:flex-row justify-center items-center gap-4"
         >
-            <Button 
-                asChild 
-                size="lg" 
+            <Button
+                asChild
+                size="lg"
                 className={cn(
                     "w-full sm:w-auto bg-gradient-to-r from-primary to-accent text-primary-foreground hover:shadow-2xl px-8 py-3 text-base sm:text-lg shadow-xl",
                     "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 )}
                 onClick={() => {
-                  // Scroll to query form or trigger focus, assuming queryFormSlot contains the form.
-                  // This might need more specific targeting if the form is deeply nested.
-                  const queryFormElement = document.getElementById('researchQuestion'); // Assuming your Textarea has this ID
+                  const queryFormElement = document.getElementById('researchQuestion');
                   if (queryFormElement) {
                     queryFormElement.focus({ preventScroll: true });
-                    // Smooth scroll to the form area
-                    const formCard = queryFormElement.closest('form')?.parentElement?.parentElement; // Adjust based on actual DOM structure
+                    const formCard = queryFormElement.closest('form')?.parentElement?.parentElement;
                     formCard?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                   }
                 }}
@@ -93,10 +90,10 @@ export default function HeroSection({ queryFormSlot, isAuthenticated, authLoadin
                     {!authLoading && <ArrowRight className="ml-2 h-5 w-5" />}
                 </span>
             </Button>
-            <Button 
-                asChild 
-                variant="outline" 
-                size="lg" 
+            <Button
+                asChild
+                variant="outline"
+                size="lg"
                 className={cn(
                     "w-full sm:w-auto border-primary/40 hover:border-primary/70 hover:bg-primary/5 hover:text-primary px-8 py-3 text-base sm:text-lg shadow-lg",
                     "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
@@ -109,7 +106,7 @@ export default function HeroSection({ queryFormSlot, isAuthenticated, authLoadin
         </motion.div>
 
         {!isAuthenticated && !authLoading && (
-             <motion.p 
+             <motion.p
                 initial="hidden"
                 animate="visible"
                 variants={FADE_UP_ANIMATION_VARIANTS}
