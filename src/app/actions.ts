@@ -17,8 +17,11 @@ const formulateQuerySchema = z.object({
 export interface FormulateQueryActionState {
   success: boolean;
   message: string;
-  formulatedQueries: string[] | null;
   originalQuestion?: string; 
+  formulatedQueries?: string[] | null;
+  alternativePhrasings?: string[] | null;
+  keyConcepts?: string[] | null;
+  potentialSubTopics?: string[] | null;
   errors: { researchQuestion?: string[] } | null;
 }
 
@@ -34,7 +37,6 @@ export async function handleFormulateQueryAction(
       success: false,
       message: "Invalid input.",
       errors: validation.error.flatten().fieldErrors,
-      formulatedQueries: null,
       originalQuestion: researchQuestion, 
     };
   }
@@ -44,17 +46,20 @@ export async function handleFormulateQueryAction(
     const result = await formulateResearchQuery(input);
     return {
       success: true,
-      message: "Queries formulated successfully.",
-      formulatedQueries: result.searchQueries,
+      message: "Queries and research guidance formulated successfully.",
       originalQuestion: validation.data.researchQuestion, 
+      formulatedQueries: result.searchQueries,
+      alternativePhrasings: result.alternativePhrasings,
+      keyConcepts: result.keyConcepts,
+      potentialSubTopics: result.potentialSubTopics,
       errors: null,
     };
   } catch (error) {
     console.error("Error formulating queries:", error);
+    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
     return {
       success: false,
-      message: "Failed to formulate queries. An unexpected error occurred.",
-      formulatedQueries: null,
+      message: `Failed to formulate queries: ${errorMessage}`,
       originalQuestion: researchQuestion, 
       errors: null,
     };

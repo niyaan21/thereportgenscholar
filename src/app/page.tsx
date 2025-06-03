@@ -13,20 +13,20 @@ const HowItWorksSection = dynamic(() => import('@/components/landing/HowItWorksS
 const KeyFeaturesShowcase = dynamic(() => import('@/components/landing/KeyFeaturesShowcase'));
 const FinalCTASection = dynamic(() => import('@/components/landing/FinalCTASection'));
 
-// Removed dynamic import for Simple3DElement
-
 import QueryForm from '@/components/scholar-ai/QueryForm';
 import FormulatedQueriesDisplay from '@/components/scholar-ai/FormulatedQueriesDisplay';
 import ResearchSummaryDisplay from '@/components/scholar-ai/ResearchSummaryDisplay';
 import ResearchReportDisplay from '@/components/scholar-ai/ResearchReportDisplay';
 
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge'; // Import Badge
 import { ToastAction } from "@/components/ui/toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
-  ArrowLeft, RotateCcw, FileTextIcon, Settings, Moon, Sun, Palette, Image as ImageIconLucide, Loader2, BookOpen, Brain, Search, Filter, BarChartBig, Telescope, Layers, Sparkles, Bot, CornerDownLeft, Edit, CheckSquare, Zap, Eye, Lightbulb, FileArchive, Atom, ClipboardCopy, Share2, Download, Sigma, BarChartHorizontal, TrendingUpIcon, ScaleIcon, FlaskConical, LightbulbIcon as LightbulbLucideIcon, InfoIcon, AlertCircleIcon, CheckCircle2Icon, ExternalLink, MaximizeIcon, ChevronRight, Rocket, Check, Lock, FileText, Shield, MessageSquare
-} from 'lucide-react';
+  ArrowLeft, RotateCcw, FileTextIcon, Settings, Moon, Sun, Palette, Image as ImageIconLucide, Loader2, BookOpen, Brain, Search, Filter, BarChartBig, Telescope, Layers, Sparkles, Bot, CornerDownLeft, Edit, CheckSquare, Zap, Eye, Lightbulb, FileArchive, Atom, ClipboardCopy, Share2, Download, Sigma, BarChartHorizontal, TrendingUpIcon, ScaleIcon, FlaskConical, LightbulbIcon as LightbulbLucideIcon, InfoIcon, AlertCircleIcon, CheckCircle2Icon, ExternalLink, MaximizeIcon, ChevronRight, Rocket, Check, Lock, FileText, Shield, MessageSquare, Tag, MessagesSquare, ListTree
+} from 'lucide-react'; // Added Tag, MessagesSquare, ListTree
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"; // Import Accordion
 
 import {
   handleFormulateQueryAction,
@@ -59,8 +59,11 @@ type AppState = 'initial' | 'queries_formulated' | 'summary_generated' | 'report
 const initialFormulateQueryActionState: FormulateQueryActionState = {
   success: false,
   message: '',
-  formulatedQueries: null,
   originalQuestion: '',
+  formulatedQueries: null,
+  alternativePhrasings: null,
+  keyConcepts: null,
+  potentialSubTopics: null,
   errors: null,
 };
 
@@ -93,6 +96,10 @@ export default function ScholarAIPage() {
   const [queryFormInputValue, setQueryFormInputValue] = useState<string>('');
 
   const [formulatedQueries, setFormulatedQueries] = useState<string[]>([]);
+  const [alternativePhrasings, setAlternativePhrasings] = useState<string[]>([]);
+  const [keyConcepts, setKeyConcepts] = useState<string[]>([]);
+  const [potentialSubTopics, setPotentialSubTopics] = useState<string[]>([]);
+  
   const [researchSummary, setResearchSummary] = useState<string>('');
   const [summarizedPaperTitles, setSummarizedPaperTitles] = useState<string[]>([]);
 
@@ -119,11 +126,20 @@ export default function ScholarAIPage() {
     return () => unsubscribe();
   }, []);
 
-  const handleQueriesFormulatedCallback = useCallback((queries: string[], question: string) => {
+  const handleQueriesFormulatedCallback = useCallback((
+    question: string,
+    queries?: string[] | null,
+    altPhrasings?: string[] | null,
+    kConcepts?: string[] | null,
+    subTopics?: string[] | null
+  ) => {
     startTransition(() => {
       setResearchQuestion(question);
       setQueryFormInputValue(question);
-      setFormulatedQueries(queries);
+      setFormulatedQueries(queries || []);
+      setAlternativePhrasings(altPhrasings || []);
+      setKeyConcepts(kConcepts || []);
+      setPotentialSubTopics(subTopics || []);
       setAppState('queries_formulated');
       setGeneratedImageUrl(null);
       if (currentUser) {
@@ -143,9 +159,15 @@ export default function ScholarAIPage() {
 
   useEffect(() => {
     if (!isFormulatingQueries && formulateQueryState.message) {
-      if (formulateQueryState.success && formulateQueryState.formulatedQueries && formulateQueryState.originalQuestion) {
+      if (formulateQueryState.success && formulateQueryState.originalQuestion) {
         toast({ title: "🚀 AI Engine Ignited!", description: formulateQueryState.message, variant: 'default', duration: 5000 });
-        handleQueriesFormulatedCallback(formulateQueryState.formulatedQueries, formulateQueryState.originalQuestion);
+        handleQueriesFormulatedCallback(
+          formulateQueryState.originalQuestion,
+          formulateQueryState.formulatedQueries,
+          formulateQueryState.alternativePhrasings,
+          formulateQueryState.keyConcepts,
+          formulateQueryState.potentialSubTopics
+        );
       } else if (!formulateQueryState.success) {
         let description = formulateQueryState.message;
         if (formulateQueryState.errors?.researchQuestion) {
@@ -193,7 +215,7 @@ export default function ScholarAIPage() {
         if (imageActionState.errors?.topic) {
             fullErrorMessage += ` Details: ${imageActionState.errors.topic.join(' ')}`;
         }
-        toast({ title: "🚫 Image Generation Failed", description: fullErrorMessage, variant: 'destructive', duration: 7000 });
+        toast({ title: "🚫 Image Generation Failed", description: fullErrorMessage, variant: "destructive", duration: 7000 });
       }
     }
   }, [imageActionState, isImageGenerating, toast, setIsImagePreviewDialogOpen]);
@@ -221,7 +243,7 @@ export default function ScholarAIPage() {
             fullErrorMessage += ` Details: ${errorDetails}`;
           }
         }
-        toast({ title: "🚫 Report Generation Failed", description: fullErrorMessage, variant: 'destructive', duration: 9000 });
+        toast({ title: "🚫 Report Generation Failed", description: fullErrorMessage, variant: "destructive", duration: 9000 });
       }
     }
   }, [reportActionState, isReportGenerating, toast, researchQuestion, currentUser]);
@@ -232,6 +254,9 @@ export default function ScholarAIPage() {
       setResearchQuestion('');
       setQueryFormInputValue('');
       setFormulatedQueries([]);
+      setAlternativePhrasings([]);
+      setKeyConcepts([]);
+      setPotentialSubTopics([]);
       setResearchSummary('');
       setSummarizedPaperTitles([]);
       setGeneratedImageUrl(null);
@@ -250,6 +275,9 @@ export default function ScholarAIPage() {
       } else if (appState === 'queries_formulated') {
         setAppState('initial');
         setQueryFormInputValue(researchQuestion);
+        setAlternativePhrasings([]);
+        setKeyConcepts([]);
+        setPotentialSubTopics([]);
       }
     });
   }, [appState, researchQuestion]);
@@ -370,6 +398,9 @@ export default function ScholarAIPage() {
             </Card>
             <FormulatedQueriesDisplay
               queries={formulatedQueries}
+              alternativePhrasings={alternativePhrasings}
+              keyConcepts={keyConcepts}
+              potentialSubTopics={potentialSubTopics}
               formAction={synthesizeResearchFormAction}
               isBusy={isSynthesizingResearch || (!currentUser && authChecked)}
             />
@@ -510,3 +541,4 @@ export default function ScholarAIPage() {
     </Dialog>
   );
 }
+

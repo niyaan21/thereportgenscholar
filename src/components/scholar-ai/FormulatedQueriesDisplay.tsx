@@ -5,13 +5,17 @@
 import React from 'react';
 import { useFormStatus } from 'react-dom';
 import { Button } from '@/components/ui/button';
-// type SynthesizeResearchActionState is already imported in page.tsx which uses this component
-import { Loader2, Layers, ArrowRight, Telescope, FileSearch2, DatabaseZap, Brain, Sparkles, ChevronRightIcon, Activity, Zap, Lock } from 'lucide-react';
+import { Loader2, Layers, ArrowRight, Telescope, FileSearch2, DatabaseZap, Brain, Sparkles, ChevronRightIcon, Activity, Zap, Lock, MessagesSquare, Tag, ListTree } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 export interface FormulatedQueriesDisplayProps {
   queries: string[];
+  alternativePhrasings?: string[] | null;
+  keyConcepts?: string[] | null;
+  potentialSubTopics?: string[] | null;
   formAction: (payload: FormData) => void; 
   isBusy: boolean; 
 }
@@ -39,11 +43,66 @@ function SubmitButtonFormulatedQueries({ isBusy, isProcessingAction }: { isBusy:
   );
 }
 
-function FormulatedQueriesDisplayInner({ queries, isProcessingAction }: { queries: string[], isProcessingAction?: boolean }) {
+function FormulatedQueriesDisplayInner({ 
+    queries, 
+    alternativePhrasings,
+    keyConcepts,
+    potentialSubTopics,
+    isProcessingAction 
+}: { 
+    queries: string[], 
+    alternativePhrasings?: string[] | null,
+    keyConcepts?: string[] | null,
+    potentialSubTopics?: string[] | null,
+    isProcessingAction?: boolean 
+}) {
   const { pending } = useFormStatus();
-  const icons = [FileSearch2, DatabaseZap, Telescope, Brain, Sparkles, Layers, Activity];
+  const queryIcons = [FileSearch2, DatabaseZap, Telescope, Brain, Sparkles, Layers, Activity];
   
   const showOverlay = pending || isProcessingAction;
+
+  const renderListItems = (items: string[] | null | undefined, Icon: React.ElementType, itemClassName?: string) => {
+    if (!items || items.length === 0) return <p className="text-sm text-muted-foreground italic px-1">None suggested for this query.</p>;
+    return (
+      <ul className={cn("space-y-2", showOverlay && "opacity-50")}>
+        {items.map((item, index) => (
+          <li
+            key={index}
+            className={cn(
+              "flex items-start space-x-2.5 p-2.5 bg-secondary/40 dark:bg-secondary/20 rounded-md shadow-sm border border-border/60",
+              itemClassName,
+              (isProcessingAction || pending) && "opacity-60 cursor-not-allowed"
+            )}
+          >
+            <Icon className="h-4 w-4 text-accent flex-shrink-0 mt-0.5" />
+            <span className="flex-grow text-xs text-foreground/85">{item}</span>
+          </li>
+        ))}
+      </ul>
+    );
+  };
+  
+  const renderKeyConcepts = (concepts: string[] | null | undefined) => {
+    if (!concepts || concepts.length === 0) return <p className="text-sm text-muted-foreground italic px-1">None identified for this query.</p>;
+    return (
+        <div className={cn("flex flex-wrap gap-2 pt-1", showOverlay && "opacity-50")}>
+            {concepts.map((concept, index) => (
+                 <Badge 
+                    key={index} 
+                    variant="outline" 
+                    className={cn(
+                        "text-xs font-medium bg-accent/15 border-accent/40 text-accent-foreground hover:bg-accent/25 transition-colors",
+                        (isProcessingAction || pending) && "opacity-60 cursor-not-allowed"
+                    )}
+                >
+                    <Tag className="h-3 w-3 mr-1.5"/>
+                    {concept}
+                </Badge>
+            ))}
+        </div>
+    );
+  };
+
 
   return (
     <>
@@ -52,37 +111,94 @@ function FormulatedQueriesDisplayInner({ queries, isProcessingAction }: { querie
           <Loader2 className="h-10 w-10 text-primary animate-spin" />
         </div>
       )}
-      {queries.length > 0 ? (
-        <ul className={cn("space-y-3 sm:space-y-3.5", showOverlay && "opacity-50")}>
-          {queries.map((query, index) => {
-            const IconComponent = icons[index % icons.length];
-            return (
-              <li
-                key={index}
-                className={cn(
-                  "flex items-center space-x-3 sm:space-x-3.5 p-3 sm:p-4 bg-secondary/40 dark:bg-secondary/20 rounded-lg sm:rounded-xl shadow-md border border-border/70 transition-all duration-250 group",
-                  "hover:border-accent/50 hover:shadow-lg hover:bg-secondary/60 dark:hover:bg-secondary/30 hover:scale-[1.015] transform",
-                  (isProcessingAction || pending) && "opacity-60 cursor-not-allowed"
-                )}
-              >
-                <IconComponent className="h-4 w-4 sm:h-5 sm:w-5 text-accent flex-shrink-0 group-hover:scale-110 transition-transform" />
-                <span className="flex-grow text-sm sm:text-base text-foreground/90">
-                  {query}
-                </span>
-                <ChevronRightIcon className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground/60 ml-auto flex-shrink-0 opacity-70 group-hover:opacity-100 group-hover:text-accent transition-all" />
-              </li>
-            );
-          })}
-        </ul>
-      ) : (
-        <p className="text-center text-muted-foreground py-4 sm:py-6 text-sm sm:text-base">No search vectors were generated for the provided question.</p>
-      )}
+      <Accordion type="multiple" defaultValue={["search-queries"]} className="w-full space-y-3">
+        <AccordionItem value="search-queries" className="bg-card border-none rounded-lg shadow-md overflow-hidden">
+          <AccordionTrigger className="px-4 py-3 text-md font-semibold hover:no-underline text-primary bg-primary/5 hover:bg-primary/10 transition-colors">
+            <div className="flex items-center">
+              <Search className="h-5 w-5 mr-2.5 text-primary/80" /> AI-Forged Search Vectors
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="px-4 pb-4 pt-2">
+            {queries.length > 0 ? (
+              <ul className={cn("space-y-3 sm:space-y-3", showOverlay && "opacity-50")}>
+                {queries.map((query, index) => {
+                  const IconComponent = queryIcons[index % queryIcons.length];
+                  return (
+                    <li
+                      key={index}
+                      className={cn(
+                        "flex items-center space-x-3 sm:space-x-3 p-3 sm:p-3.5 bg-secondary/40 dark:bg-secondary/20 rounded-lg sm:rounded-xl shadow-md border border-border/70 transition-all duration-250 group",
+                        "hover:border-accent/50 hover:shadow-lg hover:bg-secondary/60 dark:hover:bg-secondary/30 hover:scale-[1.015] transform",
+                        (isProcessingAction || pending) && "opacity-60 cursor-not-allowed"
+                      )}
+                    >
+                      <IconComponent className="h-4 w-4 sm:h-5 sm:w-5 text-accent flex-shrink-0 group-hover:scale-110 transition-transform" />
+                      <span className="flex-grow text-sm sm:text-base text-foreground/90">
+                        {query}
+                      </span>
+                      <ChevronRightIcon className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground/60 ml-auto flex-shrink-0 opacity-70 group-hover:opacity-100 group-hover:text-accent transition-all" />
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="text-center text-muted-foreground py-4 sm:py-6 text-sm sm:text-base">No search vectors were generated for the provided question.</p>
+            )}
+          </AccordionContent>
+        </AccordionItem>
+
+        {(alternativePhrasings && alternativePhrasings.length > 0) && (
+           <AccordionItem value="alternative-phrasings" className="bg-card border-none rounded-lg shadow-md overflow-hidden">
+              <AccordionTrigger className="px-4 py-3 text-md font-semibold hover:no-underline text-primary bg-primary/5 hover:bg-primary/10 transition-colors">
+                <div className="flex items-center">
+                  <MessagesSquare className="h-5 w-5 mr-2.5 text-primary/80" /> Alternative Phrasings
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4 pt-2">
+                {renderListItems(alternativePhrasings, ChevronRightIcon)}
+              </AccordionContent>
+            </AccordionItem>
+        )}
+
+        {(keyConcepts && keyConcepts.length > 0) && (
+            <AccordionItem value="key-concepts" className="bg-card border-none rounded-lg shadow-md overflow-hidden">
+              <AccordionTrigger className="px-4 py-3 text-md font-semibold hover:no-underline text-primary bg-primary/5 hover:bg-primary/10 transition-colors">
+                <div className="flex items-center">
+                  <Tag className="h-5 w-5 mr-2.5 text-primary/80" /> Key Concepts
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4 pt-2">
+                {renderKeyConcepts(keyConcepts)}
+              </AccordionContent>
+            </AccordionItem>
+        )}
+        
+        {(potentialSubTopics && potentialSubTopics.length > 0) && (
+            <AccordionItem value="sub-topics" className="bg-card border-none rounded-lg shadow-md overflow-hidden">
+              <AccordionTrigger className="px-4 py-3 text-md font-semibold hover:no-underline text-primary bg-primary/5 hover:bg-primary/10 transition-colors">
+                <div className="flex items-center">
+                  <ListTree className="h-5 w-5 mr-2.5 text-primary/80" /> Potential Sub-Topics
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4 pt-2">
+                {renderListItems(potentialSubTopics, ChevronRightIcon)}
+              </AccordionContent>
+            </AccordionItem>
+        )}
+      </Accordion>
     </>
   );
 }
 
 
-const FormulatedQueriesDisplay = React.memo(function FormulatedQueriesDisplay({ queries, formAction, isBusy }: FormulatedQueriesDisplayProps) {
+const FormulatedQueriesDisplay = React.memo(function FormulatedQueriesDisplay({ 
+    queries, 
+    alternativePhrasings,
+    keyConcepts,
+    potentialSubTopics,
+    formAction, 
+    isBusy 
+}: FormulatedQueriesDisplayProps) {
   const isAuthLocked = isBusy && queries.length > 0; // Determine if busy due to auth lock specifically
 
   return (
@@ -99,10 +215,10 @@ const FormulatedQueriesDisplay = React.memo(function FormulatedQueriesDisplay({ 
             </div>
             <div>
               <CardTitle className="text-lg sm:text-xl md:text-2xl font-extrabold text-primary tracking-tight">
-                AI-Forged Search Vectors
+                Expanded Research Guidance
               </CardTitle>
               <CardDescription className="text-muted-foreground text-sm sm:text-base mt-1 sm:mt-1.5 max-w-lg">
-                {isAuthLocked ? "Log in to synthesize insights from these queries." : "ScholarAI has crafted these targeted queries. Synthesize to distill profound insights."}
+                {isAuthLocked ? "Log in to synthesize insights." : "Review AI-crafted queries and suggestions. Synthesize to distill key insights."}
               </CardDescription>
             </div>
           </div>
@@ -112,7 +228,13 @@ const FormulatedQueriesDisplay = React.memo(function FormulatedQueriesDisplay({ 
           onSubmit={(e) => { if (isAuthLocked) e.preventDefault(); }}
         >
           <CardContent className="p-4 sm:p-5 md:p-6 relative"> {/* Added relative here */}
-             <FormulatedQueriesDisplayInner queries={queries} isProcessingAction={isBusy && !isAuthLocked} />
+             <FormulatedQueriesDisplayInner 
+                queries={queries} 
+                alternativePhrasings={alternativePhrasings}
+                keyConcepts={keyConcepts}
+                potentialSubTopics={potentialSubTopics}
+                isProcessingAction={isBusy && !isAuthLocked} 
+            />
           </CardContent>
           {queries.length > 0 && (
             <CardFooter className="flex justify-end p-4 sm:p-5 md:p-6 pt-4 sm:pt-5 border-t border-border/40 bg-secondary/25 dark:bg-secondary/10">
@@ -127,3 +249,4 @@ const FormulatedQueriesDisplay = React.memo(function FormulatedQueriesDisplay({ 
 });
 FormulatedQueriesDisplay.displayName = 'FormulatedQueriesDisplay';
 export default FormulatedQueriesDisplay;
+
