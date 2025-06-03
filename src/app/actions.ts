@@ -6,10 +6,8 @@ import { formulateResearchQuery, type FormulateResearchQueryInput, type Formulat
 import { summarizeResearchPapers, type SummarizeResearchPapersInput, type SummarizeResearchPapersOutput } from '@/ai/flows/summarize-research-papers';
 import { generateResearchImage, type GenerateResearchImageInput, type GenerateResearchImageOutput } from '@/ai/flows/generate-research-image';
 import { generateResearchReport, type GenerateResearchReportInput, type GenerateResearchReportOutput } from '@/ai/flows/generate-research-report';
+import { generateReportFromFile, type GenerateReportFromFileInput, type GenerateReportFromFileOutput } from '@/ai/flows/generate-report-from-file'; // New import
 import { z } from 'zod';
-// Firebase auth instance from @/lib/firebase is no longer needed here for direct auth calls.
-// import { auth } from '@/lib/firebase'; 
-// import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 
 const formulateQuerySchema = z.object({
   researchQuestion: z.string().min(10, "Research question must be at least 10 characters long.").max(1500, "Research question must be at most 1500 characters long."),
@@ -156,7 +154,6 @@ export interface GenerateImageActionState {
   errors: { topic?: string[] } | null;
 }
 
-// This schema should match GenerateResearchImageInputSchema in generate-research-image.ts
 const generateImageSchema = z.object({
   topic: z.string().min(5, "Topic must be at least 5 characters long.").max(200, "Topic must be at most 200 characters long."),
 });
@@ -251,51 +248,79 @@ export async function handleGenerateReportAction(
   }
 }
 
-// Sign Up and Login server actions are removed as they are now handled client-side.
-// // Sign Up Action
-// const signUpSchema = z.object({
-//   email: z.string().email({ message: "Invalid email address." }),
-//   password: z.string().min(6, { message: "Password must be at least 6 characters long." }),
-// });
+// New action for generating report from file
+const MAX_FILE_SIZE_MB = 5;
+const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+const ALLOWED_FILE_TYPES = ['text/plain', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/markdown'];
 
-// export interface SignUpActionState {
-//   success: boolean;
-//   message: string;
-//   userId?: string | null;
-//   errors?: {
-//     email?: string[];
-//     password?: string[];
-//     firebase?: string[]; 
-//   } | null;
-// }
+const generateReportFromFileSchema = z.object({
+  guidanceQuery: z.string().min(10, "Guidance query must be at least 10 characters.").max(1000, "Guidance query must be at most 1000 characters."),
+  file: z
+    .instanceof(File, { message: "A file is required." })
+    .refine((file) => file.size > 0, "File cannot be empty.")
+    .refine((file) => file.size <= MAX_FILE_SIZE_BYTES, `File size must be less than ${MAX_FILE_SIZE_MB}MB.`)
+    .refine((file) => ALLOWED_FILE_TYPES.includes(file.type), "Invalid file type. Allowed types: .txt, .md, .pdf, .doc, .docx"),
+});
 
-// export async function handleSignUpAction(
-//   prevState: SignUpActionState,
-//   formData: FormData
-// ): Promise<SignUpActionState> {
-//   // ... implementation removed
-// }
+export interface GenerateReportFromFileActionState {
+  success: boolean;
+  message: string;
+  researchReport: GenerateReportFromFileOutput | null;
+  originalGuidance?: string;
+  errors: { guidanceQuery?: string[]; file?: string[] } | null;
+}
 
-// // Login Action
-// const loginSchema = z.object({
-//   email: z.string().email({ message: "Invalid email address." }),
-//   password: z.string().min(1, { message: "Password cannot be empty." }), 
-// });
+export async function handleGenerateReportFromFileAction(
+  prevState: GenerateReportFromFileActionState,
+  formData: FormData
+): Promise<GenerateReportFromFileActionState> {
+  const guidanceQuery = formData.get('guidanceQuery') as string;
+  const file = formData.get('file') as File;
 
-// export interface LoginActionState {
-//   success: boolean;
-//   message: string;
-//   userId?: string | null;
-//   errors?: {
-//     email?: string[];
-//     password?: string[];
-//     firebase?: string[]; 
-//   } | null;
-// }
+  const validation = generateReportFromFileSchema.safeParse({ guidanceQuery, file });
 
-// export async function handleLoginAction(
-//   prevState: LoginActionState,
-//   formData: FormData
-// ): Promise<LoginActionState> {
-//  // ... implementation removed
-// }
+  if (!validation.success) {
+    return {
+      success: false,
+      message: "Invalid input for file report generation.",
+      researchReport: null,
+      errors: validation.error.flatten().fieldErrors,
+      originalGuidance: guidanceQuery,
+    };
+  }
+
+  const validatedFile = validation.data.file;
+  const validatedQuery = validation.data.guidanceQuery;
+
+  try {
+    // Convert file to data URI
+    const arrayBuffer = await validatedFile.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const fileDataUri = `data:${validatedFile.type};base64,${buffer.toString('base64')}`;
+
+    const input: GenerateReportFromFileInput = {
+      fileDataUri,
+      guidanceQuery: validatedQuery,
+      fileName: validatedFile.name,
+    };
+
+    const result = await generateReportFromFile(input);
+    return {
+      success: true,
+      message: "Report from file generated successfully.",
+      researchReport: result,
+      originalGuidance: validatedQuery,
+      errors: null,
+    };
+  } catch (error) {
+    console.error("Error generating report from file:", error);
+    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred while processing the file and generating the report.";
+    return {
+      success: false,
+      message: `Failed to generate report: ${errorMessage}`,
+      researchReport: null,
+      originalGuidance: validatedQuery,
+      errors: null,
+    };
+  }
+}

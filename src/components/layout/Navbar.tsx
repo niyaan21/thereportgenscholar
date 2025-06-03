@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import NextLink from 'next/link';
-import { BookText, UserPlus, LogIn, Home, Palette, Settings, Moon, Sun, Check, LogOut, Info, BookOpenText, Code2, Menu, X as CloseIcon, UserCircle, ChevronDown, Sparkles, FileText as FeaturesIcon, Settings2 as AccountSettingsIcon, LayoutDashboard, DollarSign, MessageSquare } from 'lucide-react';
+import { BookText, UserPlus, LogIn, Home, Palette, Settings, Moon, Sun, Check, LogOut, Info, BookOpenText, Code2, Menu, X as CloseIcon, UserCircle, ChevronDown, Sparkles, FileText as FeaturesIcon, Settings2 as AccountSettingsIcon, LayoutDashboard, DollarSign, MessageSquare, UploadCloud as FileReportIcon } from 'lucide-react'; // Added FileReportIcon
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -58,21 +58,20 @@ export default function Navbar() {
     }
   };
 
-  const commonNavLinks = [
+  const commonNavLinksBase = [
     { href: "/", label: "Home", icon: Home },
+    { href: "/file-report", label: "File Report", icon: FileReportIcon }, // New Link
     { href: "/features", label: "Features", icon: Sparkles },
     { href: "/pricing", label: "Pricing", icon: DollarSign },
     { href: "/about", label: "About", icon: Info },
     { href: "/docs", label: "Docs", icon: BookOpenText },
     { href: "/contact", label: "Contact", icon: MessageSquare },
-    // { href: "/api-docs", label: "API", icon: Code2 }, // API Docs can be less prominent if needed
   ];
   
-  const authenticatedNavLinks = [
-    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    ...commonNavLinks,
-  ];
-
+  const commonNavLinks = currentUser
+    ? [{ href: "/dashboard", label: "Dashboard", icon: LayoutDashboard }, ...commonNavLinksBase]
+    : commonNavLinksBase;
+  
   const NavLinkItem: React.FC<{ href: string; label: string; icon: React.ElementType; onClick?: () => void }> = ({ href, label, icon: Icon, onClick }) => (
     <NextLink href={href} passHref legacyBehavior>
       <Button
@@ -183,8 +182,6 @@ export default function Navbar() {
       </DropdownMenu>
   );
 
-  const currentNavLinks = currentUser ? authenticatedNavLinks : commonNavLinks;
-
   return (
     <nav className="bg-background/80 backdrop-blur-md text-foreground shadow-xl sticky top-0 z-50 border-b border-border/60">
       <div className="container mx-auto flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
@@ -206,7 +203,7 @@ export default function Navbar() {
         </NextLink>
 
         <div className="hidden lg:flex items-center space-x-1">
-          {currentNavLinks.map(link => <NavLinkItem key={link.href} {...link} />)}
+          {commonNavLinks.map(link => <NavLinkItem key={link.href} {...link} />)}
         </div>
 
         <div className="hidden lg:flex items-center space-x-2">
@@ -236,8 +233,7 @@ export default function Navbar() {
               </SheetHeader>
               
               <div className="flex flex-col space-y-2 px-4 py-4 flex-grow overflow-y-auto">
-                {currentNavLinks.map(link => <NavLinkItem key={link.href} {...link} onClick={() => setMobileMenuOpen(false)} />)}
-                 {/* Separator for less prominent links */}
+                {commonNavLinks.map(link => <NavLinkItem key={link.href} {...link} onClick={() => setMobileMenuOpen(false)} />)}
                 <DropdownMenuSeparator className="my-2" />
                 <NavLinkItem href="/api-docs" label="API Docs" icon={Code2} onClick={() => setMobileMenuOpen(false)} />
               </div>

@@ -3,13 +3,13 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import NextLink from 'next/link';
-import { Zap, Brain, FileTextIcon, Image as ImageIcon, ShieldCheck, LayoutDashboard, Download, Smartphone, ArrowRight, Sparkles, Search, Layers, Palette, Settings, Users, ThumbsUp } from 'lucide-react';
+import { Zap, Brain, FileTextIcon, Image as ImageIconLucide, ShieldCheck, LayoutDashboard, Download, Smartphone, ArrowRight, Sparkles, Search, Layers, Palette, Settings, Users, ThumbsUp, UploadCloud, MessageCircle, BarChart, BookOpen, Server, Share2 } from 'lucide-react';
 import type { Metadata } from 'next';
-import { cn } from '@/lib/utils'; // Added import for cn
+import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
   title: 'ScholarAI Features - Advanced AI Research Capabilities',
-  description: 'Discover the powerful features of ScholarAI, including AI-driven query formulation, intelligent knowledge synthesis, comprehensive report generation, conceptual visualization, and more. Elevate your research workflow today.',
+  description: 'Discover the powerful features of ScholarAI, including AI-driven query formulation, intelligent knowledge synthesis, file-powered reporting, conceptual visualization, and more. Elevate your research workflow today.',
   openGraph: {
     title: 'ScholarAI Features - Advanced AI Research Capabilities',
     description: 'Explore how ScholarAI\'s innovative features can streamline your research process and help you uncover deeper insights.',
@@ -33,14 +33,14 @@ interface FeatureCardProps {
 }
 
 const FeatureCard: React.FC<FeatureCardProps> = ({ icon: Icon, title, description, className }) => (
-  <Card className={cn("w-full shadow-lg hover:shadow-xl transition-all duration-300 ease-out border-primary/15 hover:border-accent/70 bg-card", className)}>
+  <Card className={cn("w-full shadow-lg hover:shadow-xl transition-all duration-300 ease-out border-primary/15 hover:border-accent/70 bg-card flex flex-col", className)}>
     <CardHeader className="items-center text-center p-5 sm:p-6">
       <div className="p-3.5 sm:p-4 bg-gradient-to-br from-accent to-accent/80 rounded-full mb-4 ring-2 ring-accent/30 shadow-md text-accent-foreground">
         <Icon className="h-7 w-7 sm:h-8 sm:w-8" />
       </div>
       <CardTitle className="text-xl sm:text-2xl font-semibold text-primary">{title}</CardTitle>
     </CardHeader>
-    <CardContent className="text-center text-sm sm:text-base text-muted-foreground leading-relaxed px-5 pb-6 sm:px-6 sm:pb-8">
+    <CardContent className="text-center text-sm sm:text-base text-muted-foreground leading-relaxed px-5 pb-6 sm:px-6 sm:pb-8 flex-grow">
       {description}
     </CardContent>
   </Card>
@@ -50,53 +50,83 @@ export default function FeaturesPage() {
   const features = [
     {
       icon: Search,
-      title: "AI-Powered Query Formulation",
-      description: "Transform complex research questions into precise, effective search vectors. Our AI understands nuance and context to create queries that maximize information retrieval and relevance from its vast knowledge base.",
+      title: "AI Query Formulation",
+      description: "Transforms complex research questions into precise search vectors, maximizing information retrieval relevance from its knowledge base.",
     },
     {
       icon: Layers,
       title: "Intelligent Knowledge Synthesis",
-      description: "ScholarAI distills information from multiple conceptual sources based on the formulated queries, providing you with a concise, coherent summary of key insights, emerging themes, and critical findings.",
+      description: "Distills information from multiple conceptual sources, providing concise summaries of key insights, themes, and findings.",
     },
     {
       icon: FileTextIcon,
       title: "Comprehensive Report Generation",
-      description: "Automatically generate structured, multi-section academic-style research reports. Reports include executive summaries, introductions, literature reviews, methodology, results, discussions, conclusions, and placeholder references.",
+      description: "Automatically generates structured, multi-section academic-style reports including summaries, reviews, methodology, and references.",
+    },
+    {
+      icon: UploadCloud,
+      title: "File-Powered Guided Reporting",
+      description: "Upload your documents (TXT, MD, PDF, DOCX) and provide specific guidance to generate tailored reports based on your file's content.",
     },
     {
       icon: Palette,
       title: "Conceptual Image Visualization",
-      description: "Bring your research to life with AI-generated abstract and symbolic images. These visuals can represent core concepts from your topic or summary, perfect for presentations and sparking creative insights.",
+      description: "Brings research to life with AI-generated abstract images representing core concepts, perfect for presentations and creative insights.",
     },
     {
       icon: ShieldCheck,
       title: "Secure User Authentication",
-      description: "Your research work is protected with robust Firebase authentication. Sign up and log in securely to access ScholarAI's full suite of features and manage your research endeavors.",
+      description: "Protects your work with robust Firebase authentication, ensuring secure access to ScholarAI's full suite of features.",
     },
     {
       icon: LayoutDashboard,
       title: "Intuitive User Interface",
-      description: "Experience a clean, modern, and user-friendly interface built with Next.js, ShadCN UI, and Tailwind CSS. Designed for ease of use, allowing you to focus on your research, not on learning complex software.",
+      description: "A clean, modern interface built with Next.js & ShadCN UI, designed for ease of use, letting you focus on research.",
     },
     {
       icon: Download,
       title: "Downloadable Outputs",
-      description: "Easily export your work. Full research reports can be downloaded in structured JSON format for data portability and as professionally formatted PDF documents for sharing and offline access.",
+      description: "Export reports in structured JSON for data portability and as professionally formatted PDFs for sharing and offline access.",
     },
     {
       icon: Smartphone,
       title: "Responsive Design",
-      description: "Access ScholarAI and conduct your research anytime, anywhere. Our platform is fully responsive, providing a seamless experience across desktops, tablets, and mobile devices.",
+      description: "Access ScholarAI and conduct research anytime, anywhere. Fully responsive across desktops, tablets, and mobile devices.",
     },
      {
       icon: Settings,
       title: "Customizable Workflow",
-      description: "ScholarAI guides you through a structured research process, but also offers flexibility. You can revisit and refine previous steps, such as editing your initial question or re-synthesizing information with adjusted queries.",
+      description: "Offers a guided research process with flexibility to revisit and refine steps like editing questions or re-synthesizing information.",
     },
     {
       icon: ThumbsUp,
       title: "User-Centric Enhancements",
-      description: "Benefit from continuous improvements, including UI/UX refinements, dynamic animations, and clear feedback mechanisms like toasts, ensuring a polished and engaging user experience.",
+      description: "Benefits from continuous UI/UX refinements, dynamic animations, and clear feedback for a polished, engaging experience.",
+    },
+    {
+      icon: MessageCircle,
+      title: "Interactive Feedback Loop",
+      description: "Provides clear progress indicators and toast notifications, keeping you informed throughout the AI generation process.",
+    },
+    {
+      icon: BarChart,
+      title: "Data Visualization Suggestions",
+      description: "AI suggests relevant chart types (bar, line, pie, scatter) within reports to help visualize key data points and trends.",
+    },
+    {
+      icon: BookOpen,
+      title: "In-App Documentation",
+      description: "Access comprehensive guides and FAQs directly within the platform to master all features and troubleshoot effectively.",
+    },
+    {
+      icon: Server,
+      title: "Scalable Cloud Infrastructure",
+      description: "Built on robust cloud technologies ensuring reliable performance and scalability as your research demands grow.",
+    },
+     {
+      icon: Share2,
+      title: "Content Sharing (Coming Soon)",
+      description: "Future capabilities to easily share your generated reports or specific insights with collaborators or peers securely.",
     },
   ];
 
