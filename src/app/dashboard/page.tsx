@@ -9,10 +9,11 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, LayoutDashboard, History, FileText, Settings, PlusCircle, BarChart2, ExternalLink, UserCircle, Info, BookOpen, Zap, UploadCloud, ClockIcon, Search, FileSignature, Activity } from 'lucide-react';
+import { Loader2, LayoutDashboard, History, FileText, Settings, PlusCircle, BarChart2, ExternalLink, UserCircle, Info, BookOpen, Zap, UploadCloud, ClockIcon, Search, FileSignature, Activity, Filter as FilterIcon } from 'lucide-react';
 import NextLink from 'next/link';
 import type { Metadata } from 'next';
 import { getResearchHistory, type ResearchActivityItem } from '@/lib/historyService';
+import { cn } from '@/lib/utils';
 
 const DashboardStatCard: React.FC<{ title: string; value: string; icon: React.ElementType; description: string, className?: string }> = ({ title, value, icon: Icon, description, className }) => (
   <Card className={className}>
@@ -50,12 +51,14 @@ const QuickActionCard: React.FC<{ title: string; href: string; icon: React.Eleme
   </NextLink>
 );
 
+type ActivityFilterType = 'all' | 'query-formulation' | 'report-generation' | 'file-report-generation';
 
 export default function DashboardPage() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [recentActivities, setRecentActivities] = useState<ResearchActivityItem[]>([]);
+  const [allActivities, setAllActivities] = useState<ResearchActivityItem[]>([]);
   const [stats, setStats] = useState({ sessions: 0, reports: 0, activities: 0 });
+  const [activityFilter, setActivityFilter] = useState<ActivityFilterType>('all');
   const router = useRouter();
 
   useEffect(() => {
@@ -63,9 +66,9 @@ export default function DashboardPage() {
       if (user) {
         setCurrentUser(user);
         const history = getResearchHistory();
-        setRecentActivities(history);
+        setAllActivities(history);
         
-        // Calculate stats
+        // Calculate stats based on all activities
         const uniqueSessions = new Set(history.filter(item => item.type === 'query-formulation').map(item => item.question)).size;
         const reportCount = history.filter(item => item.type === 'report-generation' || item.type === 'file-report-generation').length;
         setStats({ sessions: uniqueSessions, reports: reportCount, activities: history.length });
@@ -78,6 +81,12 @@ export default function DashboardPage() {
     return () => unsubscribe();
   }, [router]);
 
+  const filteredActivities = activityFilter === 'all' 
+    ? allActivities 
+    : allActivities.filter(item => item.type === activityFilter);
+
+  const displayedActivities = filteredActivities.slice(0, 5); // Show latest 5 filtered activities
+
   if (isLoading || !currentUser) {
     return (
       <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center">
@@ -86,7 +95,12 @@ export default function DashboardPage() {
     );
   }
   
-  const displayedActivities = recentActivities.slice(0, 3); // Show latest 3 activities
+  const filterButtons: { label: string; type: ActivityFilterType; icon: React.ElementType }[] = [
+    { label: 'All Activities', type: 'all', icon: History },
+    { label: 'Queries', type: 'query-formulation', icon: Search },
+    { label: 'AI Reports', type: 'report-generation', icon: BookOpen },
+    { label: 'File Reports', type: 'file-report-generation', icon: FileSignature },
+  ];
 
   return (
     <div className="container mx-auto min-h-[calc(100vh-8rem)] py-10 sm:py-12 px-4 sm:px-6 lg:px-8">
@@ -154,14 +168,37 @@ export default function DashboardPage() {
       </section>
       
       <section>
-        <h2 className="text-2xl sm:text-3xl font-semibold text-primary mb-4 sm:mb-6 flex items-center">
-            <History className="mr-3 h-7 w-7 text-accent" />
-            Recent Activity
-        </h2>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6">
+            <h2 className="text-2xl sm:text-3xl font-semibold text-primary flex items-center">
+                <History className="mr-3 h-7 w-7 text-accent" />
+                Recent Activity
+            </h2>
+            <div className="flex items-center space-x-2 mt-3 sm:mt-0 overflow-x-auto pb-2 sm:pb-0">
+                {filterButtons.map(filter => (
+                    <Button
+                        key={filter.type}
+                        variant={activityFilter === filter.type ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setActivityFilter(filter.type)}
+                        className={cn("text-xs whitespace-nowrap", activityFilter === filter.type && "bg-primary text-primary-foreground hover:bg-primary/90")}
+                    >
+                        <filter.icon className="mr-1.5 h-3.5 w-3.5" />
+                        {filter.label}
+                    </Button>
+                ))}
+            </div>
+        </div>
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="text-xl font-medium text-primary/90">Latest Research Items</CardTitle>
-            <CardDescription className="text-sm">A glimpse of your recent interactions with ScholarAI (locally stored).</CardDescription>
+            <CardTitle className="text-xl font-medium text-primary/90">
+              {filterButtons.find(f => f.type === activityFilter)?.label || 'Filtered Activities'}
+            </CardTitle>
+            <CardDescription className="text-sm">
+              {activityFilter === 'all' 
+                ? `Showing latest ${displayedActivities.length} of ${allActivities.length} activities.`
+                : `Showing latest ${displayedActivities.length} of ${filteredActivities.length} matching activities.`
+              }
+            </CardDescription>
           </CardHeader>
           <CardContent>
             {displayedActivities.length > 0 ? (
@@ -193,17 +230,25 @@ export default function DashboardPage() {
                 })}
               </ul>
             ) : (
-              <p className="text-muted-foreground italic text-sm">
-                No recent activity logged yet in this browser. Start a new research session to see it here.
+              <p className="text-muted-foreground italic text-sm text-center py-4">
+                {activityFilter === 'all' 
+                    ? "No research activity logged yet in this browser. Start a new research session!" 
+                    : `No activities found for the "${filterButtons.find(f => f.type === activityFilter)?.label}" filter.`
+                }
               </p>
             )}
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex justify-between items-center">
             <Button variant="outline" asChild>
               <NextLink href="/account-settings#history">
                 View Full History <ExternalLink className="ml-2 h-4 w-4"/>
               </NextLink>
             </Button>
+            {activityFilter !== 'all' && (
+                <Button variant="ghost" size="sm" onClick={() => setActivityFilter('all')}>
+                    Clear Filter
+                </Button>
+            )}
           </CardFooter>
         </Card>
       </section>
