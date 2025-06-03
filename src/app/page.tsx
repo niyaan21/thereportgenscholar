@@ -472,10 +472,16 @@ export default function ScholarAIPage() {
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/10 to-background flex flex-col overflow-x-hidden antialiased selection:bg-accent/20 selection:text-accent-foreground">
       
       <main className={cn(
-        "flex-grow container mx-auto px-4 sm:px-6 py-8 sm:py-10 md:py-12",
-        appState === 'initial' ? "max-w-none md:py-0" : "md:py-16" // Full width for landing, constrained for workflow
+        "flex-grow",
+        appState === 'initial' ? 
+          "w-full md:py-0" : // For initial state (landing page), main takes full width and no vertical padding from main itself
+          "container mx-auto px-4 sm:px-6 py-8 sm:py-10 md:py-12" // For workflow states, use container with padding
       )}>
-        <div className={cn(appState !== 'initial' && "max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto")}>
+        <div className={cn(
+          appState === 'initial' ? 
+            "w-full" : // Inner div also full width if landing sections handle their own container
+            "max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto" // Constrained width for workflow steps
+        )}>
             {renderCurrentStep()}
         </div>
       </main>
@@ -499,3 +505,4 @@ export default function ScholarAIPage() {
     </Dialog>
   );
 }
+

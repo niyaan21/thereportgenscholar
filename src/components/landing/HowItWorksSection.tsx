@@ -76,23 +76,18 @@ export default function HowItWorksSection() {
         </motion.div>
 
         <div className="relative grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4 items-start">
-          {/* Dashed lines for larger screens */}
           {steps.slice(0, -1).map((_, index) => (
             <motion.div
               key={`line-${index}`}
-              initial={{ opacity: 0, pathLength: 0 }}
-              whileInView={{ opacity: 1, pathLength: 1 }}
-              transition={{ delay: (index * 0.15) + 0.4, duration: 0.5, ease: "easeInOut" }}
+              initial={{ opacity: 0 }} // Start with opacity 0 for fade-in
+              whileInView={{ opacity: 1 }}
+              transition={{ delay: (index * 0.15) + 0.5, duration: 0.6, ease: "easeInOut" }} // Slightly delay line animation
               viewport={{ once: true }}
-              className={cn(
-                "hidden lg:block absolute top-1/2 left-0 w-full h-px -translate-y-1/2",
-                `lg:left-[${(index + 0.5) * 25}%] lg:w-[25%]`
-              )}
+              className="hidden lg:block absolute top-1/2 -translate-y-1/2" // Vertical centering handled here
               style={{
-                 left: `${(index * 25) + 12.5}%`,
-                 width: '25%',
-                 transform: 'translateY(-50%) translateX(-12.5%)', 
-                 zIndex:0
+                 left: `${(index * 25) + 12.5}%`, // Start of the line (center of the (index)th card)
+                 width: '25%', // Length of the line (to reach the center of the (index+1)th card)
+                 zIndex: 0,
               }}
             >
                <svg width="100%" height="2" preserveAspectRatio="none">
@@ -131,3 +126,4 @@ export default function HowItWorksSection() {
     </section>
   );
 }
+
