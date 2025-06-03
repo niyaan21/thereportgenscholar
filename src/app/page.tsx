@@ -10,7 +10,6 @@ import QueryForm from '@/components/scholar-ai/QueryForm';
 import FormulatedQueriesDisplay from '@/components/scholar-ai/FormulatedQueriesDisplay';
 import ResearchSummaryDisplay from '@/components/scholar-ai/ResearchSummaryDisplay';
 import ResearchReportDisplay from '@/components/scholar-ai/ResearchReportDisplay';
-// TestimonialsSection is no longer imported here as it has its own page.
 
 import { Button } from '@/components/ui/button';
 import { ToastAction } from "@/components/ui/toast";
@@ -396,7 +395,6 @@ export default function ScholarAIPage() {
                   onChange={setQueryFormInputValue}
                 />
                 <KeyFeaturesSection />
-                {/* TestimonialsSection removed from here */}
               </>
             )}
           </div>

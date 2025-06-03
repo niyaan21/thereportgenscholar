@@ -20,7 +20,6 @@ export default function Footer() {
           <NextLink href="/about" className="hover:text-accent hover:underline">About</NextLink>
           <NextLink href="/features" className="hover:text-accent hover:underline">Features</NextLink>
           <NextLink href="/pricing" className="hover:text-accent hover:underline">Pricing</NextLink>
-          <NextLink href="/testimonials" className="hover:text-accent hover:underline">Testimonials</NextLink>
           <NextLink href="/contact" className="hover:text-accent hover:underline">Contact</NextLink>
           <NextLink href="/docs" className="hover:text-accent hover:underline">Docs</NextLink>
           <NextLink href="/api-docs" className="hover:text-accent hover:underline">API</NextLink>
