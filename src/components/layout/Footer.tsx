@@ -4,7 +4,7 @@
 
 import React from 'react';
 import NextLink from 'next/link';
-import { Sparkles, ExternalLink } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
 export default function Footer() {
   const [currentYear, setCurrentYear] = React.useState<number | null>(null);
@@ -38,14 +38,6 @@ export default function Footer() {
           <p className="mt-2 text-xs">
             Pioneering the future of research with augmented intelligence.
           </p>
-          <a
-            href="https://github.com/firebase/genkit/tree/main/examples/nextjs_template"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-3 sm:mt-4 inline-flex items-center text-xs text-accent hover:text-accent-foreground hover:underline group"
-          >
-            View Project on GitHub <ExternalLink className="ml-1.5 h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform"/>
-          </a>
         </div>
       </div>
     </footer>
