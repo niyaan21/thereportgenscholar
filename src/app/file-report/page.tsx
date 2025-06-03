@@ -18,6 +18,7 @@ import { UploadCloud, FileText, Wand2, Loader2, ArrowLeft, RotateCcw, AlertCircl
 import { cn } from '@/lib/utils';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged, type User } from 'firebase/auth';
+import { addResearchActivity } from '@/lib/historyService'; // Import history service
 import type { Metadata } from 'next';
 
 
@@ -64,6 +65,14 @@ export default function FileReportPage() {
           duration: 7000,
         });
         setShowReport(true);
+        if (currentUser && reportState.originalGuidance) {
+           addResearchActivity({
+            type: 'file-report-generation',
+            question: reportState.originalGuidance,
+            reportTitle: reportState.researchReport.title,
+            executiveSummarySnippet: reportState.researchReport.executiveSummary?.substring(0, 150) + (reportState.researchReport.executiveSummary && reportState.researchReport.executiveSummary.length > 150 ? '...' : '')
+          });
+        }
         // Scroll to report section
         document.getElementById('file-report-display-section')?.scrollIntoView({ behavior: 'smooth' });
       } else if (!reportState.success) {
@@ -83,7 +92,7 @@ export default function FileReportPage() {
         setShowReport(false);
       }
     }
-  }, [reportState, isGenerating, toast]);
+  }, [reportState, isGenerating, toast, currentUser]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -98,11 +107,11 @@ export default function FileReportPage() {
     setShowReport(false);
     setFileName(null);
     setGuidanceQuery(''); 
-    // Reset form action state if possible or re-initialize the key of the form
     const form = document.getElementById('fileReportForm') as HTMLFormElement;
     form?.reset();
-    // Resetting reportState would be ideal if useActionState provided a reset mechanism.
-    // For now, visually clearing and allowing new submission.
+    // Visually clearing the form and allowing new submission.
+    // To truly reset useActionState, you might need to remount the component or use a key.
+    // For this prototype, visual reset is sufficient.
   };
   
   const isFormDisabled = (!currentUser && authChecked) || isGenerating;

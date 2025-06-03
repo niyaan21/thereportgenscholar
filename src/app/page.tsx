@@ -6,6 +6,11 @@ import React, { useState, useEffect, useTransition, useCallback } from 'react';
 import { useActionState } from 'react'; 
 import NextLink from 'next/link';
 
+import HeroSection from '@/components/landing/HeroSection';
+import HowItWorksSection from '@/components/landing/HowItWorksSection';
+import KeyFeaturesShowcase from '@/components/landing/KeyFeaturesShowcase';
+import FinalCTASection from '@/components/landing/FinalCTASection';
+
 import QueryForm from '@/components/scholar-ai/QueryForm';
 import FormulatedQueriesDisplay from '@/components/scholar-ai/FormulatedQueriesDisplay';
 import ResearchSummaryDisplay from '@/components/scholar-ai/ResearchSummaryDisplay';
@@ -31,6 +36,7 @@ import {
 } from '@/app/actions';
 import type { GenerateResearchReportOutput } from '@/ai/flows/generate-research-report';
 import { useToast } from '@/hooks/use-toast';
+import { addResearchActivity } from '@/lib/historyService'; // Import history service
 import {
   Dialog,
   DialogContent,
@@ -115,9 +121,12 @@ export default function ScholarAIPage() {
       setQueryFormInputValue(question);
       setFormulatedQueries(queries);
       setAppState('queries_formulated');
-      setGeneratedImageUrl(null); 
+      setGeneratedImageUrl(null);
+      if (currentUser) {
+        addResearchActivity({ type: 'query-formulation', question });
+      }
     });
-  }, []);
+  }, [currentUser]);
 
   const handleResearchSynthesizedCallback = useCallback((summary: string, titles: string[]) => {
     startTransition(() => {
@@ -192,6 +201,14 @@ export default function ScholarAIPage() {
         toast({ title: "📜 Research Report Generated!", description: reportActionState.message, variant: 'default', duration: 7000,
           action: <ToastAction altText="View Report" onClick={() => document.getElementById('research-report-section')?.scrollIntoView({ behavior: 'smooth' })}>Jump to Report</ToastAction>
         });
+        if (currentUser) {
+          addResearchActivity({
+            type: 'report-generation',
+            question: researchQuestion,
+            reportTitle: reportActionState.researchReport.title,
+            executiveSummarySnippet: reportActionState.researchReport.executiveSummary?.substring(0, 150) + (reportActionState.researchReport.executiveSummary && reportActionState.researchReport.executiveSummary.length > 150 ? '...' : '')
+          });
+        }
       } else if (!reportActionState.success) { 
         let fullErrorMessage = reportActionState.message;
         if (reportActionState.errors) {
@@ -203,7 +220,7 @@ export default function ScholarAIPage() {
         toast({ title: "🚫 Report Generation Failed", description: fullErrorMessage, variant: 'destructive', duration: 9000 });
       }
     }
-  }, [reportActionState, isReportGenerating, toast]);
+  }, [reportActionState, isReportGenerating, toast, researchQuestion, currentUser]);
 
   const handleStartNewResearch = useCallback(() => {
     startTransition(() => {
@@ -301,50 +318,6 @@ export default function ScholarAIPage() {
     </Button>
   );
 
-  const KeyFeaturesSection = React.memo(() => (
-    <div className="mt-12 md:mt-16 space-y-8">
-      <h2 className="text-2xl sm:text-3xl font-bold text-center text-primary tracking-tight">
-        Empower Your Research with ScholarAI
-      </h2>
-      <div className="grid md:grid-cols-3 gap-6 sm:gap-8">
-        <Card className="bg-card/80 backdrop-blur-sm border-primary/20 hover:shadow-primary/20 transition-all duration-300 ease-out">
-          <CardHeader className="items-center text-center">
-            <div className="p-3 bg-gradient-to-br from-accent to-accent/80 rounded-full mb-3 ring-2 ring-accent/30 shadow-lg">
-              <LightbulbLucideIcon className="h-7 w-7 text-accent-foreground" />
-            </div>
-            <CardTitle className="text-lg sm:text-xl font-semibold text-primary">AI Query Formulation</CardTitle>
-          </CardHeader>
-          <CardContent className="text-center text-sm sm:text-base text-muted-foreground leading-relaxed">
-            Transform your broad questions into precise, targeted search vectors for optimal information retrieval.
-          </CardContent>
-        </Card>
-        <Card className="bg-card/80 backdrop-blur-sm border-primary/20 hover:shadow-primary/20 transition-all duration-300 ease-out">
-          <CardHeader className="items-center text-center">
-            <div className="p-3 bg-gradient-to-br from-accent to-accent/80 rounded-full mb-3 ring-2 ring-accent/30 shadow-lg">
-              <Layers className="h-7 w-7 text-accent-foreground" />
-            </div>
-            <CardTitle className="text-lg sm:text-xl font-semibold text-primary">Intelligent Synthesis</CardTitle>
-          </CardHeader>
-          <CardContent className="text-center text-sm sm:text-base text-muted-foreground leading-relaxed">
-            ScholarAI distills complex information from multiple sources into concise, actionable insights and summaries.
-          </CardContent>
-        </Card>
-        <Card className="bg-card/80 backdrop-blur-sm border-primary/20 hover:shadow-primary/20 transition-all duration-300 ease-out">
-          <CardHeader className="items-center text-center">
-            <div className="p-3 bg-gradient-to-br from-accent to-accent/80 rounded-full mb-3 ring-2 ring-accent/30 shadow-lg">
-              <FileTextIcon className="h-7 w-7 text-accent-foreground" />
-            </div>
-            <CardTitle className="text-lg sm:text-xl font-semibold text-primary">Comprehensive Reporting</CardTitle>
-          </CardHeader>
-          <CardContent className="text-center text-sm sm:text-base text-muted-foreground leading-relaxed">
-            Automatically generate structured, in-depth academic-style research reports with references and visuals.
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  ));
-  KeyFeaturesSection.displayName = 'KeyFeaturesSection';
-
 
   const renderCurrentStep = () => {
     let content;
@@ -353,40 +326,8 @@ export default function ScholarAIPage() {
       case 'initial':
         content = (
           <div key="initial" className={cn("w-full", animationClasses)}>
-             {!authChecked && ( 
-              <Card className="w-full shadow-2xl border-primary/30 rounded-xl sm:rounded-2xl overflow-hidden bg-card">
-                <CardHeader className="p-4 sm:p-5 md:p-6">
-                  <div className="h-10 w-3/4 bg-muted/50 rounded animate-pulse mb-4"></div>
-                  <div className="h-6 w-1/2 bg-muted/50 rounded animate-pulse"></div>
-                </CardHeader>
-                <CardContent className="p-4 sm:p-5 md:p-6 pt-5 sm:pt-6">
-                  <div className="h-8 w-1/3 bg-muted/50 rounded animate-pulse mb-3"></div>
-                  <div className="h-32 w-full bg-muted/50 rounded-xl animate-pulse"></div>
-                   <CardFooter className="flex justify-end p-0 pt-6">
-                      <div className="h-12 w-36 bg-muted/50 rounded-lg animate-pulse"></div>
-                   </CardFooter>
-                </CardContent>
-              </Card>
-            )}
-            {authChecked && !currentUser && (
-              <Alert variant="destructive" className="mb-6 sm:mb-8 bg-destructive/10 border-destructive/30 text-destructive">
-                <Lock className="h-5 w-5" />
-                <AlertTitle className="font-semibold">Authentication Required</AlertTitle>
-                <AlertDescription>
-                  Please{' '}
-                  <NextLink href="/login" className="font-medium hover:underline underline-offset-2">
-                    log in
-                  </NextLink>{' '}
-                  or{' '}
-                  <NextLink href="/signup" className="font-medium hover:underline underline-offset-2">
-                    sign up
-                  </NextLink>{' '}
-                  to start your research journey with ScholarAI.
-                </AlertDescription>
-              </Alert>
-            )}
-            {authChecked && (
-              <>
+            <HeroSection 
+              queryFormSlot={
                 <QueryForm 
                   formAction={formulateQueryFormAction}
                   isBusy={isFormulatingQueries || (!currentUser && authChecked)}
@@ -394,9 +335,13 @@ export default function ScholarAIPage() {
                   value={queryFormInputValue}
                   onChange={setQueryFormInputValue}
                 />
-                <KeyFeaturesSection />
-              </>
-            )}
+              }
+              isAuthenticated={!!currentUser}
+              authLoading={!authChecked}
+            />
+            <HowItWorksSection />
+            <KeyFeaturesShowcase />
+            <FinalCTASection />
           </div>
         );
         break;
@@ -526,13 +471,14 @@ export default function ScholarAIPage() {
       </DialogTrigger>
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/10 to-background flex flex-col overflow-x-hidden antialiased selection:bg-accent/20 selection:text-accent-foreground">
       
-      <main className="flex-grow container mx-auto px-4 sm:px-6 py-8 sm:py-10 md:py-16">
-        <div className="max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto">
+      <main className={cn(
+        "flex-grow container mx-auto px-4 sm:px-6 py-8 sm:py-10 md:py-12",
+        appState === 'initial' ? "max-w-none md:py-0" : "md:py-16" // Full width for landing, constrained for workflow
+      )}>
+        <div className={cn(appState !== 'initial' && "max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto")}>
             {renderCurrentStep()}
         </div>
       </main>
-
-      {/* Footer is now global via layout.tsx */}
     </div>
     <DialogContent className="w-[95vw] max-w-xs sm:max-w-lg md:max-w-2xl lg:max-w-4xl xl:max-w-5xl p-1 sm:p-2 bg-transparent border-none shadow-none !rounded-lg">
         <DialogHeader>

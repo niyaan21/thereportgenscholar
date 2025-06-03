@@ -9,33 +9,10 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, LayoutDashboard, History, FileText, Settings, PlusCircle, BarChart2, ExternalLink, UserCircle, Info, BookOpen, Zap, UploadCloud, ClockIcon } from 'lucide-react';
+import { Loader2, LayoutDashboard, History, FileText, Settings, PlusCircle, BarChart2, ExternalLink, UserCircle, Info, BookOpen, Zap, UploadCloud, ClockIcon, Search, FileSignature, Activity } from 'lucide-react';
 import NextLink from 'next/link';
 import type { Metadata } from 'next';
-
-// Mock data for recent activity - aligned with account-settings mock
-interface MockDashboardActivityItem {
-  id: string;
-  question: string;
-  date: string;
-  type: 'query' | 'report'; // Could be expanded
-}
-
-const mockDashboardActivity: MockDashboardActivityItem[] = [
-  {
-    id: '1',
-    question: 'Impact of AI on renewable energy...',
-    date: '2024-07-15',
-    type: 'query',
-  },
-  {
-    id: 'hist-report-file-1',
-    question: 'Generated report from "Annual_Climate_Change_Review.pdf"',
-    date: '2024-07-14',
-    type: 'report',
-  },
-];
-
+import { getResearchHistory, type ResearchActivityItem } from '@/lib/historyService';
 
 const DashboardStatCard: React.FC<{ title: string; value: string; icon: React.ElementType; description: string, className?: string }> = ({ title, value, icon: Icon, description, className }) => (
   <Card className={className}>
@@ -77,12 +54,22 @@ const QuickActionCard: React.FC<{ title: string; href: string; icon: React.Eleme
 export default function DashboardPage() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [recentActivities, setRecentActivities] = useState<ResearchActivityItem[]>([]);
+  const [stats, setStats] = useState({ sessions: 0, reports: 0, activities: 0 });
   const router = useRouter();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setCurrentUser(user);
+        const history = getResearchHistory();
+        setRecentActivities(history);
+        
+        // Calculate stats
+        const uniqueSessions = new Set(history.filter(item => item.type === 'query-formulation').map(item => item.question)).size;
+        const reportCount = history.filter(item => item.type === 'report-generation' || item.type === 'file-report-generation').length;
+        setStats({ sessions: uniqueSessions, reports: reportCount, activities: history.length });
+
       } else {
         router.push('/login'); 
       }
@@ -98,6 +85,8 @@ export default function DashboardPage() {
       </div>
     );
   }
+  
+  const displayedActivities = recentActivities.slice(0, 3); // Show latest 3 activities
 
   return (
     <div className="container mx-auto min-h-[calc(100vh-8rem)] py-10 sm:py-12 px-4 sm:px-6 lg:px-8">
@@ -112,23 +101,23 @@ export default function DashboardPage() {
 
        <Alert variant="default" className="mb-6 sm:mb-8 bg-primary/5 border-primary/20 text-primary dark:bg-primary/10 dark:border-primary/30 dark:text-primary-foreground/90 shadow-md">
         <Info className="h-5 w-5 text-primary" />
-        <AlertTitle className="font-semibold text-primary">Developer Note: Placeholder Content</AlertTitle>
+        <AlertTitle className="font-semibold text-primary">Local Activity Tracking</AlertTitle>
         <AlertDescription className="text-primary/80 dark:text-primary-foreground/80 mt-1 text-sm">
-          The dashboard, stats, and research history currently display mock/placeholder data. Full functionality requires backend integration.
+          Your dashboard stats and research history are based on activity stored locally in this browser.
         </AlertDescription>
       </Alert>
 
       <section className="mb-8 sm:mb-10">
         <h2 className="text-2xl sm:text-3xl font-semibold text-primary mb-4 sm:mb-6 flex items-center">
           <BarChart2 className="mr-3 h-7 w-7 text-accent" />
-          Your Activity At a Glance (Mock Data)
+          Your Activity At a Glance
         </h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <DashboardStatCard title="Research Sessions" value="4" icon={FileText} description="Total mock sessions initiated." className="bg-card/80 backdrop-blur-sm"/>
-          <DashboardStatCard title="Reports Generated" value="2" icon={BookOpen} description="Mock comprehensive reports created." className="bg-card/80 backdrop-blur-sm"/>
-          <DashboardStatCard title="Queries Formulated" value="17" icon={Zap} description="Mock AI-assisted query sets." className="bg-card/80 backdrop-blur-sm"/>
+          <DashboardStatCard title="Research Sessions Initiated" value={stats.sessions.toString()} icon={Search} description="Unique research questions explored." className="bg-card/80 backdrop-blur-sm"/>
+          <DashboardStatCard title="Reports Generated" value={stats.reports.toString()} icon={BookOpen} description="Comprehensive reports created." className="bg-card/80 backdrop-blur-sm"/>
+          <DashboardStatCard title="Total Activities Logged" value={stats.activities.toString()} icon={Activity} description="Total interactions recorded." className="bg-card/80 backdrop-blur-sm"/>
         </div>
-         <p className="text-xs text-muted-foreground mt-3 text-center sm:text-left">Data is illustrative and not yet tracked.</p>
+         <p className="text-xs text-muted-foreground mt-3 text-center sm:text-left">Data reflects activity stored locally in this browser.</p>
       </section>
 
       <section className="mb-8 sm:mb-10">
@@ -167,33 +156,45 @@ export default function DashboardPage() {
       <section>
         <h2 className="text-2xl sm:text-3xl font-semibold text-primary mb-4 sm:mb-6 flex items-center">
             <History className="mr-3 h-7 w-7 text-accent" />
-            Recent Activity (Mock Data)
+            Recent Activity
         </h2>
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="text-xl font-medium text-primary/90">Latest Research Items</CardTitle>
-            <CardDescription className="text-sm">A glimpse of your recent interactions with ScholarAI.</CardDescription>
+            <CardDescription className="text-sm">A glimpse of your recent interactions with ScholarAI (locally stored).</CardDescription>
           </CardHeader>
           <CardContent>
-            {mockDashboardActivity.length > 0 ? (
+            {displayedActivities.length > 0 ? (
               <ul className="space-y-3">
-                {mockDashboardActivity.map(item => (
-                  <li key={item.id} className="p-3 bg-secondary/50 dark:bg-secondary/20 rounded-md hover:bg-secondary/70 dark:hover:bg-secondary/30 transition-colors border border-border/60">
-                    <div className="flex items-center justify-between">
-                        <p className="font-medium text-foreground/90 text-sm truncate" title={item.question}>
-                            {item.type === 'query' ? <Zap className="inline h-4 w-4 mr-2 text-accent/80"/> : <BookOpen className="inline h-4 w-4 mr-2 text-accent/80"/>}
-                            {item.question.length > 60 ? `${item.question.substring(0, 60)}...` : item.question}
-                        </p>
-                        <span className="text-xs text-muted-foreground whitespace-nowrap ml-2 flex items-center">
-                            <ClockIcon className="h-3 w-3 mr-1"/> {new Date(item.date).toLocaleDateString()}
-                        </span>
-                    </div>
-                  </li>
-                ))}
+                {displayedActivities.map(item => {
+                  let itemIcon = <Search className="inline h-4 w-4 mr-2 text-accent/80"/>;
+                  let itemDescription = item.question;
+                  if (item.type === 'report-generation') {
+                    itemIcon = <BookOpen className="inline h-4 w-4 mr-2 text-accent/80"/>;
+                    itemDescription = item.reportTitle || item.question;
+                  }
+                  if (item.type === 'file-report-generation') {
+                     itemIcon = <FileSignature className="inline h-4 w-4 mr-2 text-accent/80"/>;
+                     itemDescription = item.reportTitle || `Report from file: ${item.question}`;
+                  }
+                  return (
+                    <li key={item.id} className="p-3 bg-secondary/50 dark:bg-secondary/20 rounded-md hover:bg-secondary/70 dark:hover:bg-secondary/30 transition-colors border border-border/60">
+                      <div className="flex items-center justify-between">
+                          <p className="font-medium text-foreground/90 text-sm truncate" title={itemDescription}>
+                              {itemIcon}
+                              {itemDescription.length > 60 ? `${itemDescription.substring(0, 60)}...` : itemDescription}
+                          </p>
+                          <span className="text-xs text-muted-foreground whitespace-nowrap ml-2 flex items-center">
+                              <ClockIcon className="h-3 w-3 mr-1"/> {new Date(item.date).toLocaleDateString()}
+                          </span>
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
             ) : (
               <p className="text-muted-foreground italic text-sm">
-                No recent activity logged yet. Start a new research session to see it here.
+                No recent activity logged yet in this browser. Start a new research session to see it here.
               </p>
             )}
           </CardContent>
@@ -215,5 +216,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-    
