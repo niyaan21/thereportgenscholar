@@ -186,7 +186,7 @@ export default function Navbar() {
   const currentNavLinks = currentUser ? authenticatedNavLinks : commonNavLinks;
 
   return (
-    <nav className="bg-background/80 backdrop-blur-md text-foreground shadow-lg sticky top-0 z-40 border-b border-border/60"> {/* Adjusted z-index for navbar */}
+    <nav className="bg-background/80 backdrop-blur-md text-foreground shadow-xl sticky top-0 z-50 border-b border-border/60">
       <div className="container mx-auto flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
         <NextLink href="/" passHref legacyBehavior>
           <a className="flex items-center space-x-2.5 group">
