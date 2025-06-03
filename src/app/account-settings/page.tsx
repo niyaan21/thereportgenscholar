@@ -24,12 +24,49 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Mail, Lock, UserCircle, Trash2, Palette, Bell, Settings2, ShieldAlert, LogOut, ChevronRight, ExternalLink, Edit3, ImageDown, AlertCircle, CheckCircle2, Sun, Moon, History, Settings as GeneralSettingsIcon, UserRoundCog, FileText } from 'lucide-react';
+import { Loader2, Mail, Lock, UserCircle, Trash2, Palette, Bell, Settings2, ShieldAlert, LogOut, ChevronRight, ExternalLink, Edit3, ImageDown, AlertCircle, CheckCircle2, Sun, Moon, History, Settings as GeneralSettingsIcon, UserRoundCog, FileText, BookOpen, ClockIcon } from 'lucide-react';
 import NextLink from 'next/link';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from '@/lib/utils'; // Ensured cn is imported
-import type { ClassValue } from 'clsx'; // Ensured ClassValue is imported
+import { cn } from '@/lib/utils';
+import type { ClassValue } from 'clsx';
+
+// Mock data for research history
+interface MockHistoryItem {
+  id: string;
+  question: string;
+  date: string;
+  summarySnippet: string;
+  reportId?: string; // Placeholder for actual report link/ID
+}
+
+const mockResearchHistory: MockHistoryItem[] = [
+  {
+    id: '1',
+    question: 'The impact of AI on renewable energy sector advancements and policy implications.',
+    date: '2024-07-15',
+    summarySnippet: 'AI is significantly accelerating R&D in renewables, particularly in solar and wind, by optimizing grid management and predicting maintenance needs...',
+  },
+  {
+    id: '2',
+    question: 'Explore the multifaceted impacts of generative AI on the future of creative professions.',
+    date: '2024-07-10',
+    summarySnippet: 'Generative AI presents both opportunities and challenges for creative fields, automating certain tasks while also offering new tools for artistic expression...',
+  },
+  {
+    id: '3',
+    question: 'Analyze the role of gut microbiome in mental health and potential therapeutic interventions.',
+    date: '2024-06-28',
+    summarySnippet: 'Emerging research highlights a strong connection between gut bacteria and brain function, with implications for treating depression and anxiety...',
+  },
+  {
+    id: '4',
+    question: 'How does quantum computing affect current cryptographic standards?',
+    date: '2024-06-22',
+    summarySnippet: 'Quantum computers pose a significant threat to existing encryption methods like RSA and ECC, necessitating the development of quantum-resistant cryptography...',
+  }
+];
+
 
 const SettingsSection: React.FC<{ title: string; description?: string; icon?: React.ElementType; children: React.ReactNode; className?: string }> = ({ title, description, icon: Icon, children, className }) => (
   <Card className={cn("w-full shadow-lg border-border/60 hover:border-primary/40 transition-colors duration-300", className)}>
@@ -78,8 +115,7 @@ export default function AccountSettingsPage() {
             const prefersDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
             setThemeState(prefersDark ? 'dark' : 'system');
         }
-        // Check for #history hash in URL to set active tab
-        if (window.location.hash === "#history") {
+        if (typeof window !== 'undefined' && window.location.hash === "#history") {
           setActiveTab("history");
         }
       } else {
@@ -91,13 +127,14 @@ export default function AccountSettingsPage() {
   }, [router]);
 
   useEffect(() => {
-    // Update URL hash when activeTab changes
-    if (activeTab === "history") {
-      router.replace("/account-settings#history", { scroll: false });
-    } else {
-      router.replace("/account-settings", { scroll: false });
+    if (typeof window !== 'undefined') {
+        if (activeTab === "history") {
+          window.history.replaceState(null, '', "/account-settings#history");
+        } else if (window.location.hash === "#history") { // If hash is present but tab isn't history, remove hash
+            window.history.replaceState(null, '', "/account-settings");
+        }
     }
-  }, [activeTab, router]);
+  }, [activeTab]);
 
 
   const handleThemeChange = (newTheme: 'light' | 'dark' | 'system') => {
@@ -409,20 +446,57 @@ export default function AccountSettingsPage() {
         </TabsContent>
 
         <TabsContent value="history" className="mt-6 sm:mt-8">
-            <SettingsSection title="Your Research Journey" icon={History} description="Review your past research queries and generated reports. (Placeholder)">
-                <div className="min-h-[300px] flex flex-col items-center justify-center text-center p-6 border-2 border-dashed border-border/60 rounded-lg bg-secondary/30 dark:bg-secondary/10">
-                    <FileText className="h-16 w-16 text-muted-foreground/70 mb-4" />
-                    <h3 className="text-xl font-semibold text-primary/90 mb-2">No History... Yet!</h3>
-                    <p className="text-muted-foreground max-w-md">
-                        Your past research sessions, queries, synthesized insights, and generated reports will appear here once you start exploring with ScholarAI.
-                    </p>
-                    <Button asChild className="mt-6">
-                        <NextLink href="/">Start New Research</NextLink>
-                    </Button>
-                </div>
-                <p className="text-xs text-muted-foreground mt-4 text-center">
-                    Note: Full history tracking requires backend integration, which is not yet implemented. This section is a placeholder for future functionality.
-                </p>
+            <SettingsSection title="Your Research Journey" icon={History} description="Review your past research queries and generated reports.">
+                {mockResearchHistory.length > 0 ? (
+                    <div className="space-y-4">
+                        {mockResearchHistory.map((item) => (
+                            <Card key={item.id} className="shadow-md hover:shadow-lg transition-shadow border-border/70">
+                                <CardHeader className="pb-3">
+                                    <CardTitle className="text-lg font-medium text-primary truncate" title={item.question}>
+                                        <BookOpen className="inline h-5 w-5 mr-2.5 text-accent"/>
+                                        {item.question.length > 80 ? `${item.question.substring(0, 80)}...` : item.question}
+                                    </CardTitle>
+                                    <CardDescription className="text-xs flex items-center text-muted-foreground">
+                                        <ClockIcon className="inline h-3.5 w-3.5 mr-1.5"/>
+                                        Initiated on: {new Date(item.date).toLocaleDateString()}
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="pb-4">
+                                    <p className="text-sm text-foreground/80 leading-relaxed line-clamp-2" title={item.summarySnippet}>
+                                        {item.summarySnippet}
+                                    </p>
+                                </CardContent>
+                                <CardFooter>
+                                    <Button 
+                                        variant="outline" 
+                                        size="sm" 
+                                        className="ml-auto text-xs"
+                                        onClick={() => toast({
+                                            title: "Feature Coming Soon!",
+                                            description: "Viewing full reports from history will be available in a future update."
+                                        })}
+                                    >
+                                        View Details (Mock)
+                                    </Button>
+                                </CardFooter>
+                            </Card>
+                        ))}
+                         <p className="text-xs text-muted-foreground mt-6 text-center">
+                            Note: This history is for demonstration purposes. Actual history tracking requires backend integration.
+                        </p>
+                    </div>
+                ) : (
+                    <div className="min-h-[250px] flex flex-col items-center justify-center text-center p-6 border-2 border-dashed border-border/60 rounded-lg bg-secondary/30 dark:bg-secondary/10">
+                        <FileText className="h-16 w-16 text-muted-foreground/70 mb-4" />
+                        <h3 className="text-xl font-semibold text-primary/90 mb-2">No History... Yet!</h3>
+                        <p className="text-muted-foreground max-w-md">
+                            Your past research sessions will appear here once you start exploring.
+                        </p>
+                        <Button asChild className="mt-6">
+                            <NextLink href="/">Start New Research</NextLink>
+                        </Button>
+                    </div>
+                )}
             </SettingsSection>
         </TabsContent>
       </Tabs>
@@ -436,5 +510,4 @@ export default function AccountSettingsPage() {
   );
 }
 
-// cn function was defined here, but it should be imported from @/lib/utils. This ensures only one definition.
-// Removed the local cn function definition. ClassValue is also imported.
+    

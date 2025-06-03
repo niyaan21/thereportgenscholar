@@ -9,16 +9,33 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, LayoutDashboard, History, FileText, Settings, PlusCircle, BarChart2, ExternalLink, UserCircle, Info, BookOpen, Zap, UploadCloud } from 'lucide-react';
+import { Loader2, LayoutDashboard, History, FileText, Settings, PlusCircle, BarChart2, ExternalLink, UserCircle, Info, BookOpen, Zap, UploadCloud, ClockIcon } from 'lucide-react';
 import NextLink from 'next/link';
-import type { Metadata } from 'next'; // For potential future server component parent
+import type { Metadata } from 'next';
 
-// Note: Metadata object cannot be used in client components for static export.
-// If SEO for this page is critical, consider moving metadata to a server component parent or layout.
-// export const metadata: Metadata = {
-//   title: 'My Dashboard - ScholarAI',
-//   description: 'Your personal ScholarAI dashboard. View recent activity, quick actions, and stats.',
-// };
+// Mock data for recent activity - aligned with account-settings mock
+interface MockDashboardActivityItem {
+  id: string;
+  question: string;
+  date: string;
+  type: 'query' | 'report'; // Could be expanded
+}
+
+const mockDashboardActivity: MockDashboardActivityItem[] = [
+  {
+    id: '1',
+    question: 'Impact of AI on renewable energy...',
+    date: '2024-07-15',
+    type: 'query',
+  },
+  {
+    id: 'hist-report-file-1',
+    question: 'Generated report from "Annual_Climate_Change_Review.pdf"',
+    date: '2024-07-14',
+    type: 'report',
+  },
+];
+
 
 const DashboardStatCard: React.FC<{ title: string; value: string; icon: React.ElementType; description: string, className?: string }> = ({ title, value, icon: Icon, description, className }) => (
   <Card className={className}>
@@ -67,7 +84,7 @@ export default function DashboardPage() {
       if (user) {
         setCurrentUser(user);
       } else {
-        router.push('/login'); // Redirect if not logged in
+        router.push('/login'); 
       }
       setIsLoading(false);
     });
@@ -93,36 +110,33 @@ export default function DashboardPage() {
         </p>
       </header>
 
-      {/* Placeholder for no actual data backend */}
        <Alert variant="default" className="mb-6 sm:mb-8 bg-primary/5 border-primary/20 text-primary dark:bg-primary/10 dark:border-primary/30 dark:text-primary-foreground/90 shadow-md">
         <Info className="h-5 w-5 text-primary" />
         <AlertTitle className="font-semibold text-primary">Developer Note: Placeholder Content</AlertTitle>
         <AlertDescription className="text-primary/80 dark:text-primary-foreground/80 mt-1 text-sm">
-          The dashboard and history features currently display placeholder data. Full functionality for recent activity, stats, and research history requires backend database integration to store and retrieve user-specific information.
+          The dashboard, stats, and research history currently display mock/placeholder data. Full functionality requires backend integration.
         </AlertDescription>
       </Alert>
 
-      {/* Stats Overview Section - Placeholder */}
       <section className="mb-8 sm:mb-10">
         <h2 className="text-2xl sm:text-3xl font-semibold text-primary mb-4 sm:mb-6 flex items-center">
           <BarChart2 className="mr-3 h-7 w-7 text-accent" />
-          Your Activity At a Glance
+          Your Activity At a Glance (Mock Data)
         </h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <DashboardStatCard title="Research Started" value="0" icon={FileText} description="Total research sessions initiated." className="bg-card/80 backdrop-blur-sm"/>
-          <DashboardStatCard title="Reports Generated" value="0" icon={BookOpen} description="Comprehensive reports created." className="bg-card/80 backdrop-blur-sm"/>
-          <DashboardStatCard title="Queries Formulated" value="0" icon={Zap} description="AI-assisted query sets." className="bg-card/80 backdrop-blur-sm"/>
+          <DashboardStatCard title="Research Sessions" value="4" icon={FileText} description="Total mock sessions initiated." className="bg-card/80 backdrop-blur-sm"/>
+          <DashboardStatCard title="Reports Generated" value="2" icon={BookOpen} description="Mock comprehensive reports created." className="bg-card/80 backdrop-blur-sm"/>
+          <DashboardStatCard title="Queries Formulated" value="17" icon={Zap} description="Mock AI-assisted query sets." className="bg-card/80 backdrop-blur-sm"/>
         </div>
          <p className="text-xs text-muted-foreground mt-3 text-center sm:text-left">Data is illustrative and not yet tracked.</p>
       </section>
 
-      {/* Quick Actions Section */}
       <section className="mb-8 sm:mb-10">
         <h2 className="text-2xl sm:text-3xl font-semibold text-primary mb-4 sm:mb-6 flex items-center">
             <PlusCircle className="mr-3 h-7 w-7 text-accent" />
             Quick Actions
         </h2>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4"> {/* Adjusted grid for 4 items */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
             <QuickActionCard 
                 title="Start New Research" 
                 href="/" 
@@ -150,27 +164,38 @@ export default function DashboardPage() {
         </div>
       </section>
       
-      {/* Recent Activity Section - Placeholder */}
       <section>
         <h2 className="text-2xl sm:text-3xl font-semibold text-primary mb-4 sm:mb-6 flex items-center">
             <History className="mr-3 h-7 w-7 text-accent" />
-            Recent Activity
+            Recent Activity (Mock Data)
         </h2>
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="text-xl font-medium text-primary/90">Last Research Query</CardTitle>
-            <CardDescription className="text-sm">This is where your most recent research topic would appear.</CardDescription>
+            <CardTitle className="text-xl font-medium text-primary/90">Latest Research Items</CardTitle>
+            <CardDescription className="text-sm">A glimpse of your recent interactions with ScholarAI.</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground italic">
-              No research activity logged yet. Start a new research session to see it here.
-            </p>
-            {/* Example of how an item might look:
-            <div className="p-3 bg-secondary/50 rounded-md mt-2">
-                <p className="font-medium text-foreground/90">"The impact of AI on renewable energy sector."</p>
-                <p className="text-xs text-muted-foreground mt-1">Accessed: 2 hours ago</p>
-            </div>
-            */}
+            {mockDashboardActivity.length > 0 ? (
+              <ul className="space-y-3">
+                {mockDashboardActivity.map(item => (
+                  <li key={item.id} className="p-3 bg-secondary/50 dark:bg-secondary/20 rounded-md hover:bg-secondary/70 dark:hover:bg-secondary/30 transition-colors border border-border/60">
+                    <div className="flex items-center justify-between">
+                        <p className="font-medium text-foreground/90 text-sm truncate" title={item.question}>
+                            {item.type === 'query' ? <Zap className="inline h-4 w-4 mr-2 text-accent/80"/> : <BookOpen className="inline h-4 w-4 mr-2 text-accent/80"/>}
+                            {item.question.length > 60 ? `${item.question.substring(0, 60)}...` : item.question}
+                        </p>
+                        <span className="text-xs text-muted-foreground whitespace-nowrap ml-2 flex items-center">
+                            <ClockIcon className="h-3 w-3 mr-1"/> {new Date(item.date).toLocaleDateString()}
+                        </span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-muted-foreground italic text-sm">
+                No recent activity logged yet. Start a new research session to see it here.
+              </p>
+            )}
           </CardContent>
           <CardFooter>
             <Button variant="outline" asChild>
@@ -191,3 +216,4 @@ export default function DashboardPage() {
   );
 }
 
+    
