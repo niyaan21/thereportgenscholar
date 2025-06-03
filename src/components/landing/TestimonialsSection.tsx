@@ -113,6 +113,30 @@ export const testimonialsData: Testimonial[] = [
     avatarSrc: "https://placehold.co/100x100/FFC0CB/4A5568.png?text=PS",
     avatarFallback: "PS",
     stars: 4,
+  },
+  {
+    quote: "The iterative process of refining queries and summaries in ScholarAI is fantastic. It feels like a true collaborative partner in research, not just a static tool. The AI adapts!",
+    name: "Dr. Ben Isaac",
+    title: "Cognitive Scientist",
+    avatarSrc: "https://placehold.co/100x100/718096/FFFFFF.png?text=BI",
+    avatarFallback: "BI",
+    stars: 5,
+  },
+  {
+    quote: "ScholarAI has streamlined our team's initial research phase for new projects. We can quickly get a comprehensive overview and identify key areas for deeper manual investigation. Huge efficiency gain.",
+    name: "Aisha Khan",
+    title: "R&D Project Manager",
+    avatarSrc: "https://placehold.co/100x100/ED8936/FFFFFF.png?text=AK",
+    avatarFallback: "AK",
+    stars: 5,
+  },
+  {
+    quote: "The depth of the generated reports is impressive. It covers aspects I wouldn't have thought to include initially, providing a more holistic view of the research topic. The chart suggestions are also spot on.",
+    name: "Tom Evans",
+    title: "Freelance Technical Writer",
+    avatarSrc: "https://placehold.co/100x100/4299E1/FFFFFF.png?text=TE",
+    avatarFallback: "TE",
+    stars: 4,
   }
 ];
 
