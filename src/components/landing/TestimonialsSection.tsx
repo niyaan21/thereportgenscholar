@@ -89,6 +89,30 @@ export const testimonialsData: Testimonial[] = [
     avatarSrc: "https://placehold.co/100x100/68D391/FFFFFF.png?text=SG",
     avatarFallback: "SG",
     stars: 5,
+  },
+  {
+    quote: "The conceptual image generation is surprisingly inspiring. It gives a fresh visual perspective on my research topics, often sparking new ideas or ways to present my findings.",
+    name: "Dr. Olivia Huang",
+    title: "Art History Professor",
+    avatarSrc: "https://placehold.co/100x100/D6BCFA/4A5568.png?text=OH",
+    avatarFallback: "OH",
+    stars: 5,
+  },
+  {
+    quote: "As a non-native English speaker, the report structuring and formal language generation by ScholarAI are incredibly helpful for producing professional-quality academic documents.",
+    name: "Marco Rossi",
+    title: "Visiting Scholar, International Relations",
+    avatarSrc: "https://placehold.co/100x100/FBD38D/4A5568.png?text=MR",
+    avatarFallback: "MR",
+    stars: 5,
+  },
+  {
+    quote: "What used to take me days of sifting through articles now takes a fraction of the time. ScholarAI's AI query formulation is like having an expert librarian guide my search.",
+    name: "Priya Sharma",
+    title: "Policy Analyst, Civic Think Tank",
+    avatarSrc: "https://placehold.co/100x100/FFC0CB/4A5568.png?text=PS",
+    avatarFallback: "PS",
+    stars: 4,
   }
 ]; // Explicitly an array
 
@@ -126,4 +150,3 @@ export const TestimonialCard: React.FC<Testimonial & {className?: string}> = ({ 
     </Card>
   );
 };
-
