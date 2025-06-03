@@ -90,7 +90,7 @@ export const testimonialsData: Testimonial[] = [
     avatarFallback: "SG",
     stars: 5,
   },
-  {
+    {
     quote: "The conceptual image generation is surprisingly inspiring. It gives a fresh visual perspective on my research topics, often sparking new ideas or ways to present my findings.",
     name: "Dr. Olivia Huang",
     title: "Art History Professor",
@@ -114,7 +114,7 @@ export const testimonialsData: Testimonial[] = [
     avatarFallback: "PS",
     stars: 4,
   }
-]; // Explicitly an array
+];
 
 export const TestimonialCard: React.FC<Testimonial & {className?: string}> = ({ quote, name, title, avatarSrc, avatarFallback, stars, className }) => {
   return (

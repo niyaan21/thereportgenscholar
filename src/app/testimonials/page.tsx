@@ -1,6 +1,6 @@
 
 // src/app/testimonials/page.tsx
-import { TestimonialCard, testimonialsData } from '@/components/landing/TestimonialsSection';
+import { TestimonialCard, testimonialsData, type Testimonial } from '@/components/landing/TestimonialsSection';
 import { Users } from 'lucide-react';
 import type { Metadata } from 'next';
 
@@ -23,6 +23,7 @@ export const metadata: Metadata = {
 };
 
 export default function TestimonialsPage() {
+  console.log('Debug testimonialsData:', typeof testimonialsData, testimonialsData);
   return (
     <div className="container mx-auto min-h-[calc(100vh-8rem)] py-12 sm:py-16 px-4 sm:px-6 lg:px-8">
       <div className="text-center mb-12 sm:mb-16">
@@ -38,19 +39,20 @@ export default function TestimonialsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-        {Array.isArray(testimonialsData) && testimonialsData.map((testimonial, index) => (
-          <TestimonialCard 
-            key={index}
-            quote={testimonial.quote}
-            name={testimonial.name}
-            title={testimonial.title}
-            avatarSrc={testimonial.avatarSrc}
-            avatarFallback={testimonial.avatarFallback}
-            stars={testimonial.stars}
-          />
-        ))}
-        {!Array.isArray(testimonialsData) && (
-          <p className="text-center text-muted-foreground col-span-full">Testimonials data is currently unavailable.</p>
+        {Array.isArray(testimonialsData) && testimonialsData.length > 0 ? (
+            testimonialsData.map((testimonial, index) => (
+            <TestimonialCard 
+                key={index}
+                quote={testimonial.quote}
+                name={testimonial.name}
+                title={testimonial.title}
+                avatarSrc={testimonial.avatarSrc}
+                avatarFallback={testimonial.avatarFallback}
+                stars={testimonial.stars}
+            />
+            ))
+        ) : (
+          <p className="text-center text-muted-foreground col-span-full text-lg py-10">Testimonials are currently being gathered. Check back soon!</p>
         )}
       </div>
     </div>
