@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { ToastAction } from "@/components/ui/toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
-  ArrowLeft, RotateCcw, FileTextIcon, Settings, Moon, Sun, Palette, Image as ImageIconLucide, Loader2, BookOpen, Brain, Search, Filter, BarChartBig, Telescope, Layers, Sparkles, Bot, CornerDownLeft, Edit, CheckSquare, Zap, Eye, Lightbulb, FileArchive, Atom, ClipboardCopy, Share2, Download, Sigma, BarChartHorizontal, TrendingUpIcon, ScaleIcon, FlaskConical, LightbulbIcon as LightbulbLucideIcon, InfoIcon, AlertCircleIcon, CheckCircle2Icon, ExternalLink, MaximizeIcon, ChevronRight, Rocket, Check, Lock
+  ArrowLeft, RotateCcw, FileTextIcon, Settings, Moon, Sun, Palette, Image as ImageIconLucide, Loader2, BookOpen, Brain, Search, Filter, BarChartBig, Telescope, Layers, Sparkles, Bot, CornerDownLeft, Edit, CheckSquare, Zap, Eye, Lightbulb, FileArchive, Atom, ClipboardCopy, Share2, Download, Sigma, BarChartHorizontal, TrendingUpIcon, ScaleIcon, FlaskConical, LightbulbIcon as LightbulbLucideIcon, InfoIcon, AlertCircleIcon, CheckCircle2Icon, ExternalLink, MaximizeIcon, ChevronRight, Rocket, Check, Lock, FileText, Shield, MessageSquare
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 
@@ -539,6 +539,18 @@ export default function ScholarAIPage() {
 
       <footer className="py-8 sm:py-10 px-4 md:px-8 border-t-2 border-border/50 bg-background mt-16 sm:mt-20">
         <div className="container mx-auto text-center text-xs sm:text-sm text-muted-foreground">
+          <div className="flex justify-center items-center space-x-4 mb-3">
+              <NextLink href="/about" className="hover:text-accent hover:underline">About</NextLink>
+              <NextLink href="/features" className="hover:text-accent hover:underline">Features</NextLink>
+              <NextLink href="/pricing" className="hover:text-accent hover:underline">Pricing</NextLink>
+              <NextLink href="/contact" className="hover:text-accent hover:underline">Contact</NextLink>
+              <NextLink href="/docs" className="hover:text-accent hover:underline">Docs</NextLink>
+          </div>
+          <div className="flex justify-center items-center space-x-4 mb-4">
+              <NextLink href="/privacy-policy" className="text-xs hover:text-accent hover:underline">Privacy Policy</NextLink>
+              <span className="text-muted-foreground/50">|</span>
+              <NextLink href="/terms-conditions" className="text-xs hover:text-accent hover:underline">Terms & Conditions</NextLink>
+          </div>
           <div>
             <p>
               &copy; {currentYear ?? <span className="inline-block w-10 h-4 bg-muted/40 rounded-sm animate-pulse"></span>} ScholarAI. 
@@ -579,4 +591,3 @@ export default function ScholarAIPage() {
     </Dialog>
   );
 }
-

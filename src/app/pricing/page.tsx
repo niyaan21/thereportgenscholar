@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import NextLink from 'next/link';
-import { Check, Star, Users, Zap, TrendingUp, ShieldCheck, Package, ArrowRight, DollarSign, HelpCircle, MessageCircle } from 'lucide-react';
+import { Check, Star, Users, Zap, TrendingUp, ShieldCheck, Package, ArrowRight, DollarSign, HelpCircle, MessageSquare } from 'lucide-react';
 import type { Metadata } from 'next';
 import { cn } from '@/lib/utils';
 
@@ -125,7 +125,7 @@ export default function PricingPage() {
         "Full API Access & Higher Rate Limits",
       ],
       ctaText: "Contact Sales",
-      ctaLink: "/contact", // Placeholder for contact page or modal
+      ctaLink: "/contact", 
       icon: Users,
     },
   ];
@@ -189,7 +189,7 @@ export default function PricingPage() {
             </CardContent>
              <CardFooter className="p-0 pt-8 text-center">
                 <p className="text-muted-foreground text-sm sm:text-base w-full">
-                    Have more questions? <NextLink href="/contact" className="text-accent hover:underline">Contact our support team</NextLink> (Contact page not yet created).
+                    Have more questions? <NextLink href="/contact" className="text-accent hover:underline">Contact our support team</NextLink>.
                 </p>
             </CardFooter>
         </Card>
@@ -208,5 +208,3 @@ export default function PricingPage() {
     </div>
   );
 }
-
-    

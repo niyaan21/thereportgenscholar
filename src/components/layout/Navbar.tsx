@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import NextLink from 'next/link';
-import { BookText, UserPlus, LogIn, Home, Palette, Settings, Moon, Sun, Check, LogOut, Info, BookOpenText, Code2, Menu, X as CloseIcon, UserCircle, ChevronDown, Sparkles, FileText as FeaturesIcon, Settings2 as AccountSettingsIcon, LayoutDashboard, DollarSign } from 'lucide-react';
+import { BookText, UserPlus, LogIn, Home, Palette, Settings, Moon, Sun, Check, LogOut, Info, BookOpenText, Code2, Menu, X as CloseIcon, UserCircle, ChevronDown, Sparkles, FileText as FeaturesIcon, Settings2 as AccountSettingsIcon, LayoutDashboard, DollarSign, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -64,7 +64,8 @@ export default function Navbar() {
     { href: "/pricing", label: "Pricing", icon: DollarSign },
     { href: "/about", label: "About", icon: Info },
     { href: "/docs", label: "Docs", icon: BookOpenText },
-    { href: "/api-docs", label: "API", icon: Code2 },
+    { href: "/contact", label: "Contact", icon: MessageSquare },
+    // { href: "/api-docs", label: "API", icon: Code2 }, // API Docs can be less prominent if needed
   ];
   
   const authenticatedNavLinks = [
@@ -236,6 +237,9 @@ export default function Navbar() {
               
               <div className="flex flex-col space-y-2 px-4 py-4 flex-grow overflow-y-auto">
                 {currentNavLinks.map(link => <NavLinkItem key={link.href} {...link} onClick={() => setMobileMenuOpen(false)} />)}
+                 {/* Separator for less prominent links */}
+                <DropdownMenuSeparator className="my-2" />
+                <NavLinkItem href="/api-docs" label="API Docs" icon={Code2} onClick={() => setMobileMenuOpen(false)} />
               </div>
               <div className="mt-auto p-4 border-t border-border/60 space-y-3">
                 <AuthButtons isMobile onLinkClick={() => setMobileMenuOpen(false)} />
@@ -248,5 +252,3 @@ export default function Navbar() {
     </nav>
   );
 }
-
-    

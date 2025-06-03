@@ -429,7 +429,7 @@ export default function AccountSettingsPage() {
 
       <CardFooter className="mt-10 sm:mt-12 text-center border-t pt-6 text-xs text-muted-foreground">
         <p className="mx-auto">
-          Need help? Visit our <NextLink href="/docs" className="text-accent hover:underline">Documentation</NextLink> or <NextLink href="/contact" className="text-accent hover:underline">Contact Support</NextLink> (Contact page not yet created).
+          Need help? Visit our <NextLink href="/docs" className="text-accent hover:underline">Documentation</NextLink> or <NextLink href="/contact" className="text-accent hover:underline">Contact Support</NextLink>.
         </p>
       </CardFooter>
     </div>
