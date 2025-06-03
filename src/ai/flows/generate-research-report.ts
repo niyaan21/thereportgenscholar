@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview Generates a comprehensive research report from a research question.
@@ -26,6 +27,16 @@ const ChartSuggestionSchema = z.object({
   dataDescription: z.string().describe('Description of what data this chart should represent (e.g., "Comparison of Group A vs Group B on Metric Z over 5 years").'),
   xAxisLabel: z.string().optional().describe('Suggested X-axis label if applicable.'),
   yAxisLabel: z.string().optional().describe('Suggested Y-axis label if applicable.'),
+  categoryDataKey: z.string().optional().describe('The key in the sample data objects that represents the category or X-axis values (e.g., "month", "productName"). Required for bar, line, pie charts if data is provided.'),
+  seriesDataKeys: z.array(z.object({
+      key: z.string().describe('The key in the sample data objects for this series (e.g., "revenue", "users").'),
+      label: z.string().describe('The display label for this series (e.g., "Total Revenue", "Active Users").')
+  })).min(1).optional().describe('Defines the data series for the chart. For pie charts, use one series for values. For scatter, first key is Y, second (optional) is Z/size.'),
+  data: z.array(z.record(z.union([z.string(), z.number(), z.boolean(), z.null()]))) // Allow boolean and null for flexibility
+    .min(2)
+    .max(7)
+    .optional()
+    .describe('An array of 2-7 sample data objects for the chart, e.g., [{category: "A", value1: 10, value2: 20}, ...]. Keys within these objects MUST match the categoryDataKey and the keys defined in seriesDataKeys. For pie charts, data should be like [{name: "Category A", value: 40}, {name: "Category B", value: 60}]. For scatter, like [{xVal: 10, yVal: 20, zVal: 5}, ...]')
 });
 
 const ResearchReportOutputSchema = z.object({
@@ -41,8 +52,8 @@ const ResearchReportOutputSchema = z.object({
   resultsAndAnalysis: z.array(z.object({
     sectionTitle: z.string().describe('A descriptive title for this specific result/analysis section.'),
     content: z.string().describe('Detailed presentation and in-depth analysis of a specific segment of results or data. Discuss patterns, trends, and statistical significance if applicable (approx. 300-400 words per section).'),
-    chartSuggestion: ChartSuggestionSchema.optional().describe('Suggestion for a chart to visualize this result. If a chart is relevant, provide details.')
-  })).min(3).max(5).describe('Detailed breakdown of 3-5 key results sections, each with analysis and an optional chart suggestion.'),
+    chartSuggestion: ChartSuggestionSchema.optional().describe('Suggestion for a chart to visualize this result. If a chart is relevant, provide details including sample data.')
+  })).min(3).max(5).describe('Detailed breakdown of 3-5 key results sections, each with analysis and an optional chart suggestion with sample data.'),
   discussion: z.string().describe('An expanded discussion interpreting the overall findings, their implications, how they relate back to the research question and literature review. Connect different results (approx. 600-800 words).'),
   conclusion: z.string().describe('A robust conclusion summarizing the main findings, their significance, and restating the overall contribution of the research (approx. 350-450 words).'),
   limitations: z.string().optional().describe('A detailed discussion of potential limitations of the research, analysis, or typical approaches to this topic (approx. 200-300 words).'),
@@ -90,7 +101,16 @@ Key requirements for the report:
 5.  **Key Themes**: Identify and extensively discuss 4-6 major themes or areas of investigation. Each theme's discussion should be approx. 250-350 words, providing substantial analysis and synthesis of information.
 6.  **Detailed Methodology**: (approx. 500-700 words) Describe in great detail the typical or proposed methodologies for investigating such a research question. This should include research design choices (e.g., qualitative, quantitative, mixed-methods), specific data collection approaches (even if hypothetical, explain them thoroughly), sampling strategies, instrumentation, and advanced analytical techniques. Discuss the rationale for these choices and potential challenges.
 7.  **Results and Analysis**: Provide 3-5 distinct sections. Each should have a 'sectionTitle', very detailed 'content' (approx. 300-400 words per section discussing patterns, trends, statistical significance if applicable, and nuanced interpretations), and an optional 'chartSuggestion'.
-    *   For 'chartSuggestion': If a chart (bar, line, pie, scatter) would be beneficial for illustrating complex data or findings, specify its 'type', a 'title' for the chart, 'dataDescription' (what it shows, e.g., "Trends of X over Y time, segmented by Group Z"), and optional 'xAxisLabel' and 'yAxisLabel'. If no chart is suitable for a section, set type to 'none'. Ensure chart suggestions are meaningful and add value.
+    *   For 'chartSuggestion': If a chart (bar, line, pie, scatter) would be beneficial for illustrating complex data or findings:
+        *   Specify its 'type', a 'title' for the chart.
+        *   Provide a 'dataDescription' (what it shows, e.g., "Trends of X over Y time, segmented by Group Z").
+        *   Suggest 'xAxisLabel' and 'yAxisLabel'.
+        *   Define 'categoryDataKey' (the field name for categories/x-axis in your sample data, e.g., "year" or "product_category").
+        *   Define 'seriesDataKeys' as an array of objects, each with 'key' (the data field name, e.g., "sales_total" or "user_count") and 'label' (display name, e.g., "Total Sales" or "Active Users").
+        *   Provide 2-7 plausible 'data' points as an array of objects. Keys in these data objects MUST exactly match the 'categoryDataKey' and the 'key's defined in 'seriesDataKeys'.
+            Example (bar/line): If categoryDataKey is "month" and seriesDataKeys is [{key: "revenue", label: "Revenue"}], data could be: [{month: "Jan", revenue: 1200}, {month: "Feb", revenue: 1500}, {month: "Mar", revenue: 1300}].
+            Example (pie): If categoryDataKey is "segment" and seriesDataKeys is [{key: "percentage", label: "Market Share"}], data could be: [{segment: "Alpha", percentage: 40}, {segment: "Beta", percentage: 30}, {segment: "Gamma", percentage: 30}].
+        *   If no chart is suitable for a section, set chartSuggestion.type to 'none' and omit other chart-related fields for that suggestion. Ensure chart suggestions are meaningful and add value.
 8.  **Discussion**: (approx. 600-800 words) Interpret the overall (hypothetical or synthesized) findings in great depth. Discuss their implications, how they relate back to the research question and literature review, and how they contribute to the field. Connect different results, address inconsistencies, and explore alternative interpretations.
 9.  **Conclusion**: (approx. 350-450 words) Provide a robust conclusion summarizing the main findings, their significance, and restating the overall contribution of the research. Reiterate the answers to the research objectives.
 10. **Limitations**: (approx. 200-300 words) Detail potential limitations of the research, analysis, or typical approaches to this topic, including scope, methodology, and data.
@@ -120,3 +140,4 @@ const generateResearchReportFlow = ai.defineFlow(
     return output;
   }
 );
+
