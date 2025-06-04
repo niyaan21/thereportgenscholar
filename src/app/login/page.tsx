@@ -1,4 +1,3 @@
-
 // src/app/login/page.tsx
 'use client';
 
@@ -11,9 +10,10 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, LogIn, Mail, Lock, AlertCircle } from 'lucide-react';
 import NextLink from 'next/link';
 import { useRouter } from 'next/navigation';
-import { auth } from '@/lib/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth, googleProvider } from '@/lib/firebase'; // Import googleProvider
+import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth'; // Import signInWithPopup
 import { z } from 'zod';
+import { Separator } from '@/components/ui/separator';
 
 const loginFormSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -24,6 +24,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string[]; password?: string[]; firebase?: string[] } | null>(null);
 
   const { toast } = useToast();
@@ -54,7 +55,7 @@ export default function LoginPage() {
         description: "Logged in successfully! Redirecting...",
         variant: 'default',
       });
-      router.push('/'); // Redirect to home or dashboard after login
+      router.push('/'); 
     } catch (error: any) {
       let firebaseErrorMessage = "Failed to log in. Please check your credentials and try again.";
        if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
@@ -75,6 +76,37 @@ export default function LoginPage() {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    setIsGoogleLoading(true);
+    setErrors(null);
+    try {
+      await signInWithPopup(auth, googleProvider);
+      toast({
+        title: 'Login Successful!',
+        description: "Logged in with Google successfully! Redirecting...",
+        variant: 'default',
+      });
+      router.push('/');
+    } catch (error: any) {
+      let firebaseErrorMessage = "Failed to sign in with Google. Please try again.";
+      if (error.code === 'auth/account-exists-with-different-credential') {
+        firebaseErrorMessage = 'An account already exists with the same email address but different sign-in credentials. Try signing in with the original method.';
+      } else if (error.code === 'auth/popup-closed-by-user') {
+        firebaseErrorMessage = 'Sign-in popup closed by user. Please try again.';
+      } else if (error.code === 'auth/cancelled-popup-request') {
+        firebaseErrorMessage = 'Multiple sign-in popups open. Please close other popups and try again.';
+      }
+      setErrors({ firebase: [firebaseErrorMessage] });
+      toast({
+        title: 'Google Sign-In Failed',
+        description: firebaseErrorMessage,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background via-secondary/10 to-background p-4">
       <NextLink href="/" passHref className="mb-8">
@@ -92,7 +124,30 @@ export default function LoginPage() {
           <CardTitle className="text-2xl font-bold">Welcome Back!</CardTitle>
           <CardDescription>Log in to continue your research with ScholarAI.</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
+           <Button 
+            variant="outline" 
+            className="w-full" 
+            onClick={handleGoogleSignIn}
+            disabled={isLoading || isGoogleLoading}
+          >
+            {isGoogleLoading ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 fill-current">
+                <title>Google</title>
+                <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.85 3.18-1.73 4.1-1.05 1.05-2.36 1.67-4.66 1.67-3.86 0-6.99-3.16-6.99-7.12s3.13-7.12 6.99-7.12c1.96 0 3.41.79 4.3 1.7l2.43-2.42C18.09.47 15.49 0 12.48 0c-6.63 0-12 5.37-12 12s5.37 12 12 12c6.28 0 11.43-4.39 11.43-11.72 0-.81-.07-1.61-.21-2.36h-11.22z"/>
+              </svg>
+            )}
+            Sign in with Google
+          </Button>
+
+          <div className="flex items-center space-x-2">
+            <Separator className="flex-1" />
+            <span className="text-xs text-muted-foreground">OR</span>
+            <Separator className="flex-1" />
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="email" className="flex items-center">
@@ -106,6 +161,7 @@ export default function LoginPage() {
                 required 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={isLoading || isGoogleLoading}
               />
               {errors?.email && (
                 <p className="text-xs text-destructive flex items-center mt-1">
@@ -125,6 +181,7 @@ export default function LoginPage() {
                 required 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoading || isGoogleLoading}
               />
               {errors?.password && (
                 <p className="text-xs text-destructive flex items-center mt-1">
@@ -138,9 +195,9 @@ export default function LoginPage() {
                 </p>
               )}
             <CardFooter className="p-0 pt-4">
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading}>
                 {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LogIn className="mr-2 h-4 w-4" />}
-                Log In
+                Log In with Email
               </Button>
             </CardFooter>
           </form>

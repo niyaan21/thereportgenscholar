@@ -1,6 +1,6 @@
 // src/lib/firebase.ts
 import { initializeApp, getApp, getApps, type FirebaseApp } from "firebase/app";
-import { getAuth, type Auth } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, type Auth } from "firebase/auth"; // Added GoogleAuthProvider
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -22,5 +22,6 @@ if (!getApps().length) {
 }
 
 const auth: Auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider(); // Create an instance of GoogleAuthProvider
 
-export { app, auth };
+export { app, auth, googleProvider }; // Export googleProvider
