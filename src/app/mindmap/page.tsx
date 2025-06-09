@@ -2,7 +2,7 @@
 // src/app/mindmap/page.tsx
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; // Imported useState and useEffect
 import { useActionState } from 'react';
 import NextLink from 'next/link';
 import { useToast } from '@/hooks/use-toast';
