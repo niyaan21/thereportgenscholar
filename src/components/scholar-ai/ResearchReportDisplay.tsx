@@ -7,7 +7,7 @@ import type { GenerateResearchReportOutput } from '@/ai/flows/generate-research-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { FileText, BookOpen, ListChecks, MessageSquareQuote, SearchCode, Lightbulb, AlertTriangle, ThumbsUp, Telescope, Edit3, BarChartHorizontalBig, Users, ShieldCheck, BookCopy, BookMarked, TrendingUp, FileJson, GanttChartSquare, PieChartIcon, LineChartIcon, BarChartIcon, ScatterChartIcon, Brain, LightbulbIcon, MaximizeIcon, Settings, FileQuestion, Activity, Library, UsersRound, ShieldAlert, ClipboardList, Milestone, Scale, GitBranch, DownloadCloud, Share2Icon, BookText, FileType, Image as ImageIconLucide, Loader2 } from 'lucide-react'; // Added Loader2
+import { FileText, BookOpen, ListChecks, MessageSquareQuote, SearchCode, Lightbulb, AlertTriangle, ThumbsUp, Telescope, Edit3, BarChartHorizontalBig, Users, ShieldCheck, BookCopy, BookMarked, TrendingUp, FileJson, GanttChartSquare, PieChartIcon, LineChartIcon, BarChartIcon, ScatterChartIcon, Brain, LightbulbIcon, MaximizeIcon, Settings, FileQuestion, Activity, Library, UsersRound, ShieldAlert, ClipboardList, Milestone, Scale, GitBranch, DownloadCloud, Share2Icon, BookText, FileType, Image as ImageIconLucide, Loader2, Info as InfoIcon } from 'lucide-react'; // Added Loader2 and InfoIcon
 import NextImage from 'next/image';
 import { cn } from '@/lib/utils';
 import PlaceholderChart from './PlaceholderChart';
@@ -15,6 +15,8 @@ import { Button } from '@/components/ui/button';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { useToast } from '@/hooks/use-toast';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
 
 export interface ResearchReportDisplayProps {
   report: GenerateResearchReportOutput;
@@ -119,10 +121,25 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
   const handleDownloadReportPdf = async () => {
     setIsGeneratingPdf(true);
     toast({
-      title: "🚀 Generating PDF Report",
-      description: "Please wait, this may take a few moments. Ensure relevant sections are expanded for chart inclusion.",
-      duration: 7000,
+      title: "🚀 Generating PDF Report...",
+      description: (
+        <div className="flex flex-col gap-2 text-xs">
+            <p>This may take a few moments. Report quality is best when viewed online.</p>
+            <Alert variant="default" className="bg-primary/5 border-primary/20 p-2">
+                <InfoIcon className="h-4 w-4 text-primary" />
+                <AlertTitle className="text-xs font-medium text-primary">Important for Chart Accuracy:</AlertTitle>
+                <AlertDescription className="text-xs text-primary/80">
+                    Ensure all report sections containing charts are <strong className="text-primary">EXPANDED</strong> in the web view before starting the PDF generation. This helps include them accurately.
+                </AlertDescription>
+            </Alert>
+        </div>
+      ),
+      duration: 10000, // Increased duration for user to read
     });
+
+    // Give a slight delay for the toast to be visible and for user to potentially expand sections
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
 
     const doc = new jsPDF({ unit: 'pt', format: 'a4' });
     let yPosition = 40;
@@ -483,13 +500,8 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
                            </p>
                         )}
                         <PlaceholderChart
-                          chartType={result.chartSuggestion.type}
-                          title={result.chartSuggestion.title}
-                          description={result.chartSuggestion.dataDescription}
-                          chartData={result.chartSuggestion.data}
-                          seriesDataKeysConfig={result.chartSuggestion.seriesDataKeys}
-                          categoryDataKeyConfig={result.chartSuggestion.categoryDataKey}
-                          pdfChartId={`pdf-chart-results-${index}`} // Assign ID for PDF capture
+                          chartSuggestion={result.chartSuggestion}
+                          pdfChartId={`pdf-chart-results-${index}`} 
                         />
                       </div>
                     )}

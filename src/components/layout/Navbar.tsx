@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import NextLink from 'next/link';
-import { BookText, UserPlus, LogIn, Home, Palette, Settings, Moon, Sun, Check, LogOut, Info, BookOpenText, Code2, Menu, X as CloseIcon, UserCircle, ChevronDown, Sparkles, FileText as FeaturesIcon, Settings2 as AccountSettingsIcon, LayoutDashboard, DollarSign, MessageSquare, UploadCloud as FileReportIcon } from 'lucide-react'; // Added FileReportIcon
+import { BookText, UserPlus, LogIn, Home, Palette, Settings, Moon, Sun, Check, LogOut, Info, BookOpenText, Code2, Menu, X as CloseIcon, UserCircle, ChevronDown, Sparkles, FileText as FeaturesIcon, Settings2 as AccountSettingsIcon, LayoutDashboard, DollarSign, MessageSquare, UploadCloud as FileReportIcon, BrainCircuit as MindMapIcon } from 'lucide-react'; // Added MindMapIcon
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -60,7 +60,8 @@ export default function Navbar() {
 
   const commonNavLinksBase = [
     { href: "/", label: "Home", icon: Home },
-    { href: "/file-report", label: "File Report", icon: FileReportIcon }, // New Link
+    { href: "/file-report", label: "File Report", icon: FileReportIcon },
+    { href: "/mindmap", label: "Mind Map", icon: MindMapIcon }, // New Mind Map Link
     { href: "/features", label: "Features", icon: Sparkles },
     { href: "/pricing", label: "Pricing", icon: DollarSign },
     { href: "/about", label: "About", icon: Info },
@@ -250,4 +251,3 @@ export default function Navbar() {
     </nav>
   );
 }
-

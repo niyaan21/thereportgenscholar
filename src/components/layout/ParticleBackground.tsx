@@ -64,11 +64,11 @@ const ParticleBackground: React.FC = () => {
           },
           modes: {
             repulse: {
-              distance: 80,
+              distance: 60, // Reduced from 80
               duration: 0.4,
             },
             push: {
-                quantity: 2,
+                quantity: 1, // Reduced from 2
             }
           },
         },
@@ -80,7 +80,7 @@ const ParticleBackground: React.FC = () => {
             color: linkColor,
             distance: 150,
             enable: true,
-            opacity: 0.3, // Increased link opacity
+            opacity: 0.25, // Slightly reduced link opacity
             width: 1,
           },
           move: {
@@ -90,24 +90,24 @@ const ParticleBackground: React.FC = () => {
               default: 'bounce',
             },
             random: false,
-            speed: 0.7,
+            speed: 0.6, // Slightly reduced speed
             straight: false,
           },
           number: {
             density: {
               enable: true,
-              area: 800, // Decreased area for more density or increase value
+              area: 900, // Increased area for slightly less density
             },
-            value: 80, // Increased number of particles
+            value: 60, // Reduced from 80
           },
           opacity: {
-            value: 0.4, // Increased particle opacity
+            value: 0.35, // Slightly reduced particle opacity
           },
           shape: {
             type: 'circle',
           },
           size: {
-            value: { min: 1, max: 3 }, 
+            value: { min: 1, max: 2.5 }, // Slightly smaller max size
           },
         },
         detectRetina: true,
@@ -121,4 +121,3 @@ const ParticleBackground: React.FC = () => {
 };
 
 export default ParticleBackground;
-

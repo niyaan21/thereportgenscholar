@@ -7,7 +7,8 @@ import { summarizeResearchPapers, type SummarizeResearchPapersInput, type Summar
 import { generateResearchImage, type GenerateResearchImageInput, type GenerateResearchImageOutput } from '@/ai/flows/generate-research-image';
 import { generateResearchReport, type GenerateResearchReportInput, type GenerateResearchReportOutput } from '@/ai/flows/generate-research-report';
 import { generateReportFromFile, type GenerateReportFromFileInput, type GenerateReportFromFileOutput } from '@/ai/flows/generate-report-from-file'; // New import
-import { generateDailyPrompt, type GenerateDailyPromptOutput } from '@/ai/flows/generate-daily-prompt-flow'; // New import for daily prompt
+import { generateDailyPrompt, type GenerateDailyPromptOutput } from '@/ai/flows/generate-daily-prompt-flow';
+import { extractMindmapConcepts, type ExtractMindmapConceptsInput, type ExtractMindmapConceptsOutput } from '@/ai/flows/extract-mindmap-concepts'; // New import for mindmap
 import { z } from 'zod';
 
 const formulateQuerySchema = z.object({
@@ -352,6 +353,55 @@ export async function handleGenerateDailyPromptAction(): Promise<GenerateDailyPr
       message: `Failed to generate daily prompt: ${errorMessage}`,
       dailyPrompt: null,
       error: errorMessage,
+    };
+  }
+}
+
+// Action for Mindmap Concept Extraction
+const extractMindmapConceptsSchema = z.object({
+  textToAnalyze: z.string().min(50, "Text must be at least 50 characters.").max(10000, "Text must be at most 10,000 characters."),
+});
+
+export interface ExtractMindmapConceptsActionState {
+  success: boolean;
+  message: string;
+  extractedData: ExtractMindmapConceptsOutput | null;
+  errors: { textToAnalyze?: string[] } | null;
+}
+
+export async function handleExtractMindmapConceptsAction(
+  prevState: ExtractMindmapConceptsActionState,
+  formData: FormData
+): Promise<ExtractMindmapConceptsActionState> {
+  const textToAnalyze = formData.get('textToAnalyze') as string;
+
+  const validation = extractMindmapConceptsSchema.safeParse({ textToAnalyze });
+  if (!validation.success) {
+    return {
+      success: false,
+      message: "Invalid input for mindmap concept extraction.",
+      extractedData: null,
+      errors: validation.error.flatten().fieldErrors,
+    };
+  }
+
+  try {
+    const input: ExtractMindmapConceptsInput = { textToAnalyze: validation.data.textToAnalyze };
+    const result = await extractMindmapConcepts(input);
+    return {
+      success: true,
+      message: "Mindmap concepts extracted successfully.",
+      extractedData: result,
+      errors: null,
+    };
+  } catch (error) {
+    console.error("Error extracting mindmap concepts:", error);
+    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
+    return {
+      success: false,
+      message: `Failed to extract mindmap concepts: ${errorMessage}`,
+      extractedData: null,
+      errors: null,
     };
   }
 }
