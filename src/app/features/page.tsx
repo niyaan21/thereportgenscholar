@@ -6,7 +6,7 @@ import NextLink from 'next/link';
 import { Zap, Brain, FileTextIcon, Image as ImageIconLucide, ShieldCheck, LayoutDashboard, Download, Smartphone, ArrowRight, Sparkles, Search, Layers, Palette, Settings, Users, ThumbsUp, UploadCloud, MessageCircle, BarChart, BookOpen, Server, Share2 } from 'lucide-react';
 import type { Metadata } from 'next';
 import { cn } from '@/lib/utils';
-import React from 'react'; // Import React
+import React from 'react'; 
 
 export const metadata: Metadata = {
   title: 'ScholarAI Features - Advanced AI Research Capabilities',
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
         width: 1200,
         height: 630,
         alt: 'Features of ScholarAI Platform',
-        'data-ai-hint': 'features list infographic',
+        'data-ai-hint': 'features list infographic' as any,
       },
     ],
   },
@@ -48,6 +48,8 @@ const FeatureCard = React.memo(function FeatureCard({ icon: Icon, title, descrip
     </Card>
   );
 });
+FeatureCard.displayName = "FeatureCard";
+
 
 export default function FeaturesPage() {
   const features = [
@@ -182,4 +184,3 @@ export default function FeaturesPage() {
     </div>
   );
 }
-

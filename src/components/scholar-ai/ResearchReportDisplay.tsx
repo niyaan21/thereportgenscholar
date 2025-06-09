@@ -1,13 +1,12 @@
-
 // src/components/scholar-ai/ResearchReportDisplay.tsx
 'use client';
 
-import React, { useState } from 'react'; // Added useState
+import React, { useState } from 'react'; 
 import type { GenerateResearchReportOutput } from '@/ai/flows/generate-research-report';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { FileText, BookOpen, ListChecks, MessageSquareQuote, SearchCode, Lightbulb, AlertTriangle, ThumbsUp, Telescope, Edit3, BarChartHorizontalBig, Users, ShieldCheck, BookCopy, BookMarked, TrendingUp, FileJson, GanttChartSquare, PieChartIcon, LineChartIcon, BarChartIcon, ScatterChartIcon, Brain, LightbulbIcon, MaximizeIcon, Settings, FileQuestion, Activity, Library, UsersRound, ShieldAlert, ClipboardList, Milestone, Scale, GitBranch, DownloadCloud, Share2Icon, BookText, FileType, Image as ImageIconLucide, Loader2, Info as InfoIcon } from 'lucide-react'; // Added Loader2 and InfoIcon
+import { FileText, BookOpen, ListChecks, MessageSquareQuote, SearchCode, Lightbulb, AlertTriangle, ThumbsUp, Telescope, Edit3, BarChartHorizontalBig, Users, ShieldCheck, BookCopy, BookMarked, TrendingUp, FileJson, GanttChartSquare, PieChartIcon, LineChartIcon, BarChartIcon, ScatterChartIcon, Brain, LightbulbIcon, MaximizeIcon, Settings, FileQuestion, Activity, Library, UsersRound, ShieldAlert, ClipboardList, Milestone, Scale, GitBranch, DownloadCloud, Share2Icon, BookText, FileType, Image as ImageIconLucide, Info as InfoIcon } from 'lucide-react';
 import NextImage from 'next/image';
 import { cn } from '@/lib/utils';
 import PlaceholderChart from './PlaceholderChart';
@@ -134,10 +133,10 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
             </Alert>
         </div>
       ),
-      duration: 10000, // Increased duration for user to read
+      duration: 10000, 
     });
 
-    // Give a slight delay for the toast to be visible and for user to potentially expand sections
+    
     await new Promise(resolve => setTimeout(resolve, 1500));
 
 
@@ -196,7 +195,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
           let imgWidthPdf = contentWidth * 0.75;
           let imgHeightPdf = (imgHeightOriginal * imgWidthPdf) / imgWidthOriginal;
 
-          if (imgHeightPdf > pageHeight * 0.4) { // Limit image height
+          if (imgHeightPdf > pageHeight * 0.4) { 
             imgHeightPdf = pageHeight * 0.4;
             imgWidthPdf = (imgWidthOriginal * imgHeightPdf) / imgHeightOriginal;
           }
@@ -215,7 +214,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
           console.error("Error loading image for PDF.");
           addTextToPdf("[Error embedding image in PDF. Please view on web.]", 10, {italic: true, color: "#AA0000"});
           yPosition += lineHeight * 1.5;
-          resolve(); // Resolve even on error to continue PDF generation
+          resolve(); 
         };
         img.src = imageDataUri;
       });
@@ -234,7 +233,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
         await addImageToPdf(generatedImageUrl, MimeTypeMatch ? MimeTypeMatch[1].split('/')[1] : 'PNG');
     }
     
-    // Function to add sections, now async to handle chart captures
+    
     const addPdfSection = async (title: string, content?: string | any[] | null, renderFn?: (item: any, index: number, doc: jsPDF, currentY: number, addTextFn: typeof addTextToPdf) => Promise<number>) => {
         const isOptionalAndEmpty = (["Acknowledged Limitations", "Future Research Avenues", "Ethical Considerations & Impact", "Supplementary Appendices", "Glossary of Key Terms"].includes(title) && (!content || (Array.isArray(content) && content.length === 0)) && !renderFn);
         if (isOptionalAndEmpty) return;
@@ -263,7 +262,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
     await addPdfSection("Comprehensive Literature Review", report.literatureReview);
 
     await addPdfSection("Key Themes & In-Depth Discussion", report.keyThemes, async (theme: any, index: number, docRef, currentY, addTextFn) => {
-        yPosition = currentY; // Ensure yPosition is managed correctly
+        yPosition = currentY; 
         addTextFn(`${index + 1}. ${theme.theme}`, 12, { bold: true });
         addTextFn(theme.discussion, 10, {}, 15);
         yPosition += lineHeight;
@@ -272,7 +271,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
 
     await addPdfSection("Detailed Research Methodology", report.detailedMethodology);
 
-    // Results and Analysis with Chart Embedding
+    
     const resultsSectionTitle = "Results Presentation & Analysis";
     if (yPosition + lineHeight * 3 > pageHeight - margin) { doc.addPage(); yPosition = margin; }
     addTextToPdf(resultsSectionTitle, 14, { bold: true });
@@ -288,7 +287,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
                 const chartElement = document.getElementById(chartElementId);
                 if (chartElement) {
                     try {
-                        if (yPosition + (pageHeight * 0.3) > pageHeight - margin) { doc.addPage(); yPosition = margin; } // Check space for chart
+                        if (yPosition + (pageHeight * 0.3) > pageHeight - margin) { doc.addPage(); yPosition = margin; } 
                         const canvas = await html2canvas(chartElement, { scale: 1.5, backgroundColor: '#FFFFFF', logging: false, useCORS: true });
                         const imgData = canvas.toDataURL('image/png');
                         
@@ -297,7 +296,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
                             chartImg.onload = () => {
                                 const chartImgWidthOriginal = chartImg.width;
                                 const chartImgHeightOriginal = chartImg.height;
-                                let chartImgWidthPdf = contentWidth * 0.8; // Chart can be wider
+                                let chartImgWidthPdf = contentWidth * 0.8; 
                                 let chartImgHeightPdf = (chartImgHeightOriginal * chartImgWidthPdf) / chartImgWidthOriginal;
 
                                 if (chartImgHeightPdf > pageHeight * 0.4) {
@@ -411,7 +410,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
                 <FileJson size={16} className="mr-1.5 sm:mr-2 group-hover:animate-pulse" /> Download JSON
              </Button>
              <Button variant="outline" size="sm" onClick={handleDownloadReportPdf} disabled={isGeneratingPdf} className="bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-md sm:rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm group w-full sm:w-auto">
-                {isGeneratingPdf ? <Loader2 size={16} className="mr-1.5 sm:mr-2 animate-spin"/> : <FileType size={16} className="mr-1.5 sm:mr-2 group-hover:animate-pulse" />} 
+                {isGeneratingPdf ? <Loader2 size={16} className="mr-1.5 sm:mr-2 animate-spin" /> : <FileType size={16} className="mr-1.5 sm:mr-2 group-hover:animate-pulse" />} 
                 {isGeneratingPdf ? "Generating..." : "Download PDF"}
              </Button>
            </div>

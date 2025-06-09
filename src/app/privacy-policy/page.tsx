@@ -16,7 +16,7 @@ export const metadata: Metadata = {
         width: 1200,
         height: 630,
         alt: 'ScholarAI Privacy Policy',
-        'data-ai-hint': 'privacy security document',
+        'data-ai-hint': 'privacy security document' as any,
       },
     ],
   },

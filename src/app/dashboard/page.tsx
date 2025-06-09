@@ -1,4 +1,3 @@
-
 // src/app/dashboard/page.tsx
 'use client';
 
@@ -11,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2, LayoutDashboard, History, FileText, Settings, PlusCircle, BarChart2, ExternalLink, UserCircle, Info, BookOpen, Zap, UploadCloud, ClockIcon, Search, FileSignature, Activity, Filter as FilterIcon, PieChart as PieChartIcon, Lightbulb, RefreshCw, AlertCircleIcon } from 'lucide-react';
 import NextLink from 'next/link';
-import type { Metadata } from 'next';
+// import type { Metadata } from 'next'; // Metadata cannot be used in client components
 import { getResearchHistory, type ResearchActivityItem } from '@/lib/historyService';
 import { cn } from '@/lib/utils';
 import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent, RechartsPrimitive } from "@/components/ui/chart";
@@ -41,7 +40,7 @@ DashboardStatCard.displayName = "DashboardStatCard";
 
 const QuickActionCard = React.memo(function QuickActionCard({ title, href, icon: Icon, description }: { title: string; href: string; icon: React.ElementType; description: string }) {
  return (
- <NextLink href={href} passHref>
+ <NextLink href={href}>
     <Card className="hover:shadow-lg hover:border-accent transition-all duration-200 cursor-pointer h-full flex flex-col">
       <CardHeader>
         <div className="flex items-center space-x-3">
@@ -427,4 +426,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-

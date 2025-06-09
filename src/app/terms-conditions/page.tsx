@@ -16,7 +16,7 @@ export const metadata: Metadata = {
         width: 1200,
         height: 630,
         alt: 'ScholarAI Terms and Conditions',
-        'data-ai-hint': 'legal document terms',
+        'data-ai-hint': 'legal document terms' as any,
       },
     ],
   },
@@ -99,4 +99,3 @@ export default function TermsConditionsPage() {
     </div>
   );
 }
-

@@ -18,7 +18,7 @@ export const metadata: Metadata = {
         width: 1200,
         height: 630,
         alt: 'About ScholarAI - Revolutionizing Research',
-        'data-ai-hint': 'about scholarai platform',
+        'data-ai-hint': 'scholarai about technology' as any,
       },
     ],
   },

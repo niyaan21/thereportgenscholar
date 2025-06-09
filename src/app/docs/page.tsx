@@ -19,7 +19,7 @@ export const metadata: Metadata = {
         width: 1200,
         height: 630,
         alt: 'ScholarAI Documentation',
-        'data-ai-hint': 'documentation guide book',
+        'data-ai-hint': 'documentation guide book' as any,
       },
     ],
   },

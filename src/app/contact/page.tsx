@@ -1,8 +1,7 @@
-
 // src/app/contact/page.tsx
 'use client';
 
-import React, { useState }
+import React, { useState, FormEvent } from 'react'; // Added FormEvent, useState
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,27 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Send, Mail, MessageSquare, Phone, Info, Building, MapPin } from 'lucide-react';
-import type { Metadata } from 'next'; // Only for potential server component parent
 import NextLink from 'next/link';
-
-// Note: Client components cannot export metadata directly.
-// export const metadata: Metadata = {
-//   title: 'Contact Us - ScholarAI',
-//   description: 'Get in touch with the ScholarAI team. We are here to help with your questions, feedback, or support requests.',
-//   openGraph: {
-//     title: 'Contact ScholarAI Support & Inquiries',
-//     description: 'Reach out to ScholarAI for assistance, partnership opportunities, or general inquiries. We value your feedback.',
-//     images: [
-//       {
-//         url: 'https://placehold.co/1200x630.png?text=Contact+ScholarAI',
-//         width: 1200,
-//         height: 630,
-//         alt: 'Contact ScholarAI',
-//         'data-ai-hint': 'contact support helpdesk',
-//       },
-//     ],
-//   },
-// };
 
 
 export default function ContactPage() {
@@ -41,7 +20,7 @@ export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
 
@@ -188,16 +167,4 @@ export default function ContactPage() {
       </Card>
     </div>
   );
-}
-
-// Add metadata for server rendering if this page were a server component
-export const getStaticProps = async () => {
-  return {
-    props: {
-      metadata: {
-        title: 'Contact Us - ScholarAI',
-        description: 'Get in touch with the ScholarAI team for support, feedback, or inquiries.',
-      }
-    }
-  }
 }

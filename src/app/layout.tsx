@@ -1,23 +1,14 @@
 
 import type {Metadata} from 'next';
-import {Geist, Geist_Mono} from 'next/font/google';
+import { GeistSans } from 'geist/font/sans';
+import { GeistMono } from 'geist/font/mono';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import Navbar from '@/components/layout/Navbar';
 import ParticleBackground from '@/components/layout/ParticleBackground';
 import { ThemeProvider } from 'next-themes';
-import Footer from '@/components/layout/Footer'; // New import
-import PageProgressBar from '@/components/layout/PageProgressBar'; // Added import
-
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-});
+import Footer from '@/components/layout/Footer';
+import PageProgressBar from '@/components/layout/PageProgressBar';
 
 export const metadata: Metadata = {
   title: {
@@ -33,10 +24,11 @@ export const metadata: Metadata = {
     siteName: 'ScholarAI',
     images: [
       {
-        url: 'https://placehold.co/1200x630.png?text=ScholarAI+Research+Platform', // Replace with your actual OG image URL
+        url: 'https://placehold.co/1200x630.png?text=ScholarAI+Research+Platform',
         width: 1200,
         height: 630,
         alt: 'ScholarAI - AI Research and Report Generation Tool',
+        'data-ai-hint': 'research platform homepage' as any,
       },
     ],
     locale: 'en_US',
@@ -67,10 +59,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable} scroll-smooth`} suppressHydrationWarning>
+      <body className="font-sans antialiased">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <PageProgressBar /> {/* Added PageProgressBar */}
+          <PageProgressBar />
           <ParticleBackground />
           <div className="relative z-10 flex flex-col min-h-screen">
             <Navbar />
@@ -78,7 +70,7 @@ export default function RootLayout({
               {children}
             </main>
             <Toaster />
-            <Footer /> {/* Added global footer */}
+            <Footer />
           </div>
         </ThemeProvider>
       </body>

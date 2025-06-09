@@ -6,7 +6,7 @@ import NextLink from 'next/link';
 import { Check, Star, Users, Zap, TrendingUp, ShieldCheck, Package, ArrowRight, DollarSign, HelpCircle, MessageSquare } from 'lucide-react';
 import type { Metadata } from 'next';
 import { cn } from '@/lib/utils';
-import React from 'react'; // Import React
+import React from 'react'; 
 
 export const metadata: Metadata = {
   title: 'ScholarAI Pricing - Unlock Your Research Potential',
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
         width: 1200,
         height: 630,
         alt: 'ScholarAI Pricing Plans',
-        'data-ai-hint': 'pricing plans infographic',
+        'data-ai-hint': 'pricing plans infographic' as any,
       },
     ],
   },
@@ -75,6 +75,8 @@ const TierCard = React.memo(function TierCard({ name, price, priceDescription, f
     </Card>
   );
 });
+TierCard.displayName = "TierCard";
+
 
 export default function PricingPage() {
   const tiers: PricingTierProps[] = [
@@ -109,7 +111,7 @@ export default function PricingPage() {
         "(Coming Soon) Basic API Access",
       ],
       ctaText: "Choose Innovator",
-      ctaLink: "/signup?plan=innovator", // Example, actual plan selection needs backend
+      ctaLink: "/signup?plan=innovator", 
       highlighted: true,
       icon: Star,
     },
@@ -211,4 +213,3 @@ export default function PricingPage() {
     </div>
   );
 }
-
