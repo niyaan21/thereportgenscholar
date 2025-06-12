@@ -4,7 +4,7 @@
 
 import React, { useState, useEffect, FormEvent, useRef, ChangeEvent } from 'react';
 import { auth } from '@/lib/firebase';
-import { onAuthStateChanged, sendEmailVerification, updatePassword, sendPasswordResetEmail, deleteUser, type User, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
+import { onAuthStateChanged, sendEmailVerification, updatePassword, sendPasswordResetEmail, deleteUser, type User, reauthenticateWithCredential, EmailAuthProvider, updateProfile } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,13 +24,12 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Mail, Lock, UserCircle, Trash2, Palette, Bell, Settings2, ShieldAlert, LogOut, ChevronRight, ExternalLink, Edit3, ImageDown, AlertCircle, CheckCircle2, Sun, Moon, History, Settings as GeneralSettingsIcon, UserRoundCog, FileText, BookOpen, ClockIcon, Search, FileSignature, Upload, Download, FileJson, Edit } from 'lucide-react'; // Added Upload, Download, FileJson
+import { Loader2, Mail, Lock, UserCircle, Trash2, Palette, Bell, Settings2, ShieldAlert, LogOut, ChevronRight, ExternalLink, Edit3, AlertCircle, CheckCircle2, Sun, Moon, History, Settings as GeneralSettingsIcon, UserRoundCog, FileText, BookOpen, ClockIcon, Search, FileSignature, Upload, Download, FileJson, Edit, Save } from 'lucide-react';
 import NextLink from 'next/link';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
-import type { ClassValue } from 'clsx';
-import { getResearchHistory, setResearchHistory, type ResearchActivityItem } from '@/lib/historyService'; // Added setResearchHistory
+import { getResearchHistory, setResearchHistory, type ResearchActivityItem } from '@/lib/historyService';
 
 
 const SettingsSection: React.FC<{ title: string; description?: string; icon?: React.ElementType; children: React.ReactNode; className?: string }> = ({ title, description, icon: Icon, children, className }) => (
@@ -55,8 +54,11 @@ export default function AccountSettingsPage() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [currentPasswordForDelete, setCurrentPasswordForDelete] = useState('');
+  
   const [displayName, setDisplayName] = useState('');
   const [profilePicUrl, setProfilePicUrl] = useState('');
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+
   const [theme, setThemeState] = useState<'light' | 'dark' | 'system'>('system');
   const [activeTab, setActiveTab] = useState("general");
   
@@ -66,11 +68,13 @@ export default function AccountSettingsPage() {
   const [showImportConfirmDialog, setShowImportConfirmDialog] = useState(false);
   const [pendingImportData, setPendingImportData] = useState<ResearchActivityItem[] | null>(null);
 
-
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [newsletterSubscription, setNewsletterSubscription] = useState(false);
+  const [isSavingNotifications, setIsSavingNotifications] = useState(false);
+
   const [itemsPerPage, setItemsPerPage] = useState('10');
   const [experimentalFeatures, setExperimentalFeatures] = useState(false);
+  const [isSavingInterface, setIsSavingInterface] = useState(false);
 
   const router = useRouter();
   const { toast } = useToast();
@@ -80,13 +84,28 @@ export default function AccountSettingsPage() {
       if (user) {
         setCurrentUser(user);
         setDisplayName(user.displayName || '');
+        setProfilePicUrl(user.photoURL || '');
+
+        // Load theme
         const localTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'system' | null;
-        if (localTheme) {
-            setThemeState(localTheme);
-        } else {
+        if (localTheme) setThemeState(localTheme);
+        else {
             const prefersDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
             setThemeState(prefersDark ? 'dark' : 'system');
         }
+        
+        // Load notification preferences
+        const storedEmailNotifications = localStorage.getItem('emailNotifications');
+        if (storedEmailNotifications) setEmailNotifications(JSON.parse(storedEmailNotifications));
+        const storedNewsletter = localStorage.getItem('newsletterSubscription');
+        if (storedNewsletter) setNewsletterSubscription(JSON.parse(storedNewsletter));
+
+        // Load interface preferences
+        const storedItemsPerPage = localStorage.getItem('itemsPerPage');
+        if (storedItemsPerPage) setItemsPerPage(storedItemsPerPage);
+        const storedExperimentalFeatures = localStorage.getItem('experimentalFeatures');
+        if (storedExperimentalFeatures) setExperimentalFeatures(JSON.parse(storedExperimentalFeatures));
+
         if (typeof window !== 'undefined') {
           if (window.location.hash === "#history" && activeTab !== "history") {
             setActiveTab("history");
@@ -214,6 +233,55 @@ export default function AccountSettingsPage() {
     }
   };
 
+  const handleUpdateProfile = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!currentUser) return;
+    setIsUpdatingProfile(true);
+    try {
+        await updateProfile(currentUser, {
+            displayName: displayName,
+            photoURL: profilePicUrl,
+        });
+        toast({ title: "Profile Updated", description: "Your display name and profile picture URL have been updated.", variant: "default" });
+    } catch (error: any) {
+        toast({ title: "Profile Update Failed", description: error.message, variant: "destructive" });
+    } finally {
+        setIsUpdatingProfile(false);
+    }
+  };
+
+  const handleSaveNotificationPreferences = async (e: FormEvent) => {
+    e.preventDefault();
+    setIsSavingNotifications(true);
+    // Simulate async operation
+    await new Promise(resolve => setTimeout(resolve, 700));
+    try {
+        localStorage.setItem('emailNotifications', JSON.stringify(emailNotifications));
+        localStorage.setItem('newsletterSubscription', JSON.stringify(newsletterSubscription));
+        toast({ title: "Notification Preferences Saved", description: "Your notification settings have been saved locally.", variant: "default" });
+    } catch (error: any) {
+        toast({ title: "Save Failed", description: "Could not save notification preferences to local storage.", variant: "destructive" });
+    } finally {
+        setIsSavingNotifications(false);
+    }
+  };
+  
+  const handleSaveInterfaceSettings = async (e: FormEvent) => {
+    e.preventDefault();
+    setIsSavingInterface(true);
+    await new Promise(resolve => setTimeout(resolve, 700));
+    try {
+        localStorage.setItem('itemsPerPage', itemsPerPage);
+        localStorage.setItem('experimentalFeatures', JSON.stringify(experimentalFeatures));
+        toast({ title: "Interface Settings Saved", description: "Your interface settings have been saved locally.", variant: "default" });
+    } catch (error: any) {
+        toast({ title: "Save Failed", description: "Could not save interface settings to local storage.", variant: "destructive" });
+    } finally {
+        setIsSavingInterface(false);
+    }
+  };
+
+
   const handleExportHistory = () => {
     const history = getResearchHistory();
     if (history.length === 0) {
@@ -247,7 +315,6 @@ export default function AccountSettingsPage() {
       try {
         const text = e.target?.result as string;
         const importedData = JSON.parse(text) as ResearchActivityItem[];
-        // Basic validation
         if (!Array.isArray(importedData) || !importedData.every(item => item.id && item.type && item.question && item.date)) {
           throw new Error("Invalid history file format.");
         }
@@ -257,7 +324,7 @@ export default function AccountSettingsPage() {
         toast({ title: "Import Failed", description: `Error processing file: ${error.message}`, variant: "destructive" });
       } finally {
         setIsImporting(false);
-        if (fileInputRef.current) fileInputRef.current.value = ""; // Reset file input
+        if (fileInputRef.current) fileInputRef.current.value = "";
       }
     };
     reader.onerror = () => {
@@ -271,7 +338,7 @@ export default function AccountSettingsPage() {
   const confirmImport = () => {
     if (pendingImportData) {
       setResearchHistory(pendingImportData);
-      setResearchHistoryItems(getResearchHistory()); // Refresh displayed history
+      setResearchHistoryItems(getResearchHistory());
       toast({ title: "History Imported", description: "Your research history has been replaced.", variant: "default" });
     }
     setShowImportConfirmDialog(false);
@@ -421,21 +488,21 @@ export default function AccountSettingsPage() {
             </div>
 
             <div className="lg:col-span-1 space-y-6 sm:space-y-8">
-              <SettingsSection title="Profile Information" icon={UserCircle} description="Customize your public profile details. (Placeholder)">
-                <div>
-                  <Label htmlFor="displayName">Display Name</Label>
-                  <Input id="displayName" type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your Name" />
-                </div>
-                 <div>
-                  <Label htmlFor="profilePicUrl">Profile Picture URL</Label>
-                  <Input id="profilePicUrl" type="url" value={profilePicUrl} onChange={(e) => setProfilePicUrl(e.target.value)} placeholder="https://example.com/image.png" />
-                  <Button variant="outline" size="sm" className="mt-2 text-xs" onClick={() => toast({title: "Feature Coming Soon!", description:"Uploading profile pictures will be available in a future update."})}>
-                    <ImageDown className="mr-2 h-3.5 w-3.5"/> Upload Image
-                  </Button>
-                </div>
-                <Button onClick={() => toast({title: "Profile Updated (Demo)", description:"Display name and picture URL settings are for demonstration."})} className="w-full sm:w-auto">
-                  Save Profile (Demo)
-                </Button>
+              <SettingsSection title="Profile Information" icon={UserCircle} description="Customize your public profile details.">
+                <form onSubmit={handleUpdateProfile} className="space-y-4">
+                    <div>
+                      <Label htmlFor="displayName">Display Name</Label>
+                      <Input id="displayName" type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your Name" disabled={isUpdatingProfile}/>
+                    </div>
+                    <div>
+                      <Label htmlFor="profilePicUrl">Profile Picture URL</Label>
+                      <Input id="profilePicUrl" type="url" value={profilePicUrl} onChange={(e) => setProfilePicUrl(e.target.value)} placeholder="https://example.com/image.png" disabled={isUpdatingProfile}/>
+                    </div>
+                    <Button type="submit" disabled={isUpdatingProfile} className="w-full sm:w-auto">
+                      {isUpdatingProfile ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Save className="mr-2 h-4 w-4"/>}
+                      Save Profile
+                    </Button>
+                </form>
               </SettingsSection>
 
               <SettingsSection title="Appearance" icon={Palette} description="Choose how ScholarAI looks and feels.">
@@ -462,47 +529,53 @@ export default function AccountSettingsPage() {
                 </RadioGroup>
               </SettingsSection>
 
-              <SettingsSection title="Notification Preferences" icon={Bell} description="Control how you receive updates. (Placeholder)">
-                <div className="flex items-center justify-between space-x-2 py-2">
-                  <Label htmlFor="email-notifications" className="flex flex-col space-y-1">
-                    <span>Email Notifications</span>
-                    <span className="font-normal leading-snug text-muted-foreground text-xs">
-                      Receive important updates about your account and new features.
-                    </span>
-                  </Label>
-                  <Switch id="email-notifications" checked={emailNotifications} onCheckedChange={setEmailNotifications} />
-                </div>
-                 <div className="flex items-center justify-between space-x-2 py-2">
-                  <Label htmlFor="newsletter-subscription" className="flex flex-col space-y-1">
-                    <span>ScholarAI Newsletter</span>
-                    <span className="font-normal leading-snug text-muted-foreground text-xs">
-                      Subscribe to our monthly newsletter for tips and insights.
-                    </span>
-                  </Label>
-                  <Switch id="newsletter-subscription" checked={newsletterSubscription} onCheckedChange={setNewsletterSubscription} />
-                </div>
-                <Button onClick={() => toast({title: "Preferences Saved (Demo)", description:"Notification settings are for demonstration."})} className="w-full sm:w-auto mt-2">
-                  Save Notifications (Demo)
-                </Button>
+              <SettingsSection title="Notification Preferences" icon={Bell} description="Control how you receive updates. Saved locally.">
+                <form onSubmit={handleSaveNotificationPreferences} className="space-y-4">
+                    <div className="flex items-center justify-between space-x-2 py-2">
+                      <Label htmlFor="email-notifications" className="flex flex-col space-y-1">
+                        <span>Email Notifications</span>
+                        <span className="font-normal leading-snug text-muted-foreground text-xs">
+                          Receive important updates about your account and new features.
+                        </span>
+                      </Label>
+                      <Switch id="email-notifications" checked={emailNotifications} onCheckedChange={setEmailNotifications} disabled={isSavingNotifications}/>
+                    </div>
+                    <div className="flex items-center justify-between space-x-2 py-2">
+                      <Label htmlFor="newsletter-subscription" className="flex flex-col space-y-1">
+                        <span>ScholarAI Newsletter</span>
+                        <span className="font-normal leading-snug text-muted-foreground text-xs">
+                          Subscribe to our monthly newsletter for tips and insights.
+                        </span>
+                      </Label>
+                      <Switch id="newsletter-subscription" checked={newsletterSubscription} onCheckedChange={setNewsletterSubscription} disabled={isSavingNotifications}/>
+                    </div>
+                    <Button type="submit" className="w-full sm:w-auto mt-2" disabled={isSavingNotifications}>
+                      {isSavingNotifications ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Save className="mr-2 h-4 w-4"/>}
+                       Save Notifications
+                    </Button>
+                </form>
               </SettingsSection>
 
-              <SettingsSection title="Interface Settings" icon={Edit} description="Customize your ScholarAI experience. (Placeholder)">
-                 <div>
-                    <Label htmlFor="itemsPerPage">Items Per Page (e.g., in results)</Label>
-                    <Input id="itemsPerPage" type="number" value={itemsPerPage} onChange={(e) => setItemsPerPage(e.target.value)} placeholder="10" min="5" max="50" />
-                </div>
-                <div className="flex items-center justify-between space-x-2 py-2">
-                  <Label htmlFor="experimental-features" className="flex flex-col space-y-1">
-                    <span>Experimental Features</span>
-                    <span className="font-normal leading-snug text-muted-foreground text-xs">
-                      Enable cutting-edge features that are still in testing.
-                    </span>
-                  </Label>
-                  <Switch id="experimental-features" checked={experimentalFeatures} onCheckedChange={setExperimentalFeatures} />
-                </div>
-                <Button onClick={() => toast({title: "Interface Settings Saved (Demo)", description:"Interface settings are for demonstration."})} className="w-full sm:w-auto mt-2">
-                  Save Interface (Demo)
-                </Button>
+              <SettingsSection title="Interface Settings" icon={Edit} description="Customize your ScholarAI experience. Saved locally.">
+                <form onSubmit={handleSaveInterfaceSettings} className="space-y-4">
+                    <div>
+                        <Label htmlFor="itemsPerPage">Items Per Page (e.g., in results)</Label>
+                        <Input id="itemsPerPage" type="number" value={itemsPerPage} onChange={(e) => setItemsPerPage(e.target.value)} placeholder="10" min="5" max="50" disabled={isSavingInterface}/>
+                    </div>
+                    <div className="flex items-center justify-between space-x-2 py-2">
+                      <Label htmlFor="experimental-features" className="flex flex-col space-y-1">
+                        <span>Experimental Features</span>
+                        <span className="font-normal leading-snug text-muted-foreground text-xs">
+                          Enable cutting-edge features that are still in testing.
+                        </span>
+                      </Label>
+                      <Switch id="experimental-features" checked={experimentalFeatures} onCheckedChange={setExperimentalFeatures} disabled={isSavingInterface}/>
+                    </div>
+                    <Button type="submit" className="w-full sm:w-auto mt-2" disabled={isSavingInterface}>
+                       {isSavingInterface ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Save className="mr-2 h-4 w-4"/>}
+                       Save Interface Settings
+                    </Button>
+                </form>
               </SettingsSection>
             </div>
           </div>
