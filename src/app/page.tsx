@@ -100,7 +100,7 @@ export default function ScholarAIPage() {
   const [keyConcepts, setKeyConcepts] = useState<string[]>([]);
   const [potentialSubTopics, setPotentialSubTopics] = useState<string[]>([]);
   
-  const [researchSummary, setResearchSummary] = useState<string>('');
+  const [researchSummary, setResearchSummary] = useState<string>(''); // This will now be editable
   const [summarizedPaperTitles, setSummarizedPaperTitles] = useState<string[]>([]);
 
   const [_isTransitionPending, startTransition] = useTransition();
@@ -150,7 +150,7 @@ export default function ScholarAIPage() {
 
   const handleResearchSynthesizedCallback = useCallback((summary: string, titles: string[]) => {
     startTransition(() => {
-      setResearchSummary(summary);
+      setResearchSummary(summary); // Set the initial AI-generated summary
       setSummarizedPaperTitles(titles);
       setAppState('summary_generated');
     });
@@ -270,8 +270,8 @@ export default function ScholarAIPage() {
         setAppState('summary_generated');
       } else if (appState === 'summary_generated') {
         setAppState('queries_formulated');
-        setResearchSummary('');
-        setSummarizedPaperTitles([]);
+        // Keep researchSummary as is, as it's now editable
+        // setSummarizedPaperTitles([]); // Not strictly necessary to clear this
       } else if (appState === 'queries_formulated') {
         setAppState('initial');
         setQueryFormInputValue(researchQuestion);
@@ -329,6 +329,7 @@ export default function ScholarAIPage() {
     startTransition(() => {
       const formData = new FormData();
       formData.append('researchQuestion', currentResearchQuestion);
+      // Ensure the current (potentially edited) researchSummary is used
       if (researchSummary && researchSummary.trim().length > 0) {
         formData.append('summary', researchSummary.trim());
       }
@@ -426,6 +427,7 @@ export default function ScholarAIPage() {
           <div key="summary" className={cn("w-full space-y-6 md:space-y-8", animationClasses)}>
             <ResearchSummaryDisplay
               summary={researchSummary}
+              onSummaryChange={setResearchSummary} // Pass setter to allow editing
               originalQuestion={researchQuestion}
               summarizedPaperTitles={summarizedPaperTitles}
               onGenerateImage={handleGenerateImageForTopic}

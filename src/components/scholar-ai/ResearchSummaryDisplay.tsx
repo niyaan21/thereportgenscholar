@@ -4,16 +4,18 @@
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { BookOpenCheck, FileText, Lightbulb, Quote, Brain, CheckCircle, BarChart3, SparklesIcon, Image as ImageIconLucide, Loader2, MaximizeIcon, Eye, ExternalLink, Zap } from 'lucide-react';
+import { BookOpenCheck, FileText, Lightbulb, Quote, Brain, CheckCircle, BarChart3, SparklesIcon, Image as ImageIconLucide, Loader2, MaximizeIcon, Eye, ExternalLink, Zap, Edit } from 'lucide-react';
 import NextImage from 'next/image'; 
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Textarea } from '@/components/ui/textarea'; // Import Textarea
 import { cn } from '@/lib/utils';
 
 export interface ResearchSummaryDisplayProps {
   summary: string;
+  onSummaryChange: (newSummary: string) => void; // Callback to update summary in parent
   originalQuestion: string;
   summarizedPaperTitles: string[];
   onGenerateImage: () => void; 
@@ -24,6 +26,7 @@ export interface ResearchSummaryDisplayProps {
 
 const ResearchSummaryDisplay = React.memo(function ResearchSummaryDisplay({ 
   summary, 
+  onSummaryChange,
   originalQuestion, 
   summarizedPaperTitles,
   onGenerateImage,
@@ -31,7 +34,6 @@ const ResearchSummaryDisplay = React.memo(function ResearchSummaryDisplay({
   isGeneratingImage,
   onOpenImagePreview
 }: ResearchSummaryDisplayProps) {
-  const summaryParagraphs = summary.split(/\n\s*\n|\n(?=\s*•|\n\s*\d+\.)/).filter(p => p.trim() !== "");
 
   const handleImageGeneration = () => {
       onGenerateImage(); 
@@ -50,7 +52,7 @@ const ResearchSummaryDisplay = React.memo(function ResearchSummaryDisplay({
               <div>
                   <CardTitle className="text-xl sm:text-2xl md:text-3xl font-extrabold text-primary tracking-tight">Illuminated Research Overview</CardTitle>
                   <CardDescription className="text-muted-foreground text-sm sm:text-base mt-1 sm:mt-1.5 max-w-lg">
-                      Key insights distilled and synthesized by ScholarAI.
+                      Key insights distilled and synthesized by ScholarAI. You can edit the summary below.
                   </CardDescription>
               </div>
             </div>
@@ -71,19 +73,19 @@ const ResearchSummaryDisplay = React.memo(function ResearchSummaryDisplay({
             
             <div className="space-y-3 sm:space-y-4">
               <h3 className="text-lg sm:text-xl font-semibold flex items-center text-primary">
-                <Brain className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 text-accent" />
-                Core Synthesized Insights
+                <Edit className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 text-accent" />
+                Core Synthesized Insights (Editable)
               </h3>
-              <ScrollArea className="h-48 sm:h-52 p-3 sm:p-4 border border-border/70 rounded-lg sm:rounded-xl bg-background/70 shadow-inner">
-                  <div className="space-y-3 sm:space-y-4 text-foreground/85 text-sm sm:text-base leading-relaxed prose prose-sm sm:prose-base dark:prose-invert max-w-none marker:text-accent">
-                  {summaryParagraphs.map((paragraph, index) => (
-                      <p key={index}>
-                      {paragraph}
-                      </p>
-                  ))}
-                  {summaryParagraphs.length === 0 && <p className="italic text-muted-foreground">No summary content available.</p>}
-                  </div>
+              <ScrollArea className="h-60 sm:h-64 border border-border/70 rounded-lg sm:rounded-xl bg-background/70 shadow-inner">
+                  <Textarea
+                    value={summary}
+                    onChange={(e) => onSummaryChange(e.target.value)}
+                    placeholder="AI-generated summary will appear here. You can edit it before generating the full report."
+                    className="w-full h-full min-h-[230px] sm:min-h-[240px] p-3 sm:p-4 text-foreground/85 text-sm sm:text-base leading-relaxed focus:border-accent focus:ring-accent border-none rounded-lg sm:rounded-xl resize-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-accent"
+                    aria-label="Editable research summary"
+                  />
               </ScrollArea>
+               <p className="text-xs text-muted-foreground text-right pr-1">Your edits here will be used for the full report.</p>
             </div>
 
             <Separator className="my-6 sm:my-7 bg-border/60"/>
@@ -185,3 +187,4 @@ const ResearchSummaryDisplay = React.memo(function ResearchSummaryDisplay({
 });
 ResearchSummaryDisplay.displayName = 'ResearchSummaryDisplay';
 export default ResearchSummaryDisplay;
+
