@@ -26,6 +26,21 @@ Foss AI is a powerful Next.js web application designed to revolutionize your res
 *   **Account Settings:** Manage profile, preferences (theme, notifications, interface), and research history (with export/import).
 *   **Dynamic Particle Background:** Visually engaging background that adapts to light/dark themes.
 
+## 🚀 Planned Future Features
+
+Foss AI is continuously evolving. Here are some of the exciting capabilities on our roadmap:
+
+*   **Interview Transcription & Analysis:** Upload audio/video files for automated transcription and AI-powered thematic analysis, sentiment detection, and key insight extraction.
+*   **Plagiarism Detection:** Integrated similarity checking for generated content to ensure originality and proper attribution.
+*   **Multi-language Support:** Capabilities to conduct research, process inputs, and generate reports in a variety of languages.
+*   **Research Timeline Visualization:** Interactive tools to create and visualize research project timelines, milestones, and progress.
+*   **Voice-to-Text Research Notes:** Seamlessly capture ideas, notes, and observations on-the-go using audio input, automatically transcribed and organized.
+*   **Note-taking Apps Integration:** Direct synchronization of research notes, summaries, and reports with popular platforms like Notion and Obsidian.
+*   **Research Network Visualization:** Tools to map and explore connections between researchers, published papers, institutions, and key topics within a field.
+*   **Ethics Compliance Checker:** AI-assisted review to help identify potential ethical considerations and ensure research aligns with relevant guidelines.
+*   **Custom Report Templates:** Ability for users to create, save, and share report templates tailored to specific academic fields, journal requirements, or organizational standards.
+*   **Advanced Keyboard Shortcuts:** A comprehensive set of keyboard shortcuts for power users to navigate and operate Foss AI features with maximum efficiency.
+
 ## 🚀 Technology Stack
 
 *   **Framework:** [Next.js](https://nextjs.org/) (App Router, Server Components, Server Actions)
@@ -141,15 +156,14 @@ foss-ai/
 │   │   ├── flows/        # Directory for individual Genkit flows
 │   │   └── genkit.ts     # Genkit initialization and global AI object
 │   ├── app/              # Next.js App Router: pages, layouts, actions
-│   │   ├── (page routes)/# e.g., dashboard/, about/, login/
+│   │   ├── (page routes)/# e.g., dashboard/, about/, login/, interview-transcription/
 │   │   ├── actions.ts    # Server Actions
 │   │   ├── globals.css   # Global styles and Tailwind theme
 │   │   └── layout.tsx    # Root layout
 │   ├── components/       # Reusable UI components
-│   │   ├── common/       # General common components (deprecated Simple3DElement)
 │   │   ├── landing/      # Components for the landing page
 │   │   ├── layout/       # Layout components (Navbar, Footer, ParticleBackground)
-│   │   ├── scholar-ai/   # Core application feature components (renamed from Foss AI for consistency with some internal naming)
+│   │   ├── scholar-ai/   # Core application feature components
 │   │   └── ui/           # ShadCN UI components
 │   ├── hooks/            # Custom React hooks (e.g., useToast, useMobile)
 │   └── lib/              # Utility functions and libraries
@@ -182,6 +196,7 @@ Foss AI uses **Genkit for Firebase** to integrate with Google's Gemini AI models
 *   `generate-report-from-file.ts`: Generates a report based on an uploaded file and user guidance.
 *   `generate-daily-prompt-flow.ts`: Creates a "Prompt of the Day" for the dashboard.
 *   `extract-mindmap-concepts.ts`: Extracts key concepts and a main idea from text for mind mapping.
+*   (Planned) Flows for interview transcription, plagiarism detection, multi-language processing, etc.
 
 These flows are called by Next.js Server Actions defined in `src/app/actions.ts`.
 
