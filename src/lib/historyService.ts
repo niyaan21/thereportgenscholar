@@ -2,7 +2,7 @@
 // src/lib/historyService.ts
 'use client';
 
-const STORAGE_KEY = 'scholarAiResearchHistory';
+const STORAGE_KEY = 'fossAiResearchHistory';
 const MAX_HISTORY_ITEMS = 50;
 
 export interface ResearchActivityItem {
@@ -75,4 +75,3 @@ export function clearResearchHistory(): void {
     console.error("Error clearing research history from localStorage:", error);
   }
 }
-

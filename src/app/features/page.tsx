@@ -9,18 +9,18 @@ import { cn } from '@/lib/utils';
 import React from 'react'; 
 
 export const metadata: Metadata = {
-  title: 'ScholarAI Features - Advanced AI Research Capabilities',
-  description: 'Discover the powerful features of ScholarAI, including AI-driven query formulation, intelligent knowledge synthesis, file-powered reporting, conceptual visualization, and more. Elevate your research workflow today.',
+  title: 'Foss AI Features - Advanced AI Research Capabilities',
+  description: 'Discover the powerful features of Foss AI, including AI-driven query formulation, intelligent knowledge synthesis, file-powered reporting, conceptual visualization, and more. Elevate your research workflow today.',
   openGraph: {
-    title: 'ScholarAI Features - Advanced AI Research Capabilities',
-    description: 'Explore how ScholarAI\'s innovative features can streamline your research process and help you uncover deeper insights.',
+    title: 'Foss AI Features - Advanced AI Research Capabilities',
+    description: 'Explore how Foss AI\'s innovative features can streamline your research process and help you uncover deeper insights.',
     images: [
       {
-        url: 'https://placehold.co/1200x630.png?text=ScholarAI+Features', 
+        url: 'https://placehold.co/1200x630.png?text=Foss+AI+Features', 
         width: 1200,
         height: 630,
-        alt: 'Features of ScholarAI Platform',
-        'data-ai-hint': 'features list infographic' as any,
+        alt: 'Features of Foss AI Platform',
+        'data-ai-hint': 'features list' as any,
       },
     ],
   },
@@ -81,7 +81,7 @@ export default function FeaturesPage() {
     {
       icon: ShieldCheck,
       title: "Secure User Authentication",
-      description: "Protects your work with robust Firebase authentication, ensuring secure access to ScholarAI's full suite of features.",
+      description: "Protects your work with robust Firebase authentication, ensuring secure access to Foss AI's full suite of features.",
     },
     {
       icon: LayoutDashboard,
@@ -96,7 +96,7 @@ export default function FeaturesPage() {
     {
       icon: Smartphone,
       title: "Responsive Design",
-      description: "Access ScholarAI and conduct research anytime, anywhere. Fully responsive across desktops, tablets, and mobile devices.",
+      description: "Access Foss AI and conduct research anytime, anywhere. Fully responsive across desktops, tablets, and mobile devices.",
     },
      {
       icon: Settings,
@@ -142,7 +142,7 @@ export default function FeaturesPage() {
           <Sparkles className="h-12 w-12 sm:h-16 sm:w-16" />
         </div>
         <h1 className="text-4xl sm:text-5xl font-extrabold text-primary tracking-tight">
-          ScholarAI Features
+          Foss AI Features
         </h1>
         <p className="mt-4 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
           Discover the suite of powerful AI-driven tools designed to revolutionize your research process, from initial ideation to final report.
@@ -170,7 +170,7 @@ export default function FeaturesPage() {
             </CardHeader>
             <CardContent className="p-0">
                 <p className="text-muted-foreground text-base sm:text-lg mb-6">
-                    Sign up for ScholarAI today and experience the future of intelligent research.
+                    Sign up for Foss AI today and experience the future of intelligent research.
                     Transform your workflow, uncover deeper insights, and generate impactful reports with ease.
                 </p>
                 <Button asChild size="lg" className="bg-gradient-to-r from-primary to-accent text-primary-foreground hover:shadow-2xl px-8 py-3 text-lg">

@@ -33,7 +33,7 @@ export default function FinalCTASection() {
                 Ready to Revolutionize Your Research?
               </CardTitle>
               <CardDescription className="mt-4 text-lg sm:text-xl text-muted-foreground max-w-xl mx-auto">
-                Join ScholarAI today and harness the power of AI to accelerate your discoveries, synthesize complex information, and generate insightful reports in minutes.
+                Join Foss AI today and harness the power of AI to accelerate your discoveries, synthesize complex information, and generate insightful reports in minutes.
               </CardDescription>
             </CardHeader>
             <CardContent className="p-8 sm:p-10 pt-0">

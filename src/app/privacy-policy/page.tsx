@@ -5,18 +5,18 @@ import { FileText, ShieldCheck, UserCircle, Database, Clock, Mail } from 'lucide
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy - ScholarAI',
-  description: 'Understand how ScholarAI collects, uses, and protects your personal information. Our commitment to your privacy.',
+  title: 'Privacy Policy - Foss AI',
+  description: 'Understand how Foss AI collects, uses, and protects your personal information. Our commitment to your privacy.',
   openGraph: {
-    title: 'ScholarAI Privacy Policy',
-    description: 'Detailed information on data handling, user rights, and security measures at ScholarAI.',
+    title: 'Foss AI Privacy Policy',
+    description: 'Detailed information on data handling, user rights, and security measures at Foss AI.',
     images: [
       {
-        url: 'https://placehold.co/1200x630.png?text=ScholarAI+Privacy',
+        url: 'https://placehold.co/1200x630.png?text=Foss+AI+Privacy',
         width: 1200,
         height: 630,
-        alt: 'ScholarAI Privacy Policy',
-        'data-ai-hint': 'privacy security document' as any,
+        alt: 'Foss AI Privacy Policy',
+        'data-ai-hint': 'privacy security' as any,
       },
     ],
   },
@@ -39,7 +39,7 @@ export default function PrivacyPolicyPage() {
         </CardHeader>
         <CardContent className="p-6 sm:p-8 md:p-10 text-base text-foreground/90 leading-relaxed prose prose-lg dark:prose-invert max-w-none marker:text-accent">
           <p>
-            Welcome to ScholarAI. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our application. Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the application.
+            Welcome to Foss AI. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our application. Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the application.
           </p>
 
           <h2 className="text-2xl font-semibold text-primary flex items-center mt-8 mb-4"><UserCircle className="h-6 w-6 mr-3 text-accent"/>Information We Collect (Placeholder)</h2>
@@ -49,7 +49,7 @@ export default function PrivacyPolicyPage() {
           <ul className="list-disc list-outside space-y-1 pl-5 mt-2">
             <li><strong>Personal Data:</strong> Email address, name (if provided during signup or account settings).</li>
             <li><strong>Usage Data:</strong> Information your browser sends whenever you visit our Service or when you access the Service by or through a mobile device. This Usage Data may include information such as your computer's Internet Protocol address (e.g. IP address), browser type, browser version, the pages of our Service that you visit, the time and date of your visit, the time spent on those pages, unique device identifiers and other diagnostic data. Research queries and generated content are processed by our AI models but are not stored long-term associated with your personal identifiers unless explicitly stated for features like history (which is currently a placeholder).</li>
-            <li><strong>AI Interaction Data:</strong> We use Google Gemini models through Genkit. Interactions with these models are subject to Google's privacy policies. ScholarAI itself does not persistently store the direct inputs to or outputs from the AI models tied to your personal account beyond the session, unless necessary for a feature like "Research History" (which would be explicitly opt-in or clearly noted).</li>
+            <li><strong>AI Interaction Data:</strong> We use Google Gemini models through Genkit. Interactions with these models are subject to Google's privacy policies. Foss AI itself does not persistently store the direct inputs to or outputs from the AI models tied to your personal account beyond the session, unless necessary for a feature like "Research History" (which would be explicitly opt-in or clearly noted).</li>
           </ul>
 
           <h2 className="text-2xl font-semibold text-primary flex items-center mt-8 mb-4"><Database className="h-6 w-6 mr-3 text-accent"/>How We Use Your Information (Placeholder)</h2>
@@ -79,9 +79,9 @@ export default function PrivacyPolicyPage() {
           <p>
             If you have questions or comments about this Privacy Policy, please contact us at:
             <br />
-            ScholarAI Support Team
+            Foss AI Support Team
             <br />
-            Email: privacy@scholarai.example.com (Placeholder)
+            Email: privacy@fossai.example.com (Placeholder)
             <br />
             Address: 123 Innovation Drive, Tech City, TX 75001 (Placeholder)
           </p>

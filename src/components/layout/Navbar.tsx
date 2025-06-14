@@ -61,7 +61,7 @@ export default function Navbar() {
   const commonNavLinksBase = [
     { href: "/", label: "Home", icon: Home },
     { href: "/file-report", label: "File Report", icon: FileReportIcon },
-    { href: "/mindmap", label: "Mind Map", icon: MindMapIcon }, // New Mind Map Link
+    { href: "/mindmap", label: "Mind Map", icon: MindMapIcon }, 
     { href: "/features", label: "Features", icon: Sparkles },
     { href: "/pricing", label: "Pricing", icon: DollarSign },
     { href: "/about", label: "About", icon: Info },
@@ -200,7 +200,7 @@ export default function Navbar() {
                 "text-lg sm:text-xl font-bold transition-colors duration-200",
                  pathname === "/" ? "text-primary" : "text-foreground group-hover:text-primary"
             )}>
-              ScholarAI
+              Foss AI
             </span>
           </a>
         </NextLink>
@@ -229,7 +229,7 @@ export default function Navbar() {
                         <div className="p-2 rounded-md bg-primary text-primary-foreground">
                           <BookText className="h-5 w-5" />
                         </div>
-                        <span className="text-lg font-bold text-primary">ScholarAI Menu</span>
+                        <span className="text-lg font-bold text-primary">Foss AI Menu</span>
                       </a>
                     </NextLink>
                 </SheetTitle>

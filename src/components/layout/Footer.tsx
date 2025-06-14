@@ -31,7 +31,7 @@ export default function Footer() {
         </div>
         <div>
           <p>
-            &copy; {currentYear ?? <span className="inline-block w-10 h-4 bg-muted/40 rounded-sm animate-pulse"></span>} ScholarAI.
+            &copy; {currentYear ?? <span className="inline-block w-10 h-4 bg-muted/40 rounded-sm animate-pulse"></span>} Foss AI.
             <Sparkles className="inline h-3.5 w-3.5 sm:h-4 sm:w-4 text-accent mx-1 sm:mx-1.5"/>
             Powered by Generative AI.
           </p>

@@ -175,7 +175,7 @@ export default function DashboardPage() {
           Welcome back, <span className="text-accent">{currentUser.displayName || currentUser.email?.split('@')[0] || 'Researcher'}!</span>
         </h1>
         <p className="mt-2 sm:mt-3 text-lg sm:text-xl text-muted-foreground max-w-2xl">
-          Here's your ScholarAI dashboard. Manage your research and access tools.
+          Here's your Foss AI dashboard. Manage your research and access tools.
         </p>
       </header>
 
@@ -321,7 +321,7 @@ export default function DashboardPage() {
                 title="View Documentation" 
                 href="/docs" 
                 icon={BookOpen}
-                description="Learn how to use ScholarAI features effectively." 
+                description="Learn how to use Foss AI features effectively." 
             />
             <QuickActionCard 
                 title="Account Settings" 

@@ -7,18 +7,18 @@ import { Info, Zap, Users, Target, Compass, Heart, Eye, Package, ArrowRight, Sta
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'About ScholarAI - Pioneering Intelligent Research',
-  description: 'Learn more about ScholarAI, our mission to revolutionize research through AI, the innovative technology we use, our core values, and our vision for the future of academic and professional inquiry.',
+  title: 'About Foss AI - Pioneering Intelligent Research',
+  description: 'Learn more about Foss AI, our mission to revolutionize research through AI, the innovative technology we use, our core values, and our vision for the future of academic and professional inquiry.',
   openGraph: {
-    title: 'About ScholarAI - Pioneering Intelligent Research',
-    description: 'Discover the vision, technology, and values driving the future of research with ScholarAI. Join us in augmenting human intellect.',
+    title: 'About Foss AI - Pioneering Intelligent Research',
+    description: 'Discover the vision, technology, and values driving the future of research with Foss AI. Join us in augmenting human intellect.',
     images: [
       {
-        url: 'https://placehold.co/1200x630.png?text=About+ScholarAI', 
+        url: 'https://placehold.co/1200x630.png?text=About+Foss+AI', 
         width: 1200,
         height: 630,
-        alt: 'About ScholarAI - Revolutionizing Research',
-        'data-ai-hint': 'scholarai about technology' as any,
+        alt: 'About Foss AI - Revolutionizing Research',
+        'data-ai-hint': 'fossai about' as any,
       },
     ],
   },
@@ -33,7 +33,7 @@ export default function AboutPage() {
             <Info className="h-12 w-12 sm:h-16 sm:w-16" />
           </div>
           <CardTitle className="text-4xl sm:text-5xl font-extrabold text-primary tracking-tight">
-            About ScholarAI
+            About Foss AI
           </CardTitle>
           <CardDescription className="text-lg sm:text-xl text-muted-foreground mt-3 sm:mt-4 max-w-2xl mx-auto">
             Pioneering the future of intelligent research and discovery.
@@ -47,7 +47,7 @@ export default function AboutPage() {
               Our Mission
             </h2>
             <p>
-              At ScholarAI, our mission is to empower researchers, students, and professionals worldwide by providing
+              At Foss AI, our mission is to empower researchers, students, and professionals worldwide by providing
               intuitive, powerful, and AI-driven tools that streamline the complexities of research. We aim to
               transform the way knowledge is discovered, synthesized, and shared, fostering a new era of
               accelerated innovation and deeper understanding. We believe in augmenting human intellect, not
@@ -61,7 +61,7 @@ export default function AboutPage() {
               The Technology Stack
             </h2>
             <p>
-              ScholarAI is engineered with a state-of-the-art technology stack to ensure a robust, scalable,
+              Foss AI is engineered with a state-of-the-art technology stack to ensure a robust, scalable,
               and responsive experience. Our platform leverages:
             </p>
             <ul className="list-disc list-outside space-y-2 pl-5 mt-4">
@@ -104,7 +104,7 @@ export default function AboutPage() {
               Our Team (Placeholder)
             </h2>
             <p>
-              ScholarAI is brought to you by a passionate team of developers, AI researchers, and product visionaries
+              Foss AI is brought to you by a passionate team of developers, AI researchers, and product visionaries
               dedicated to revolutionizing the research landscape. While we're currently a lean and focused group,
               our commitment to excellence and innovation drives us forward. (Further details about team members
               can be added here as the project evolves).
@@ -117,23 +117,23 @@ export default function AboutPage() {
               Future Vision
             </h2>
             <p>
-              Our journey with ScholarAI is just beginning. We envision a future where our platform integrates even more
+              Our journey with Foss AI is just beginning. We envision a future where our platform integrates even more
               sophisticated AI capabilities, offers deeper customization, supports collaborative research projects,
               and provides seamless access to a vast array of knowledge sources. We are dedicated to continuously
-              evolving ScholarAI to meet the ever-changing needs of the global research community. Our goal is to
+              evolving Foss AI to meet the ever-changing needs of the global research community. Our goal is to
               be the indispensable AI co-pilot for every inquiring mind.
             </p>
              <div className="mt-6 text-center">
                 <Button asChild size="lg" className="bg-gradient-to-r from-accent to-accent/80 text-accent-foreground hover:shadow-lg">
                   <NextLink href="/features">
-                    Explore ScholarAI Features <ArrowRight className="ml-2 h-5 w-5" />
+                    Explore Foss AI Features <ArrowRight className="ml-2 h-5 w-5" />
                   </NextLink>
                 </Button>
               </div>
           </section>
 
           <p className="text-center pt-6 sm:pt-8 text-muted-foreground text-base">
-            Thank you for your interest in ScholarAI. We're excited to have you on this journey with us!
+            Thank you for your interest in Foss AI. We're excited to have you on this journey with us!
           </p>
         </CardContent>
       </Card>

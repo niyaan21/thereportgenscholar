@@ -7,7 +7,7 @@ import NextLink from 'next/link';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Page Not Found (404) - ScholarAI',
+  title: 'Page Not Found (404) - Foss AI',
   description: "Oops! The page you're looking for doesn't exist or has been moved. Let's get you back on track.",
 };
 

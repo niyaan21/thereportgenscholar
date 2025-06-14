@@ -6,18 +6,18 @@ import { Code2, Construction, InfoIcon, ShieldCheck, Zap, Workflow, Image as Ima
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'ScholarAI API Documentation (Developer Preview)',
-  description: 'Explore the upcoming ScholarAI API for programmatic access to powerful research tools and generative AI capabilities. Integrate AI-driven research into your applications.',
+  title: 'Foss AI API Documentation (Developer Preview)',
+  description: 'Explore the upcoming Foss AI API for programmatic access to powerful research tools and generative AI capabilities. Integrate AI-driven research into your applications.',
   openGraph: {
-    title: 'ScholarAI API Documentation (Developer Preview)',
-    description: 'Unlock ScholarAI\'s research functionalities programmatically. Details on planned endpoints, authentication, and integration for developers.',
+    title: 'Foss AI API Documentation (Developer Preview)',
+    description: 'Unlock Foss AI\'s research functionalities programmatically. Details on planned endpoints, authentication, and integration for developers.',
     images: [
       {
-        url: 'https://placehold.co/1200x630.png?text=ScholarAI+API', 
+        url: 'https://placehold.co/1200x630.png?text=Foss+AI+API', 
         width: 1200,
         height: 630,
-        alt: 'ScholarAI API Documentation',
-        'data-ai-hint': 'api code developer' as any,
+        alt: 'Foss AI API Documentation',
+        'data-ai-hint': 'api code' as any,
       },
     ],
   },
@@ -31,15 +31,15 @@ export default function ApiDocsPage() {
           <div className="inline-flex items-center justify-center p-4 sm:p-5 bg-gradient-to-br from-accent to-accent/80 rounded-full mb-5 sm:mb-8 mx-auto ring-2 ring-accent/40 shadow-lg text-accent-foreground">
             <Code2 className="h-12 w-12 sm:h-16 sm:w-16" />
           </div>
-          <CardTitle className="text-4xl sm:text-5xl font-extrabold text-primary tracking-tight">ScholarAI API Documentation</CardTitle>
+          <CardTitle className="text-4xl sm:text-5xl font-extrabold text-primary tracking-tight">Foss AI API Documentation</CardTitle>
           <CardDescription className="text-lg sm:text-xl text-muted-foreground mt-3 sm:mt-4 max-w-2xl mx-auto">
-            Integrate ScholarAI's power into your applications and workflows. (Developer Preview)
+            Integrate Foss AI's power into your applications and workflows. (Developer Preview)
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6 sm:p-8 md:p-10 space-y-10 text-base sm:text-lg text-foreground/90 leading-relaxed prose prose-lg dark:prose-invert max-w-none marker:text-accent">
           <p className="text-lg">
-            Welcome to the ScholarAI API documentation. Our API is designed to provide developers with programmatic
-            access to the core functionalities of ScholarAI, including AI-driven query formulation, advanced
+            Welcome to the Foss AI API documentation. Our API is designed to provide developers with programmatic
+            access to the core functionalities of Foss AI, including AI-driven query formulation, advanced
             research synthesis, and comprehensive report generation.
           </p>
           
@@ -47,7 +47,7 @@ export default function ApiDocsPage() {
             <Construction className="h-7 w-7 text-primary" />
             <AlertTitle className="font-semibold text-xl text-primary">API Under Active Development</AlertTitle>
             <AlertDescription className="text-primary/80 dark:text-primary-foreground/80 mt-2 text-base">
-              The ScholarAI API is currently under active development and is not yet publicly available.
+              The Foss AI API is currently under active development and is not yet publicly available.
               This page serves as a preview of our planned API capabilities and conventions.
               We are working diligently to bring these features to you. Stay tuned for official announcements and launch dates!
             </AlertDescription>
@@ -58,7 +58,7 @@ export default function ApiDocsPage() {
                <Zap className="h-7 w-7 sm:h-8 sm:w-8 mr-3 text-accent" />
                Introduction to the API
             </h2>
-            <p>The ScholarAI API aims to provide a RESTful interface, enabling developers to harness our sophisticated AI research tools directly within their own software, platforms, or custom workflows. Whether you're building a specialized research tool, integrating AI insights into an existing application, or automating parts of your research process, our API will offer the building blocks you need.</p>
+            <p>The Foss AI API aims to provide a RESTful interface, enabling developers to harness our sophisticated AI research tools directly within their own software, platforms, or custom workflows. Whether you're building a specialized research tool, integrating AI insights into an existing application, or automating parts of your research process, our API will offer the building blocks you need.</p>
             <p className="mt-3">We plan to offer granular access to our core services, allowing for flexible integration strategies. The API will be designed with clarity, ease of use, and robustness in mind, following standard REST principles and utilizing JSON for data exchange.</p>
           </section>
 
@@ -122,7 +122,7 @@ export default function ApiDocsPage() {
                Authentication & Authorization
             </h2>
             <p>
-              Secure access to the ScholarAI API will be managed primarily through API keys. Developers will be able to generate and manage their API keys through their ScholarAI user dashboard (once available).
+              Secure access to the Foss AI API will be managed primarily through API keys. Developers will be able to generate and manage their API keys through their Foss AI user dashboard (once available).
             </p>
             <p className="mt-3">
               Requests to the API will require an API key to be included in the HTTP headers, typically as a Bearer token or a custom header like `X-API-Key`. Detailed authentication schemes will be provided in the full API specification.
@@ -154,7 +154,7 @@ export default function ApiDocsPage() {
           
           <CardFooter className="text-center p-0 pt-10">
             <p className="mx-auto text-muted-foreground text-base">
-              We are incredibly excited about the potential the ScholarAI API will unlock for developers and researchers alike!
+              We are incredibly excited about the potential the Foss AI API will unlock for developers and researchers alike!
               Your feedback during this preview phase will be invaluable. Thank you for your interest.
             </p>
           </CardFooter>

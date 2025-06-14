@@ -25,8 +25,8 @@ import type { Metadata } from 'next';
 // Client components cannot export metadata directly.
 // This can be defined in a layout.tsx if SEO is critical for this page.
 // export const metadata: Metadata = {
-//   title: 'File-Powered Report Generation - ScholarAI',
-//   description: 'Upload your document and provide guidance to generate a custom research report with ScholarAI.',
+//   title: 'File-Powered Report Generation - Foss AI',
+//   description: 'Upload your document and provide guidance to generate a custom research report with Foss AI.',
 // };
 
 const initialReportFromFileState: GenerateReportFromFileActionState = {
@@ -123,7 +123,7 @@ export default function FileReportPage() {
           File-Powered Report Generation
         </h1>
         <p className="mt-2 sm:mt-3 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-          Upload your document, provide guidance, and let ScholarAI craft a tailored report.
+          Upload your document, provide guidance, and let Foss AI craft a tailored report.
         </p>
       </header>
 

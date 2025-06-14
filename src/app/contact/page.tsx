@@ -1,7 +1,7 @@
 // src/app/contact/page.tsx
 'use client';
 
-import React, { useState, FormEvent } from 'react'; // Added FormEvent, useState
+import React, { useState, FormEvent } from 'react'; 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -124,8 +124,8 @@ export default function ContactPage() {
                 <Mail className="h-5 w-5 mr-3 mt-1 text-accent flex-shrink-0" />
                 <div>
                   <h3 className="font-medium text-primary/90">Email Us</h3>
-                  <p className="text-sm">support@scholarai.example.com (Placeholder)</p>
-                  <a href="mailto:support@scholarai.example.com" className="text-xs text-accent hover:underline">Send Email</a>
+                  <p className="text-sm">support@fossai.example.com (Placeholder)</p>
+                  <a href="mailto:support@fossai.example.com" className="text-xs text-accent hover:underline">Send Email</a>
                 </div>
               </div>
               <div className="flex items-start">

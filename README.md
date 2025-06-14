@@ -1,4 +1,4 @@
-# Firebase Studio
+# Foss AI
 
 This is a NextJS starter in Firebase Studio.
 

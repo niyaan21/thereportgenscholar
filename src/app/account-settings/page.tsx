@@ -293,7 +293,7 @@ export default function AccountSettingsPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'scholarai_research_history.json';
+    link.download = 'fossai_research_history.json';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -381,7 +381,7 @@ export default function AccountSettingsPage() {
       <header className="mb-8 sm:mb-10 text-center">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-primary tracking-tight">Account Settings</h1>
         <p className="mt-2 sm:mt-3 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-          Manage your ScholarAI profile, preferences, and security settings.
+          Manage your Foss AI profile, preferences, and security settings.
         </p>
       </header>
 
@@ -446,7 +446,7 @@ export default function AccountSettingsPage() {
                 </Button>
               </SettingsSection>
 
-              <SettingsSection title="Account Deletion" icon={Trash2} description="Permanently delete your ScholarAI account and all associated data. This action is irreversible.">
+              <SettingsSection title="Account Deletion" icon={Trash2} description="Permanently delete your Foss AI account and all associated data. This action is irreversible.">
                  <p className="text-sm text-destructive/90 bg-destructive/10 p-3 rounded-md border border-destructive/30">
                     <ShieldAlert className="inline h-4 w-4 mr-1.5 mb-0.5"/>Warning: This action cannot be undone. All your research history and settings will be lost.
                  </p>
@@ -505,7 +505,7 @@ export default function AccountSettingsPage() {
                 </form>
               </SettingsSection>
 
-              <SettingsSection title="Appearance" icon={Palette} description="Choose how ScholarAI looks and feels.">
+              <SettingsSection title="Appearance" icon={Palette} description="Choose how Foss AI looks and feels.">
                  <Label className="text-base">Theme</Label>
                  <RadioGroup value={theme} onValueChange={(value: 'light' | 'dark' | 'system') => handleThemeChange(value)} className="grid grid-cols-3 gap-2 sm:gap-3 pt-1">
                     <div>
@@ -542,7 +542,7 @@ export default function AccountSettingsPage() {
                     </div>
                     <div className="flex items-center justify-between space-x-2 py-2">
                       <Label htmlFor="newsletter-subscription" className="flex flex-col space-y-1">
-                        <span>ScholarAI Newsletter</span>
+                        <span>Foss AI Newsletter</span>
                         <span className="font-normal leading-snug text-muted-foreground text-xs">
                           Subscribe to our monthly newsletter for tips and insights.
                         </span>
@@ -556,7 +556,7 @@ export default function AccountSettingsPage() {
                 </form>
               </SettingsSection>
 
-              <SettingsSection title="Interface Settings" icon={Edit} description="Customize your ScholarAI experience. Saved locally.">
+              <SettingsSection title="Interface Settings" icon={Edit} description="Customize your Foss AI experience. Saved locally.">
                 <form onSubmit={handleSaveInterfaceSettings} className="space-y-4">
                     <div>
                         <Label htmlFor="itemsPerPage">Items Per Page (e.g., in results)</Label>
@@ -680,4 +680,3 @@ export default function AccountSettingsPage() {
     </div>
   );
 }
-

@@ -18,7 +18,7 @@ const steps = [
   {
     icon: Search,
     title: "2. AI Formulates Queries",
-    description: "ScholarAI intelligently refines your input into optimized search vectors for its knowledge base.",
+    description: "Foss AI intelligently refines your input into optimized search vectors for its knowledge base.",
     color: "bg-green-500/15 text-green-600 dark:bg-green-500/20 dark:text-green-400",
   },
   {
@@ -65,7 +65,7 @@ export default function HowItWorksSection() {
             variants={FADE_IN_ANIMATION_VARIANTS}
             className="text-3xl font-extrabold tracking-tight text-primary sm:text-4xl md:text-5xl"
           >
-            How ScholarAI Works
+            How Foss AI Works
           </motion.h2>
           <motion.p
             variants={FADE_IN_ANIMATION_VARIANTS}

@@ -115,14 +115,14 @@ export default function LoginPage() {
              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="m10 14-2 2 2 2"></path><path d="m14 18 2-2-2-2"></path></svg>
             </div>
             <h1 className="text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent group-hover:from-accent group-hover:to-primary transition-all duration-300">
-              ScholarAI
+              Foss AI
             </h1>
           </div>
       </NextLink>
       <Card className="w-full max-w-md shadow-2xl">
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-2xl font-bold">Welcome Back!</CardTitle>
-          <CardDescription>Log in to continue your research with ScholarAI.</CardDescription>
+          <CardDescription>Log in to continue your research with Foss AI.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
            <Button 
@@ -210,7 +210,7 @@ export default function LoginPage() {
         </div>
       </Card>
        <p className="mt-8 text-xs text-muted-foreground">
-        &copy; {new Date().getFullYear()} ScholarAI. All rights reserved.
+        &copy; {new Date().getFullYear()} Foss AI. All rights reserved.
       </p>
     </div>
   );

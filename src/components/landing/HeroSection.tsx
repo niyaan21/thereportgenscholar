@@ -44,7 +44,7 @@ export default function HeroSection({ queryFormSlot, isAuthenticated, authLoadin
             <Sparkles className="inline-block h-4 w-4 mr-1.5 -mt-0.5" /> Advanced AI Research Platform
           </div>
           <h1 className="hero-title text-4xl font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl bg-clip-text text-transparent bg-gradient-to-br from-primary via-primary/80 to-accent">
-            Uncover Deeper Insights with ScholarAI
+            Uncover Deeper Insights with Foss AI
           </h1>
           <p className="mt-6 max-w-xl mx-auto text-lg text-muted-foreground sm:text-xl md:text-2xl">
             Leverage cutting-edge AI to formulate research queries, synthesize knowledge, visualize concepts, and generate comprehensive reports effortlessly.
@@ -114,7 +114,7 @@ export default function HeroSection({ queryFormSlot, isAuthenticated, authLoadin
                 className="mt-6 text-xs text-muted-foreground"
             >
                 <Info className="inline h-3 w-3 mr-1 -mt-0.5"/>
-                Sign up or log in to access the full suite of ScholarAI research tools.
+                Sign up or log in to access the full suite of Foss AI research tools.
             </motion.p>
         )}
       </div>

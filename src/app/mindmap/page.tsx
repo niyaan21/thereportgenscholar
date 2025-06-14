@@ -2,7 +2,7 @@
 // src/app/mindmap/page.tsx
 'use client';
 
-import React, { useState, useEffect } from 'react'; // Imported useState and useEffect
+import React, { useState, useEffect } from 'react'; 
 import { useActionState } from 'react';
 import NextLink from 'next/link';
 import { useToast } from '@/hooks/use-toast';
@@ -21,8 +21,8 @@ import { onAuthStateChanged, type User } from 'firebase/auth';
 import type { Metadata } from 'next';
 
 // export const metadata: Metadata = { // Cannot be used in client component
-//   title: 'Mind Map Concept Extractor - ScholarAI',
-//   description: 'Input text to extract key concepts and structure ideas for mind mapping with ScholarAI.',
+//   title: 'Mind Map Concept Extractor - Foss AI',
+//   description: 'Input text to extract key concepts and structure ideas for mind mapping with Foss AI.',
 // };
 
 const initialMindmapState: ExtractMindmapConceptsActionState = {
@@ -83,7 +83,7 @@ export default function MindmapPage() {
           Mind Map Concept Extractor
         </h1>
         <p className="mt-2 sm:mt-3 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-          Paste your text below, and ScholarAI will identify the main idea and key concepts to kickstart your mind map.
+          Paste your text below, and Foss AI will identify the main idea and key concepts to kickstart your mind map.
         </p>
       </header>
 

@@ -9,18 +9,18 @@ import { cn } from '@/lib/utils';
 import React from 'react'; 
 
 export const metadata: Metadata = {
-  title: 'ScholarAI Pricing - Unlock Your Research Potential',
-  description: 'Explore flexible pricing plans for ScholarAI. Choose the perfect plan for your research needs, from individual explorers to enterprise teams, and start leveraging AI today.',
+  title: 'Foss AI Pricing - Unlock Your Research Potential',
+  description: 'Explore flexible pricing plans for Foss AI. Choose the perfect plan for your research needs, from individual explorers to enterprise teams, and start leveraging AI today.',
   openGraph: {
-    title: 'ScholarAI Pricing - Plans for Every Researcher',
-    description: 'Find the ScholarAI plan that fits your research workflow. AI-powered query formulation, synthesis, and report generation at your fingertips.',
+    title: 'Foss AI Pricing - Plans for Every Researcher',
+    description: 'Find the Foss AI plan that fits your research workflow. AI-powered query formulation, synthesis, and report generation at your fingertips.',
     images: [
       {
-        url: 'https://placehold.co/1200x630.png?text=ScholarAI+Pricing',
+        url: 'https://placehold.co/1200x630.png?text=Foss+AI+Pricing',
         width: 1200,
         height: 630,
-        alt: 'ScholarAI Pricing Plans',
-        'data-ai-hint': 'pricing plans infographic' as any,
+        alt: 'Foss AI Pricing Plans',
+        'data-ai-hint': 'pricing plans' as any,
       },
     ],
   },
@@ -166,7 +166,7 @@ export default function PricingPage() {
             <CardContent className="p-0 space-y-5 text-left">
                 <details className="group p-3 sm:p-4 rounded-lg hover:bg-accent/10 transition-colors">
                     <summary className="flex justify-between items-center font-medium cursor-pointer text-base sm:text-lg text-primary/90 group-hover:text-accent">
-                        Can I try ScholarAI before committing to a paid plan?
+                        Can I try Foss AI before committing to a paid plan?
                         <ArrowRight className="h-4 w-4 transform transition-transform duration-200 group-open:rotate-90" />
                     </summary>
                     <p className="text-muted-foreground mt-2 text-sm sm:text-base leading-relaxed">
@@ -206,7 +206,7 @@ export default function PricingPage() {
         </p>
         <Button asChild size="lg" className="mt-5 sm:mt-6 bg-gradient-to-r from-primary to-accent text-primary-foreground hover:shadow-2xl px-10 py-3.5 text-lg sm:text-xl">
           <NextLink href="/signup">
-            Get Started with ScholarAI <ArrowRight className="ml-2.5 h-5 w-5 sm:h-6 sm:w-6" />
+            Get Started with Foss AI <ArrowRight className="ml-2.5 h-5 w-5 sm:h-6 sm:w-6" />
           </NextLink>
         </Button>
       </div>

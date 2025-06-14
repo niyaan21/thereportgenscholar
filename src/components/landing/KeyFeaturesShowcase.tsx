@@ -121,13 +121,13 @@ export default function KeyFeaturesShowcase() {
             variants={{ hidden: { opacity: 0, y: -15 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, delay: 0.1, ease: "easeOut"}}}}
             className="text-3xl font-extrabold tracking-tight text-primary sm:text-4xl md:text-5xl"
           >
-            Why Choose ScholarAI?
+            Why Choose Foss AI?
           </motion.h2>
           <motion.p
             variants={{ hidden: { opacity: 0, y: -10 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, delay: 0.2, ease: "easeOut"}}}}
             className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground sm:text-xl"
           >
-            ScholarAI empowers your research with a suite of intelligent tools designed to accelerate discovery and deepen understanding.
+            Foss AI empowers your research with a suite of intelligent tools designed to accelerate discovery and deepen understanding.
           </motion.p>
         </motion.div>
 

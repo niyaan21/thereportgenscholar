@@ -12,23 +12,23 @@ import PageProgressBar from '@/components/layout/PageProgressBar';
 
 export const metadata: Metadata = {
   title: {
-    default: 'ScholarAI: Advanced AI Research & Report Generation',
-    template: '%s | ScholarAI',
+    default: 'Foss AI: Advanced AI Research & Report Generation',
+    template: '%s | Foss AI',
   },
-  description: 'Elevate your research with ScholarAI. Leverage cutting-edge AI for query formulation, knowledge synthesis, conceptual visualization, and comprehensive report generation. Start your intelligent research journey today.',
-  keywords: ['AI research', 'report generator', 'knowledge synthesis', 'academic research', 'AI tool', 'data analysis', 'generative AI', 'research assistant', 'automated reporting'],
+  description: 'Elevate your research with Foss AI. Leverage cutting-edge AI for query formulation, knowledge synthesis, conceptual visualization, and comprehensive report generation. Start your intelligent research journey today.',
+  keywords: ['AI research', 'report generator', 'knowledge synthesis', 'academic research', 'AI tool', 'data analysis', 'generative AI', 'research assistant', 'automated reporting', 'Foss AI'],
   openGraph: {
-    title: 'ScholarAI: Advanced AI Research & Report Generation',
-    description: 'Elevate your research with ScholarAI. Leverage cutting-edge AI for query formulation, knowledge synthesis, conceptual visualization, and comprehensive report generation.',
-    url: 'https://scholarai.example.com', // Replace with your actual domain
-    siteName: 'ScholarAI',
+    title: 'Foss AI: Advanced AI Research & Report Generation',
+    description: 'Elevate your research with Foss AI. Leverage cutting-edge AI for query formulation, knowledge synthesis, conceptual visualization, and comprehensive report generation.',
+    url: 'https://fossai.example.com', 
+    siteName: 'Foss AI',
     images: [
       {
-        url: 'https://placehold.co/1200x630.png?text=ScholarAI+Research+Platform',
+        url: 'https://placehold.co/1200x630.png?text=Foss+AI+Research+Platform',
         width: 1200,
         height: 630,
-        alt: 'ScholarAI - AI Research and Report Generation Tool',
-        'data-ai-hint': 'research platform homepage' as any,
+        alt: 'Foss AI - AI Research and Report Generation Tool',
+        'data-ai-hint': 'fossai platform homepage' as any,
       },
     ],
     locale: 'en_US',
@@ -36,8 +36,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ScholarAI: Advanced AI Research & Report Generation',
-    description: 'Elevate your research with ScholarAI. Leverage cutting-edge AI for query formulation, knowledge synthesis, and comprehensive report generation.',
+    title: 'Foss AI: Advanced AI Research & Report Generation',
+    description: 'Elevate your research with Foss AI. Leverage cutting-edge AI for query formulation, knowledge synthesis, and comprehensive report generation.',
   },
   robots: {
     index: true,
