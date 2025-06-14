@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview Generates a daily research prompt.
