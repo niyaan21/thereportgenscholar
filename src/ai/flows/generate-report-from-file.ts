@@ -26,7 +26,7 @@ const ChartSuggestionSchema = z.object({
   data: z.array(z.record(z.string(), z.string()))
     .max(7)
     .optional()
-    .describe('An array of 2-7 sample data objects for the chart. Keys within these objects MUST match the categoryDataKey and the keys defined in seriesDataKeys. All values in these records should be strings (e.g., numbers represented as "10"). Important if chart type is not "none".')
+    .describe('An array of 2-7 sample data objects that are plausible and illustrative for the chart, based on the file content and guidance query. If possible, derive examples from the file, otherwise generate plausible data fitting the context. Avoid generic placeholders. Keys within these objects MUST match the categoryDataKey and the keys defined in seriesDataKeys. All values in these records should be strings (e.g., numbers represented as "10"). Important if chart type is not "none".')
 });
 
 const ReportOutputSchema = z.object({
@@ -42,8 +42,8 @@ const ReportOutputSchema = z.object({
   resultsAndAnalysis: z.array(z.object({
     sectionTitle: z.string().describe('A descriptive title for this specific result/analysis section.'),
     content: z.string().describe('Detailed presentation and in-depth analysis of a specific segment of results or data. Discuss patterns, trends, and statistical significance if applicable (approx. 300-400 words per section).'),
-    chartSuggestion: ChartSuggestionSchema.optional().describe('Suggestion for a chart to visualize this result. If a chart is relevant, provide details including sample data.')
-  })).min(2).max(4).describe('Detailed breakdown of 2-4 key results sections, each with analysis and an optional chart suggestion with sample data, derived from the file content.'),
+    chartSuggestion: ChartSuggestionSchema.optional().describe('Suggestion for a chart to visualize this result. If a chart is relevant, provide details including plausible, context-relevant sample data derived from or representative of the file content.')
+  })).min(2).max(4).describe('Detailed breakdown of 2-4 key results sections, each with analysis and an optional chart suggestion with plausible sample data, derived from the file content.'),
   discussion: z.string().describe('An expanded discussion interpreting the overall findings, their implications, how they relate back to the research question and literature review. Connect different results (approx. 600-800 words).'),
   conclusion: z.string().describe('A robust conclusion summarizing the main findings, their significance, and restating the overall contribution of the research (approx. 350-450 words).'),
   limitations: z.string().optional().describe('A detailed discussion of potential limitations of the research, analysis, or typical approaches to this topic (approx. 200-300 words).'),
@@ -122,7 +122,7 @@ Key report requirements:
         *   'dataDescription' (what it shows, e.g., "Trends of X over Y time, segmented by Group Z").
         *   'categoryDataKey' (the field name for categories/x-axis in your sample data, e.g., "item_name").
         *   'seriesDataKeys' (array of objects with 'key' for data field and 'label' for display, e.g., [{key: "score", label: "Score"}]).
-        *   Provide 2-7 plausible 'data' points (array of objects) that fit the description and keys. Keys in 'data' objects MUST match 'categoryDataKey' and 'seriesDataKeys'. IMPORTANT FOR SCHEMA: All values within these data objects (e.g., for 'score') must be provided as STRINGS (e.g., "85", "92.5").
+        *   Provide 2-7 plausible 'data' points as an array of objects. This data should be illustrative. If the uploaded file contains relevant figures or patterns, try to base this sample data on that information. If the file lacks specific numerical data, generate plausible sample data that logically fits the topic and your guidance query. Avoid generic mock data. Keys in 'data' objects MUST match 'categoryDataKey' and 'seriesDataKeys'. IMPORTANT FOR SCHEMA: All values within these data objects (e.g., for 'score') must be provided as STRINGS (e.g., "85", "92.5").
             Example: If categoryDataKey is "topic" and seriesDataKeys is [{key: "relevance", label: "Relevance Score"}], data could be: [{topic: "AI Ethics", relevance: "85"}, {topic: "Data Privacy", relevance: "92"}].
         *   If no chart is suitable, set chartSuggestion.type to 'none' and other chart-related fields can be omitted. Assume some data extraction or plausible sample data generation is possible if the file context suggests it.
 8.  **Discussion**: (approx. 400-600 words) Interpret findings from the file in light of the guidance query.
@@ -153,3 +153,4 @@ const generateReportFromFileFlow = ai.defineFlow(
     return output;
   }
 );
+
