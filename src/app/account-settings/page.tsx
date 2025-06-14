@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Mail, Lock, UserCircle, Trash2, Palette, Bell, Settings2, ShieldAlert, LogOut, ChevronRight, ExternalLink, Edit3, AlertCircle, CheckCircle2, Sun, Moon, History, Settings as GeneralSettingsIcon, UserRoundCog, FileText, BookOpen, ClockIcon, Search, FileSignature, Upload, Download, FileJson, Edit, Save } from 'lucide-react';
+import { Loader2, Mail, Lock, UserCircle, Trash2, Palette, Bell, Settings2 as GeneralSettingsIcon, ShieldAlert, ExternalLink, Edit3, AlertCircle, CheckCircle2, Sun, Moon, History, UserRoundCog, FileText, BookOpen, ClockIcon, Search, FileSignature, Upload, Download, FileJson, Edit, Save, Settings as InterfaceSettingsIcon } from 'lucide-react';
 import NextLink from 'next/link';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -523,7 +523,7 @@ export default function AccountSettingsPage() {
                     <div>
                       <RadioGroupItem value="system" id="theme-system" className="peer sr-only" />
                       <Label htmlFor="theme-system" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-all">
-                        <Settings2 className="mb-1.5 h-5 w-5" /> System
+                        <GeneralSettingsIcon className="mb-1.5 h-5 w-5" /> System
                       </Label>
                     </div>
                 </RadioGroup>
@@ -556,7 +556,7 @@ export default function AccountSettingsPage() {
                 </form>
               </SettingsSection>
 
-              <SettingsSection title="Interface Settings" icon={Edit} description="Customize your Foss AI experience. Saved locally.">
+              <SettingsSection title="Interface Settings" icon={InterfaceSettingsIcon} description="Customize your Foss AI experience. Saved locally.">
                 <form onSubmit={handleSaveInterfaceSettings} className="space-y-4">
                     <div>
                         <Label htmlFor="itemsPerPage">Items Per Page (e.g., in results)</Label>
@@ -680,3 +680,5 @@ export default function AccountSettingsPage() {
     </div>
   );
 }
+
+    
