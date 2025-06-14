@@ -23,11 +23,11 @@ const ChartSuggestionSchema = z.object({
       key: z.string().describe('The key in the sample data objects for this series (e.g., "revenue", "users").'),
       label: z.string().describe('The display label for this series (e.g., "Total Revenue", "Active Users").')
   })).min(1).optional().describe('Defines the data series for the chart. For pie charts, use one series for values. For scatter, first key is Y, second (optional) is Z/size.'),
-  data: z.array(z.record(z.string(), z.any())) // Allow any type for values in the records
+  data: z.array(z.record(z.string(), z.string())) 
     .min(2)
     .max(7)
     .optional()
-    .describe('An array of 2-7 sample data objects for the chart, e.g., [{category: "A", value1: 10, value2: 20}, ...]. Keys within these objects MUST match the categoryDataKey and the keys defined in seriesDataKeys. For pie charts, data should be like [{name: "Category A", value: 40}, {name: "Category B", value: 60}]. For scatter, like [{xVal: 10, yVal: 20, zVal: 5}, ...]')
+    .describe('An array of 2-7 sample data objects for the chart. Keys within these objects MUST match the categoryDataKey and the keys defined in seriesDataKeys. For schema purposes, all values in these records should be strings (e.g., numbers represented as "10"). For pie charts, data objects might look like {"category": "Slice A", "value": "40"}. For scatter, {"x": "10", "y": "20"}.')
 });
 
 // Using the same output schema as the other report generator for consistency
@@ -122,8 +122,8 @@ Key report requirements:
         *   Suggest 'xAxisLabel' and 'yAxisLabel'.
         *   Define 'categoryDataKey' (field name for categories/x-axis, e.g., "item_name").
         *   Define 'seriesDataKeys' (array of objects with 'key' for data field and 'label' for display, e.g., [{key: "score", label: "Score"}]).
-        *   Provide 2-7 plausible 'data' points (array of objects) that fit the description and keys. Keys in 'data' objects MUST match 'categoryDataKey' and 'seriesDataKeys'.
-            Example: If categoryDataKey is "topic" and seriesDataKeys is [{key: "relevance", label: "Relevance Score"}], data could be: [{topic: "AI Ethics", relevance: 85}, {topic: "Data Privacy", relevance: 92}].
+        *   Provide 2-7 plausible 'data' points (array of objects) that fit the description and keys. Keys in 'data' objects MUST match 'categoryDataKey' and 'seriesDataKeys'. IMPORTANT FOR SCHEMA: All values within these data objects (e.g., for 'score') must be provided as STRINGS (e.g., "85", "92.5").
+            Example: If categoryDataKey is "topic" and seriesDataKeys is [{key: "relevance", label: "Relevance Score"}], data could be: [{topic: "AI Ethics", relevance: "85"}, {topic: "Data Privacy", relevance: "92"}].
         *   If no chart is suitable, set chartSuggestion.type to 'none'. Assume some data extraction or plausible sample data generation is possible if the file context suggests it.
 8.  **Discussion**: (approx. 400-600 words) Interpret findings from the file in light of the guidance query.
 9.  **Conclusion**: (approx. 250-350 words) Summarize the main takeaways from the file as per the guidance.

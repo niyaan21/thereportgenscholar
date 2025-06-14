@@ -32,11 +32,11 @@ const ChartSuggestionSchema = z.object({
       key: z.string().describe('The key in the sample data objects for this series (e.g., "revenue", "users").'),
       label: z.string().describe('The display label for this series (e.g., "Total Revenue", "Active Users").')
   })).min(1).optional().describe('Defines the data series for the chart. For pie charts, use one series for values. For scatter, first key is Y, second (optional) is Z/size.'),
-  data: z.array(z.record(z.string(), z.any())) // Allow any type for values in the records
+  data: z.array(z.record(z.string(), z.string())) 
     .min(2)
     .max(7)
     .optional()
-    .describe('An array of 2-7 sample data objects for the chart, e.g., [{category: "A", value1: 10, value2: 20}, ...]. Keys within these objects MUST match the categoryDataKey and the keys defined in seriesDataKeys. For pie charts, data should be like [{name: "Category A", value: 40}, {name: "Category B", value: 60}]. For scatter, like [{xVal: 10, yVal: 20, zVal: 5}, ...]')
+    .describe('An array of 2-7 sample data objects for the chart. Keys within these objects MUST match the categoryDataKey and the keys defined in seriesDataKeys. For schema purposes, all values in these records should be strings (e.g., numbers represented as "10"). For pie charts, data objects might look like {"category": "Slice A", "value": "40"}. For scatter, {"x": "10", "y": "20"}.')
 });
 
 const ResearchReportOutputSchema = z.object({
@@ -107,9 +107,9 @@ Key requirements for the report:
         *   Suggest 'xAxisLabel' and 'yAxisLabel'.
         *   Define 'categoryDataKey' (the field name for categories/x-axis in your sample data, e.g., "year" or "product_category").
         *   Define 'seriesDataKeys' as an array of objects, each with 'key' (the data field name, e.g., "sales_total" or "user_count") and 'label' (display name, e.g., "Total Sales" or "Active Users").
-        *   Provide 2-7 plausible 'data' points as an array of objects. Keys in these data objects MUST exactly match the 'categoryDataKey' and the 'key's defined in 'seriesDataKeys'.
-            Example (bar/line): If categoryDataKey is "month" and seriesDataKeys is [{key: "revenue", label: "Revenue"}], data could be: [{month: "Jan", revenue: 1200}, {month: "Feb", revenue: 1500}, {month: "Mar", revenue: 1300}].
-            Example (pie): If categoryDataKey is "segment" and seriesDataKeys is [{key: "percentage", label: "Market Share"}], data could be: [{segment: "Alpha", percentage: 40}, {segment: "Beta", percentage: 30}, {segment: "Gamma", percentage: 30}].
+        *   Provide 2-7 plausible 'data' points as an array of objects. Keys in these data objects MUST exactly match the 'categoryDataKey' and the 'key's defined in 'seriesDataKeys'. IMPORTANT FOR SCHEMA: All values within these data objects (e.g., for 'sales_total') must be provided as STRINGS (e.g., "1200", "1500.75").
+            Example (bar/line): If categoryDataKey is "month" and seriesDataKeys is [{key: "revenue", label: "Revenue"}], data could be: [{month: "Jan", revenue: "1200"}, {month: "Feb", revenue: "1500"}, {month: "Mar", revenue: "1300"}].
+            Example (pie): If categoryDataKey is "segment" and seriesDataKeys is [{key: "percentage", label: "Market Share"}], data could be: [{segment: "Alpha", percentage: "40"}, {segment: "Beta", percentage: "30"}, {segment: "Gamma", percentage: "30"}].
         *   If no chart is suitable for a section, set chartSuggestion.type to 'none' and omit other chart-related fields for that suggestion. Ensure chart suggestions are meaningful and add value.
 8.  **Discussion**: (approx. 600-800 words) Interpret the overall (hypothetical or synthesized) findings in great depth. Discuss their implications, how they relate back to the research question and literature review, and how they contribute to the field. Connect different results, address inconsistencies, and explore alternative interpretations.
 9.  **Conclusion**: (approx. 350-450 words) Provide a robust conclusion summarizing the main findings, their significance, and restating the overall contribution of the research. Reiterate the answers to the research objectives.
