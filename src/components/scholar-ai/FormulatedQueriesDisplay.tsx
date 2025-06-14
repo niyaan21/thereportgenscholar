@@ -1,11 +1,10 @@
-
 // src/components/scholar-ai/FormulatedQueriesDisplay.tsx
 'use client';
 
 import React from 'react';
 import { useFormStatus } from 'react-dom';
 import { Button } from '@/components/ui/button';
-import { Loader2, Layers, ArrowRight, Telescope, FileSearch2, DatabaseZap, Brain, Sparkles, ChevronRightIcon, Activity, Zap, Lock, MessagesSquare, Tag, ListTree } from 'lucide-react';
+import { Loader2, Layers, ArrowRight, Telescope, FileSearch2, DatabaseZap, Brain, Sparkles, ChevronRightIcon, Activity, Zap, Lock, MessagesSquare, Tag, ListTree, Search } from 'lucide-react'; // Added Search icon
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from '@/components/ui/badge';
