@@ -19,7 +19,7 @@ import { cn } from '@/lib/utils';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { addResearchActivity } from '@/lib/historyService'; // Import history service
-import type { Metadata } from 'next';
+// import type { Metadata } from 'next'; // Client components cannot export metadata
 
 
 // Client components cannot export metadata directly.

@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview Generates a comprehensive research report from an uploaded file and user guidance.
@@ -153,4 +152,3 @@ const generateReportFromFileFlow = ai.defineFlow(
     return output;
   }
 );
-

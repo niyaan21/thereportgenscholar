@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from '@/components/ui/button';
 import NextLink from 'next/link';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { BookOpenText, ArrowRight, Lightbulb, Workflow, Download, Sparkles, Settings, AlertTriangle, Search, Layers, FileTextIcon, UserCircle, HelpCircle, MessageSquareQuestion, KeyboardIcon, Mic, BrainCircuit } from 'lucide-react';
+import { BookOpenText, ArrowRight, Lightbulb, Workflow, Download, Sparkles, Settings, AlertTriangle, Search, Layers, FileTextIcon, UserCircle, HelpCircle, MessageSquareQuestion, KeyboardIcon, Mic, BrainCircuit, UploadCloud } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -78,6 +78,10 @@ export default function DocsPage() {
                 <div>
                   <h4 className="text-lg font-medium text-primary/90 flex items-center mb-2"><FileTextIcon className="h-5 w-5 mr-2 text-accent/80"/>Comprehensive Report Generation</h4>
                   <p>Leveraging your original question and the synthesized summary, Foss AI can generate a detailed, multi-section academic-style research report. This includes sections like an executive summary, introduction, literature review, methodology, results, discussion, conclusion, and references. The report structure is designed for clarity and depth.</p>
+                </div>
+                 <div>
+                  <h4 className="text-lg font-medium text-primary/90 flex items-center mb-2"><UploadCloud className="h-5 w-5 mr-2 text-accent/80"/>File-Powered Guided Reporting</h4>
+                  <p>Upload your documents (TXT, MD, PDF, DOCX) and provide specific guidance to generate tailored reports based on your file's content. This allows Foss AI to analyze and report on information you provide directly. Access this via the "File Report" link in the navigation.</p>
                 </div>
                  <div>
                   <h4 className="text-lg font-medium text-primary/90 flex items-center mb-2"><Mic className="h-5 w-5 mr-2 text-accent/80"/>Voice-to-Text Research Notes</h4>
