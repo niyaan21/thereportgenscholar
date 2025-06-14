@@ -13,24 +13,23 @@ import {z} from 'genkit';
 import type { GenerateResearchReportOutput } from './generate-research-report'; // Reusing the same output structure
 
 const ChartSuggestionSchema = z.object({
-  type: z.enum(['bar', 'line', 'pie', 'scatter', 'none']).describe('Suggested chart type if applicable (bar, line, pie, scatter, or none).'),
+  type: z.enum(['bar', 'line', 'pie', 'scatter', 'none']).describe('Suggested chart type. If "none", other chart-related fields may be omitted.'),
   title: z.string().optional().describe('A concise title for the suggested chart.'),
-  dataDescription: z.string().describe('Description of what data this chart should represent (e.g., "Comparison of Group A vs Group B on Metric Z over 5 years").'),
+  dataDescription: z.string().describe('Description of what data this chart should represent (e.g., "Comparison of Group A vs Group B on Metric Z over 5 years"). This field is crucial if chart type is not "none".'),
   xAxisLabel: z.string().optional().describe('Suggested X-axis label if applicable.'),
   yAxisLabel: z.string().optional().describe('Suggested Y-axis label if applicable.'),
-  categoryDataKey: z.string().optional().describe('The key in the sample data objects that represents the category or X-axis values (e.g., "month", "productName"). Required for bar, line, pie charts if data is provided.'),
+  categoryDataKey: z.string().optional().describe('The key in the sample data objects that represents the category or X-axis values (e.g., "month", "productName"). Important if chart type is not "none".'),
   seriesDataKeys: z.array(z.object({
       key: z.string().describe('The key in the sample data objects for this series (e.g., "revenue", "users").'),
       label: z.string().describe('The display label for this series (e.g., "Total Revenue", "Active Users").')
-  })).min(1).optional().describe('Defines the data series for the chart. For pie charts, use one series for values. For scatter, first key is Y, second (optional) is Z/size.'),
+  })).min(1).optional().describe('Defines the data series for the chart. Important if chart type is not "none". For pie charts, use one series for values. For scatter, first key is Y, second (optional) is Z/size.'),
   data: z.array(z.record(z.string(), z.string())) 
     .min(2)
     .max(7)
     .optional()
-    .describe('An array of 2-7 sample data objects for the chart. Keys within these objects MUST match the categoryDataKey and the keys defined in seriesDataKeys. For schema purposes, all values in these records should be strings (e.g., numbers represented as "10"). For pie charts, data objects might look like {"category": "Slice A", "value": "40"}. For scatter, {"x": "10", "y": "20"}.')
+    .describe('An array of 2-7 sample data objects for the chart. Keys within these objects MUST match the categoryDataKey and the keys defined in seriesDataKeys. All values in these records should be strings (e.g., numbers represented as "10"). Important if chart type is not "none".')
 });
 
-// Using the same output schema as the other report generator for consistency
 const ReportOutputSchema = z.object({
   title: z.string().describe('A concise and informative title for the research report (max 15 words).'),
   executiveSummary: z.string().describe('A brief, high-level summary of the entire report, covering the purpose, key findings, and main conclusions (approx. 300-400 words).'),
@@ -117,14 +116,16 @@ Key report requirements:
 6.  **Methodology (if applicable)**: (approx. 300-500 words) If the file describes a methodology, summarize it. Otherwise, discuss general methodologies relevant to analyzing such content or topic.
 7.  **Results and Analysis from File**: Present 2-4 sections. Each 'sectionTitle' and 'content' (approx. 200-300 words per section) analyzing data/information from the file. Include 'chartSuggestion' where appropriate.
     *   For 'chartSuggestion': If data in the file lends itself to visualization (or if hypothetical data related to the topic could be visualized):
-        *   Specify its 'type' (bar, line, pie, scatter), a 'title'.
-        *   Provide a 'dataDescription' (what it shows).
-        *   Suggest 'xAxisLabel' and 'yAxisLabel'.
-        *   Define 'categoryDataKey' (field name for categories/x-axis, e.g., "item_name").
-        *   Define 'seriesDataKeys' (array of objects with 'key' for data field and 'label' for display, e.g., [{key: "score", label: "Score"}]).
+        *   Specify its 'type' (bar, line, pie, scatter, or none).
+        *   If type is NOT 'none', you MUST provide 'dataDescription', 'categoryDataKey', 'seriesDataKeys', and 'data'.
+        *   'title' for the chart is optional.
+        *   'xAxisLabel' and 'yAxisLabel' are optional.
+        *   'dataDescription' (what it shows, e.g., "Trends of X over Y time, segmented by Group Z").
+        *   'categoryDataKey' (the field name for categories/x-axis in your sample data, e.g., "item_name").
+        *   'seriesDataKeys' (array of objects with 'key' for data field and 'label' for display, e.g., [{key: "score", label: "Score"}]).
         *   Provide 2-7 plausible 'data' points (array of objects) that fit the description and keys. Keys in 'data' objects MUST match 'categoryDataKey' and 'seriesDataKeys'. IMPORTANT FOR SCHEMA: All values within these data objects (e.g., for 'score') must be provided as STRINGS (e.g., "85", "92.5").
             Example: If categoryDataKey is "topic" and seriesDataKeys is [{key: "relevance", label: "Relevance Score"}], data could be: [{topic: "AI Ethics", relevance: "85"}, {topic: "Data Privacy", relevance: "92"}].
-        *   If no chart is suitable, set chartSuggestion.type to 'none'. Assume some data extraction or plausible sample data generation is possible if the file context suggests it.
+        *   If no chart is suitable, set chartSuggestion.type to 'none' and other chart-related fields can be omitted. Assume some data extraction or plausible sample data generation is possible if the file context suggests it.
 8.  **Discussion**: (approx. 400-600 words) Interpret findings from the file in light of the guidance query.
 9.  **Conclusion**: (approx. 250-350 words) Summarize the main takeaways from the file as per the guidance.
 10. **Limitations**: (approx. 150-250 words) Discuss limitations of the information in the file or the analysis.

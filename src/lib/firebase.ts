@@ -1,3 +1,4 @@
+
 // src/lib/firebase.ts
 import { initializeApp, getApp, getApps, type FirebaseApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, type Auth } from "firebase/auth"; // Added GoogleAuthProvider
@@ -5,7 +6,7 @@ import { getAuth, GoogleAuthProvider, type Auth } from "firebase/auth"; // Added
 // https://firebase.google.com/docs/web/setup#available-libraries
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC5xFskWhpAizDPGyV701knL7R42-NIY88",
+  apiKey: "AIzaSyBYK_hGTQIhCGm6sxfFigbRcPBP4YEtwAI",
   authDomain: "scholarai-v4ygd.firebaseapp.com",
   projectId: "scholarai-v4ygd",
   storageBucket: "scholarai-v4ygd.firebasestorage.app",
@@ -25,3 +26,4 @@ const auth: Auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider(); // Create an instance of GoogleAuthProvider
 
 export { app, auth, googleProvider }; // Export googleProvider
+
