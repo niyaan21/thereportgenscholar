@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from '@/components/ui/button';
 import NextLink from 'next/link';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { BookOpenText, ArrowRight, Lightbulb, Workflow, Download, Sparkles, Settings, AlertTriangle, Search, Layers, FileTextIcon, UserCircle, HelpCircle, MessageSquareQuestion, KeyboardIcon, Mic, BrainCircuit, UploadCloud } from 'lucide-react';
+import { BookOpenText, ArrowRight, Lightbulb, Workflow, Download, Sparkles, Settings, AlertTriangle, Search, Layers, FileTextIcon, UserCircle, HelpCircle, MessageSquareQuestion, KeyboardIcon, Mic, BrainCircuit, UploadCloud, ShieldCheck } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -135,6 +135,24 @@ export default function DocsPage() {
                   <li><strong>Email Verification:</strong> Ensure your email is verified for full account functionality. You can resend the verification email from <NextLink href="/account-settings" className="text-accent hover:underline font-medium">Account Settings</NextLink>.</li>
                    <li><strong>Research & Voice Note History:</strong> View, export, or import your research activity and manage your voice notes in the "Research History" tab of your <NextLink href="/account-settings#history" className="text-accent hover:underline font-medium">Account Settings</NextLink>. This data is stored locally.</li>
                 </ul>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="plagiarism-detection" className="bg-secondary/30 dark:bg-secondary/10 rounded-lg shadow-sm border border-border/50">
+              <AccordionTrigger className="px-5 py-4 text-xl font-semibold hover:no-underline text-primary">
+                <div className="flex items-center">
+                 <ShieldCheck className="h-6 w-6 mr-3 text-accent" /> Plagiarism Detection (Planned)
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-5 pb-5">
+                <p>Foss AI is committed to helping you produce original work. We are planning to integrate a plagiarism detection feature that will scan generated content against a vast database of existing literature and web sources.</p>
+                <ul className="list-disc list-outside space-y-2 pl-5 mt-3">
+                    <li><strong>Purpose:</strong> To help identify potential instances of unoriginal text and provide similarity scores.</li>
+                    <li><strong>Functionality (Planned):</strong> The system will highlight sections of text that may be similar to existing sources and provide links or references to those sources where possible.</li>
+                    <li><strong>Current Status:</strong> This feature is currently under development. A placeholder UI element (an alert) is present in the report view to indicate its planned inclusion. The full functionality is not yet active.</li>
+                    <li><strong>User Responsibility:</strong> Even with this feature, users are ultimately responsible for ensuring the academic integrity and originality of their work.</li>
+                </ul>
+                <p className="mt-3 text-sm text-muted-foreground">We are working to make this a robust and reliable tool for our users. Stay tuned for updates!</p>
               </AccordionContent>
             </AccordionItem>
 

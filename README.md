@@ -33,7 +33,7 @@ Foss AI is a powerful Next.js web application designed to revolutionize your res
 Foss AI is continuously evolving. Here are some of the exciting capabilities on our roadmap:
 
 *   **Interview Transcription & Analysis:** Upload audio/video files for automated transcription and AI-powered thematic analysis, sentiment detection, and key insight extraction. (Placeholder UI exists)
-*   **Plagiarism Detection:** Integrated similarity checking for generated content to ensure originality and proper attribution.
+*   **Plagiarism Detection:** Integrated similarity checking for generated content to ensure originality and proper attribution. (Placeholder UI in report view)
 *   **Multi-language Support:** Capabilities to conduct research, process inputs, and generate reports in a variety of languages.
 *   **Research Timeline Visualization:** Interactive tools to create and visualize research project timelines, milestones, and progress.
 *   **Note-taking Apps Integration:** Direct synchronization of research notes, summaries, and reports with popular platforms like Notion and Obsidian.
@@ -170,14 +170,14 @@ foss-ai/
 │   │   ├── flows/        # Directory for individual Genkit flows
 │   │   └── genkit.ts     # Genkit initialization and global AI object
 │   ├── app/              # Next.js App Router: pages, layouts, actions
-│   │   ├── (page routes)/# e.g., dashboard/, about/, login/, voice-notes/
+│   │   ├── (page routes)/# e.g., dashboard/, about/, login/, voice-notes/, file-report/
 │   │   ├── actions.ts    # Server Actions
 │   │   ├── globals.css   # Global styles and Tailwind theme
 │   │   └── layout.tsx    # Root layout
 │   ├── components/       # Reusable UI components
 │   │   ├── landing/      # Components for the landing page
-│   │   ├── layout/       # Layout components (Navbar, Footer, ParticleBackground)
-│   │   ├── scholar-ai/   # Core application feature components
+│   │   ├── layout/       # Layout components (Navbar, Footer, ParticleBackground, GlobalKeyboardShortcuts)
+│   │   ├── scholar-ai/   # Core application feature components (now Foss AI components)
 │   │   └── ui/           # ShadCN UI components
 │   ├── hooks/            # Custom React hooks (e.g., useToast, useMobile)
 │   └── lib/              # Utility functions and libraries
