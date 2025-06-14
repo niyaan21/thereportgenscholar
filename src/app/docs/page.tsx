@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from '@/components/ui/button';
 import NextLink from 'next/link';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { BookOpenText, ArrowRight, Lightbulb, Workflow, Download, Sparkles, Settings, AlertTriangle, Search, Layers, FileTextIcon, UserCircle, HelpCircle, MessageSquareQuestion, KeyboardIcon, Mic } from 'lucide-react';
+import { BookOpenText, ArrowRight, Lightbulb, Workflow, Download, Sparkles, Settings, AlertTriangle, Search, Layers, FileTextIcon, UserCircle, HelpCircle, MessageSquareQuestion, KeyboardIcon, Mic, BrainCircuit } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -84,6 +84,10 @@ export default function DocsPage() {
                   <p>Capture ideas, notes, and observations on-the-go using audio input. Your spoken words are transcribed, and you can edit and save these notes locally in your browser for future reference. Access this feature via the "Voice Notes" link in the navigation.</p>
                 </div>
                  <div>
+                  <h4 className="text-lg font-medium text-primary/90 flex items-center mb-2"><BrainCircuit className="h-5 w-5 mr-2 text-accent/80"/>Mind Map Concept Extraction</h4>
+                  <p>Input a block of text, and Foss AI will identify the main idea and key concepts with related terms. This provides a structured starting point for building a detailed mind map, helping you visualize connections and organize your thoughts. Access this via the "Mind Map" link in the navigation.</p>
+                </div>
+                 <div>
                   <h4 className="text-lg font-medium text-primary/90 flex items-center mb-2"><Workflow className="h-5 w-5 mr-2 text-accent/80"/>Conceptual Image Visualization</h4>
                   <p>To help illustrate your research concepts, Foss AI can generate abstract, symbolic images based on your research topic or summary. These visuals can be useful for presentations or for stimulating further thought.</p>
                 </div>
@@ -144,6 +148,7 @@ export default function DocsPage() {
                   <li><strong>Edit AI Summaries:</strong> Before generating a full report, take advantage of the ability to edit the AI-generated summary. This allows you to fine-tune the report's foundation.</li>
                   <li><strong>Contextual Summary for Reports:</strong> Providing a rich, well-synthesized summary (or refining the AI-generated one) as input for the full report generation can significantly enhance the report's quality and relevance.</li>
                   <li><strong>Voice Notes for Quick Capture:</strong> Use the Voice Notes feature for quickly capturing thoughts or summaries when typing isn't convenient. You can edit the transcript before saving.</li>
+                  <li><strong>Mind Map Concepts:</strong> For complex topics, use the Mind Map Concept Extractor to break down large texts into main ideas and related concepts. This can help structure your thoughts before writing or further research.</li>
                   <li><strong>PDF Chart Accuracy:</strong> For best chart rendering in downloaded PDFs, ensure the relevant accordion sections containing charts are expanded on the webpage before initiating the PDF download.</li>
                 </ul>
               </AccordionContent>
@@ -201,3 +206,4 @@ export default function DocsPage() {
     </div>
   );
 }
+

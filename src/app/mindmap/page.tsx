@@ -18,7 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged, type User } from 'firebase/auth';
-import type { Metadata } from 'next';
+// import type { Metadata } from 'next'; // Cannot be used in client component
 
 // export const metadata: Metadata = { // Cannot be used in client component
 //   title: 'Mind Map Concept Extractor - Foss AI',
@@ -233,3 +233,4 @@ export default function MindmapPage() {
     </div>
   );
 }
+

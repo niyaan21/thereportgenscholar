@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import NextLink from 'next/link';
-import { Zap, Brain, FileTextIcon, Image as ImageIconLucide, ShieldCheck, LayoutDashboard, Download, Smartphone, ArrowRight, Sparkles, Search, Layers, Palette, Settings, Users, ThumbsUp, UploadCloud, MessageCircle, BarChart, BookOpen, Server, Share2, Mic } from 'lucide-react';
+import { Zap, Brain, FileTextIcon, Image as ImageIconLucide, ShieldCheck, LayoutDashboard, Download, Smartphone, ArrowRight, Sparkles, Search, Layers, Palette, Settings, Users, ThumbsUp, UploadCloud, MessageCircle, BarChart, BookOpen, Server, Share2, Mic, BrainCircuit } from 'lucide-react';
 import type { Metadata } from 'next';
 import { cn } from '@/lib/utils';
 import React from 'react'; 
@@ -77,6 +77,11 @@ export default function FeaturesPage() {
       icon: Mic,
       title: "Voice-to-Text Notes",
       description: "Capture research ideas and observations on-the-go using your voice. Transcribed notes can be edited and saved locally.",
+    },
+    {
+      icon: BrainCircuit,
+      title: "Mind Map Concept Extraction",
+      description: "Analyzes text to identify main ideas and key concepts, providing a structured start for mind mapping and visualizing connections.",
     },
     {
       icon: Palette,
@@ -184,3 +189,4 @@ export default function FeaturesPage() {
     </div>
   );
 }
+
