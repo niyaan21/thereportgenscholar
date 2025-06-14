@@ -32,7 +32,7 @@ const ChartSuggestionSchema = z.object({
       key: z.string().describe('The key in the sample data objects for this series (e.g., "revenue", "users").'),
       label: z.string().describe('The display label for this series (e.g., "Total Revenue", "Active Users").')
   })).min(1).optional().describe('Defines the data series for the chart. For pie charts, use one series for values. For scatter, first key is Y, second (optional) is Z/size.'),
-  data: z.array(z.record(z.union([z.string(), z.number(), z.boolean(), z.null()]))) // Allow boolean and null for flexibility
+  data: z.array(z.record(z.string(), z.any())) // Allow any type for values in the records
     .min(2)
     .max(7)
     .optional()
