@@ -3,14 +3,14 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import NextLink from 'next/link';
-import { Zap, Brain, FileTextIcon, Image as ImageIconLucide, ShieldCheck, LayoutDashboard, Download, Smartphone, ArrowRight, Sparkles, Search, Layers, Palette, Settings, Users, ThumbsUp, UploadCloud, MessageCircle, BarChart, BookOpen, Server, Share2 } from 'lucide-react';
+import { Zap, Brain, FileTextIcon, Image as ImageIconLucide, ShieldCheck, LayoutDashboard, Download, Smartphone, ArrowRight, Sparkles, Search, Layers, Palette, Settings, Users, ThumbsUp, UploadCloud, MessageCircle, BarChart, BookOpen, Server, Share2, Mic } from 'lucide-react';
 import type { Metadata } from 'next';
 import { cn } from '@/lib/utils';
 import React from 'react'; 
 
 export const metadata: Metadata = {
   title: 'Foss AI Features - Advanced AI Research Capabilities',
-  description: 'Discover the powerful features of Foss AI, including AI-driven query formulation, intelligent knowledge synthesis, file-powered reporting, conceptual visualization, and more. Elevate your research workflow today.',
+  description: 'Discover the powerful features of Foss AI, including AI-driven query formulation, intelligent knowledge synthesis, file-powered reporting, conceptual visualization, voice notes, and more. Elevate your research workflow today.',
   openGraph: {
     title: 'Foss AI Features - Advanced AI Research Capabilities',
     description: 'Explore how Foss AI\'s innovative features can streamline your research process and help you uncover deeper insights.',
@@ -74,6 +74,11 @@ export default function FeaturesPage() {
       description: "Upload your documents (TXT, MD, PDF, DOCX) and provide specific guidance to generate tailored reports based on your file's content.",
     },
     {
+      icon: Mic,
+      title: "Voice-to-Text Notes",
+      description: "Capture research ideas and observations on-the-go using your voice. Transcribed notes can be edited and saved locally.",
+    },
+    {
       icon: Palette,
       title: "Conceptual Image Visualization",
       description: "Brings research to life with AI-generated abstract images representing core concepts, perfect for presentations and creative insights.",
@@ -92,11 +97,6 @@ export default function FeaturesPage() {
       icon: Download,
       title: "Downloadable Outputs",
       description: "Export reports in structured JSON for data portability and as professionally formatted PDFs for sharing and offline access.",
-    },
-    {
-      icon: Smartphone,
-      title: "Responsive Design",
-      description: "Access Foss AI and conduct research anytime, anywhere. Fully responsive across desktops, tablets, and mobile devices.",
     },
      {
       icon: Settings,

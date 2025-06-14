@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import NextLink from 'next/link';
-import { BookText, UserPlus, LogIn, Home, Palette, Settings, Moon, Sun, Check, LogOut, Info, BookOpenText, Code2, Menu, X as CloseIcon, UserCircle, ChevronDown, Sparkles, FileText as FeaturesIcon, Settings2 as AccountSettingsIcon, LayoutDashboard, DollarSign, MessageSquare, UploadCloud as FileReportIcon, BrainCircuit as MindMapIcon, AudioLines } from 'lucide-react';
+import { BookText, UserPlus, LogIn, Home, Palette, Settings, Moon, Sun, Check, LogOut, Info, BookOpenText, Code2, Menu, X as CloseIcon, UserCircle, ChevronDown, Sparkles, FileText as FeaturesIcon, Settings2 as AccountSettingsIcon, LayoutDashboard, DollarSign, MessageSquare, UploadCloud as FileReportIcon, BrainCircuit as MindMapIcon, AudioLines, Mic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -62,6 +62,7 @@ export default function Navbar() {
     { href: "/", label: "Home", icon: Home },
     { href: "/file-report", label: "File Report", icon: FileReportIcon },
     { href: "/mindmap", label: "Mind Map", icon: MindMapIcon }, 
+    { href: "/voice-notes", label: "Voice Notes", icon: Mic },
     { href: "/interview-transcription", label: "Transcription", icon: AudioLines },
     { href: "/features", label: "Features", icon: Sparkles },
     { href: "/pricing", label: "Pricing", icon: DollarSign },
@@ -92,99 +93,107 @@ export default function Navbar() {
       </NextLink>
     );
   });
+  NavLinkItem.displayName = "NavLinkItem";
   
-  const AuthButtons: React.FC<{ isMobile?: boolean; onLinkClick?: () => void }> = ({ isMobile, onLinkClick }) => (
-    <>
-      {!currentUser && !authLoading && (
+  const AuthButtons: React.FC<{ isMobile?: boolean; onLinkClick?: () => void }> = React.memo(function AuthButtons({ isMobile, onLinkClick }) {
+    return (
         <>
-          <NextLink href="/login" passHref legacyBehavior>
-            <Button 
-              variant={pathname === "/login" ? "default" : "outline"} 
-              size="sm" 
-              className={cn("text-xs sm:text-sm", pathname === "/login" && "font-semibold", isMobile && "w-full justify-start")}
-              onClick={onLinkClick}
-            >
-              <LogIn className="mr-1.5 sm:mr-2 h-4 w-4" /> Login
-            </Button>
-          </NextLink>
-          <NextLink href="/signup" passHref legacyBehavior>
-            <Button 
-              variant={pathname === "/signup" ? "default" : "primary"} 
-              size="sm" 
-              className={cn("text-xs sm:text-sm", pathname === "/signup" && "font-semibold", isMobile && "w-full justify-start")}
-              onClick={onLinkClick}
-            >
-              <UserPlus className="mr-1.5 sm:mr-2 h-4 w-4" /> Sign Up
-            </Button>
-          </NextLink>
+        {!currentUser && !authLoading && (
+            <>
+            <NextLink href="/login" passHref legacyBehavior>
+                <Button 
+                variant={pathname === "/login" ? "default" : "outline"} 
+                size="sm" 
+                className={cn("text-xs sm:text-sm", pathname === "/login" && "font-semibold", isMobile && "w-full justify-start")}
+                onClick={onLinkClick}
+                >
+                <LogIn className="mr-1.5 sm:mr-2 h-4 w-4" /> Login
+                </Button>
+            </NextLink>
+            <NextLink href="/signup" passHref legacyBehavior>
+                <Button 
+                variant={pathname === "/signup" ? "default" : "primary"} 
+                size="sm" 
+                className={cn("text-xs sm:text-sm", pathname === "/signup" && "font-semibold", isMobile && "w-full justify-start")}
+                onClick={onLinkClick}
+                >
+                <UserPlus className="mr-1.5 sm:mr-2 h-4 w-4" /> Sign Up
+                </Button>
+            </NextLink>
+            </>
+        )}
+        {currentUser && (
+            <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className={cn("text-xs sm:text-sm flex items-center gap-2", isMobile && "w-full justify-start")}>
+                <UserCircle className="h-5 w-5" />
+                <span className="truncate max-w-[100px] sm:max-w-[150px]">{currentUser.displayName || currentUser.email || "Profile"}</span>
+                <ChevronDown className="h-4 w-4 opacity-70" />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel className="truncate">{currentUser.email}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild className="cursor-pointer">
+                <NextLink href="/dashboard" onClick={onLinkClick}>
+                    <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
+                </NextLink>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="cursor-pointer">
+                <NextLink href="/account-settings" onClick={onLinkClick}>
+                    <AccountSettingsIcon className="mr-2 h-4 w-4" /> Account Settings
+                </NextLink>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => { handleLogout(); onLinkClick?.(); }} className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10">
+                <LogOut className="mr-2 h-4 w-4" /> Logout
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+            </DropdownMenu>
+        )}
+        {authLoading && (
+            <div className="flex items-center space-x-2">
+                <div className="h-7 w-16 bg-muted/50 rounded-md animate-pulse"></div>
+                <div className="h-7 w-20 bg-muted/50 rounded-md animate-pulse"></div>
+            </div>
+        )}
         </>
-      )}
-      {currentUser && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className={cn("text-xs sm:text-sm flex items-center gap-2", isMobile && "w-full justify-start")}>
-              <UserCircle className="h-5 w-5" />
-              <span className="truncate max-w-[100px] sm:max-w-[150px]">{currentUser.displayName || currentUser.email || "Profile"}</span>
-              <ChevronDown className="h-4 w-4 opacity-70" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel className="truncate">{currentUser.email}</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-             <DropdownMenuItem asChild className="cursor-pointer">
-              <NextLink href="/dashboard" onClick={onLinkClick}>
-                <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
-              </NextLink>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild className="cursor-pointer">
-              <NextLink href="/account-settings" onClick={onLinkClick}>
-                <AccountSettingsIcon className="mr-2 h-4 w-4" /> Account Settings
-              </NextLink>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => { handleLogout(); onLinkClick?.(); }} className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10">
-              <LogOut className="mr-2 h-4 w-4" /> Logout
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
-      {authLoading && (
-         <div className="flex items-center space-x-2">
-            <div className="h-7 w-16 bg-muted/50 rounded-md animate-pulse"></div>
-            <div className="h-7 w-20 bg-muted/50 rounded-md animate-pulse"></div>
-         </div>
-      )}
-    </>
-  );
+    );
+  });
+  AuthButtons.displayName = "AuthButtons";
   
-  const ThemeSwitcherDropdown: React.FC<{ isMobile?: boolean; onLinkClick?: () => void }> = ({ isMobile, onLinkClick }) => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size={isMobile ? "sm" : "icon"} className={cn("text-muted-foreground hover:bg-accent/15 hover:text-accent-foreground", isMobile ? "w-full justify-start" : "h-9 w-9 sm:h-10 sm:w-10 rounded-full")} aria-label="Theme settings">
-            <Palette className="h-4 w-4 sm:h-5 sm:w-5" /> {isMobile && <span className="ml-2">Theme</span>}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48 border-border/70 bg-popover shadow-xl rounded-lg p-1.5">
-          <DropdownMenuLabel className="font-semibold text-popover-foreground px-2 py-1.5 text-sm">Appearance</DropdownMenuLabel>
-          <DropdownMenuSeparator className="bg-border/50 -mx-1 my-1" />
-          <DropdownMenuItem onClick={() => { setTheme('light'); onLinkClick?.(); }} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
-            <Sun className="mr-2.5 h-4 w-4 text-muted-foreground group-hover:text-yellow-500 transition-colors" />
-            <span>Light Mode</span>
-            {theme === 'light' && <Check className="ml-auto h-4 w-4 text-accent" />}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => { setTheme('dark'); onLinkClick?.(); }} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
-            <Moon className="mr-2.5 h-4 w-4 text-muted-foreground group-hover:text-blue-400 transition-colors" />
-            <span>Dark Mode</span>
-            {theme === 'dark' && <Check className="ml-auto h-4 w-4 text-accent" />}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => { setTheme('system'); onLinkClick?.(); }} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
-            <Settings className="mr-2.5 h-4 w-4 text-muted-foreground transition-colors" />
-            <span>System Default</span>
-            {theme === 'system' && <Check className="ml-auto h-4 w-4 text-accent" />}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-  );
+  const ThemeSwitcherDropdown: React.FC<{ isMobile?: boolean; onLinkClick?: () => void }> = React.memo(function ThemeSwitcherDropdown({ isMobile, onLinkClick }) {
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size={isMobile ? "sm" : "icon"} className={cn("text-muted-foreground hover:bg-accent/15 hover:text-accent-foreground", isMobile ? "w-full justify-start" : "h-9 w-9 sm:h-10 sm:w-10 rounded-full")} aria-label="Theme settings">
+                <Palette className="h-4 w-4 sm:h-5 sm:w-5" /> {isMobile && <span className="ml-2">Theme</span>}
+            </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48 border-border/70 bg-popover shadow-xl rounded-lg p-1.5">
+            <DropdownMenuLabel className="font-semibold text-popover-foreground px-2 py-1.5 text-sm">Appearance</DropdownMenuLabel>
+            <DropdownMenuSeparator className="bg-border/50 -mx-1 my-1" />
+            <DropdownMenuItem onClick={() => { setTheme('light'); onLinkClick?.(); }} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
+                <Sun className="mr-2.5 h-4 w-4 text-muted-foreground group-hover:text-yellow-500 transition-colors" />
+                <span>Light Mode</span>
+                {theme === 'light' && <Check className="ml-auto h-4 w-4 text-accent" />}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => { setTheme('dark'); onLinkClick?.(); }} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
+                <Moon className="mr-2.5 h-4 w-4 text-muted-foreground group-hover:text-blue-400 transition-colors" />
+                <span>Dark Mode</span>
+                {theme === 'dark' && <Check className="ml-auto h-4 w-4 text-accent" />}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => { setTheme('system'); onLinkClick?.(); }} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
+                <Settings className="mr-2.5 h-4 w-4 text-muted-foreground transition-colors" />
+                <span>System Default</span>
+                {theme === 'system' && <Check className="ml-auto h-4 w-4 text-accent" />}
+            </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    );
+  });
+  ThemeSwitcherDropdown.displayName = "ThemeSwitcherDropdown";
+
 
   return (
     <nav className="bg-background/80 backdrop-blur-md text-foreground shadow-xl sticky top-0 z-50 border-b border-border/60">

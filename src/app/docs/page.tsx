@@ -4,12 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from '@/components/ui/button';
 import NextLink from 'next/link';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { BookOpenText, ArrowRight, Lightbulb, Workflow, Download, Sparkles, Settings, AlertTriangle, Search, Layers, FileTextIcon, UserCircle, HelpCircle, MessageSquareQuestion, KeyboardIcon } from 'lucide-react';
+import { BookOpenText, ArrowRight, Lightbulb, Workflow, Download, Sparkles, Settings, AlertTriangle, Search, Layers, FileTextIcon, UserCircle, HelpCircle, MessageSquareQuestion, KeyboardIcon, Mic } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Foss AI Documentation - Mastering Your Research Assistant',
-  description: 'Comprehensive documentation for Foss AI. Learn how to use features like AI query formulation, knowledge synthesis, report generation, and more to supercharge your research workflow.',
+  description: 'Comprehensive documentation for Foss AI. Learn how to use features like AI query formulation, knowledge synthesis, report generation, voice notes, and more to supercharge your research workflow.',
   openGraph: {
     title: 'Foss AI Documentation - Mastering Your Research Assistant',
     description: 'Your complete guide to understanding and utilizing all of Foss AI\'s powerful AI-driven research tools effectively.',
@@ -80,6 +80,10 @@ export default function DocsPage() {
                   <p>Leveraging your original question and the synthesized summary, Foss AI can generate a detailed, multi-section academic-style research report. This includes sections like an executive summary, introduction, literature review, methodology, results, discussion, conclusion, and references. The report structure is designed for clarity and depth.</p>
                 </div>
                  <div>
+                  <h4 className="text-lg font-medium text-primary/90 flex items-center mb-2"><Mic className="h-5 w-5 mr-2 text-accent/80"/>Voice-to-Text Research Notes</h4>
+                  <p>Capture ideas, notes, and observations on-the-go using audio input. Your spoken words are transcribed, and you can edit and save these notes locally in your browser for future reference. Access this feature via the "Voice Notes" link in the navigation.</p>
+                </div>
+                 <div>
                   <h4 className="text-lg font-medium text-primary/90 flex items-center mb-2"><Workflow className="h-5 w-5 mr-2 text-accent/80"/>Conceptual Image Visualization</h4>
                   <p>To help illustrate your research concepts, Foss AI can generate abstract, symbolic images based on your research topic or summary. These visuals can be useful for presentations or for stimulating further thought.</p>
                 </div>
@@ -121,6 +125,7 @@ export default function DocsPage() {
                   <li><strong>Logout:</strong> Securely log out of your account using the "Logout" option in the user menu within the Navbar.</li>
                   <li><strong>Password Management:</strong> Change your password or request a password reset email via the <NextLink href="/account-settings" className="text-accent hover:underline font-medium">Account Settings</NextLink> page.</li>
                   <li><strong>Email Verification:</strong> Ensure your email is verified for full account functionality. You can resend the verification email from <NextLink href="/account-settings" className="text-accent hover:underline font-medium">Account Settings</NextLink>.</li>
+                   <li><strong>Research & Voice Note History:</strong> View, export, or import your research activity and manage your voice notes in the "Research History" tab of your <NextLink href="/account-settings#history" className="text-accent hover:underline font-medium">Account Settings</NextLink>. This data is stored locally.</li>
                 </ul>
               </AccordionContent>
             </AccordionItem>
@@ -138,6 +143,7 @@ export default function DocsPage() {
                   <li><strong>Iterative Process:</strong> Research is often iterative. Use the "Go Back" functionality to refine queries or summaries if the initial results aren't perfectly aligned with your needs.</li>
                   <li><strong>Edit AI Summaries:</strong> Before generating a full report, take advantage of the ability to edit the AI-generated summary. This allows you to fine-tune the report's foundation.</li>
                   <li><strong>Contextual Summary for Reports:</strong> Providing a rich, well-synthesized summary (or refining the AI-generated one) as input for the full report generation can significantly enhance the report's quality and relevance.</li>
+                  <li><strong>Voice Notes for Quick Capture:</strong> Use the Voice Notes feature for quickly capturing thoughts or summaries when typing isn't convenient. You can edit the transcript before saving.</li>
                   <li><strong>PDF Chart Accuracy:</strong> For best chart rendering in downloaded PDFs, ensure the relevant accordion sections containing charts are expanded on the webpage before initiating the PDF download.</li>
                 </ul>
               </AccordionContent>
@@ -154,6 +160,7 @@ export default function DocsPage() {
                 <ul className="list-disc list-outside space-y-2 pl-5">
                     <li><strong>Login/Signup Issues:</strong> Ensure your email is correct and your password meets any specified criteria. Check for error messages displayed by the system. If using Google Sign-In, ensure your browser allows pop-ups from Foss AI.</li>
                     <li><strong>Slow Generation:</strong> AI generation, especially for reports and images, can take some time. Please be patient. If it seems stuck, a page refresh might be necessary (though this could lose current state).</li>
+                    <li><strong>Voice Recognition Issues:</strong> Ensure your microphone is properly connected and that Foss AI has permission to access it in your browser settings. Speak clearly and in a relatively quiet environment for best results. If the API is not supported, try a different browser (Chrome, Edge, Safari are generally good).</li>
                     <li><strong>Unexpected AI Output:</strong> Generative AI can sometimes produce unexpected or less relevant content. Try rephrasing your initial question or refining the synthesis step.</li>
                     <li><strong>"Authentication Required" Message:</strong> This means you need to be logged in to use the feature. Please log in or sign up.</li>
                      <li><strong>PDF Export Issues:</strong> If charts are missing or poorly rendered, ensure the corresponding sections were expanded on the webpage before download. Complex layouts can sometimes be challenging for client-side PDF generation.</li>

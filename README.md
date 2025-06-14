@@ -9,21 +9,22 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-Utility%20First-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
-Foss AI is a powerful Next.js web application designed to revolutionize your research process. It leverages cutting-edge Generative AI (powered by Google's Gemini models via Genkit) to assist users in formulating research queries, synthesizing knowledge, generating comprehensive reports, visualizing concepts, and extracting ideas for mind mapping.
+Foss AI is a powerful Next.js web application designed to revolutionize your research process. It leverages cutting-edge Generative AI (powered by Google's Gemini models via Genkit) to assist users in formulating research queries, synthesizing knowledge, generating comprehensive reports, visualizing concepts, capturing voice notes, and extracting ideas for mind mapping.
 
 ## ✨ Core Features
 
 *   **AI Query Formulation:** Transforms complex research questions into optimized search vectors, alternative phrasings, key concepts, and potential sub-topics.
-*   **Intelligent Knowledge Synthesis:** Distills information based on formulated queries to provide concise summaries of key insights and themes.
+*   **Intelligent Knowledge Synthesis:** Distills information based on formulated queries to provide concise summaries of key insights and themes. The AI-generated summary is editable by the user before full report generation.
 *   **Comprehensive Report Generation:** Automatically generates structured, multi-section academic-style reports with sections like executive summary, literature review, methodology, results (with chart suggestions), discussion, and references.
 *   **File-Powered Guided Reporting:** Upload documents (TXT, MD, PDF, DOCX) and provide specific guidance to generate tailored reports based on the file's content.
+*   **Voice-to-Text Research Notes:** Capture ideas, notes, and observations on-the-go using audio input. Transcribed notes can be edited and saved locally in the browser.
 *   **Mind Map Concept Extraction:** Analyzes text input to identify a main idea and key concepts with related terms, providing a structured starting point for mind mapping.
 *   **Conceptual Image Visualization:** Generates abstract images representing core research concepts, useful for presentations and creative insights.
 *   **Secure User Authentication:** Robust Firebase authentication (Email/Password, Sign in with Google).
 *   **Intuitive User Interface:** Clean, modern, and responsive UI built with Next.js, ShadCN UI, and Tailwind CSS.
 *   **Downloadable Outputs:** Export reports in structured JSON and formatted PDF.
-*   **User Dashboard:** View activity stats, get daily research prompts, and quickly access features.
-*   **Account Settings:** Manage profile, preferences (theme, notifications, interface), and research history (with export/import).
+*   **User Dashboard:** View activity stats (local), get daily research sparks (prompts), and quickly access features.
+*   **Account Settings:** Manage profile, preferences (theme, notifications, interface - saved to `localStorage`), and research/voice note history (with export/import for research history).
 *   **Dynamic Particle Background:** Visually engaging background that adapts to light/dark themes.
 *   **Basic Keyboard Shortcuts:** Quick navigation and actions for power users.
 
@@ -31,11 +32,10 @@ Foss AI is a powerful Next.js web application designed to revolutionize your res
 
 Foss AI is continuously evolving. Here are some of the exciting capabilities on our roadmap:
 
-*   **Interview Transcription & Analysis:** Upload audio/video files for automated transcription and AI-powered thematic analysis, sentiment detection, and key insight extraction.
+*   **Interview Transcription & Analysis:** Upload audio/video files for automated transcription and AI-powered thematic analysis, sentiment detection, and key insight extraction. (Placeholder UI exists)
 *   **Plagiarism Detection:** Integrated similarity checking for generated content to ensure originality and proper attribution.
 *   **Multi-language Support:** Capabilities to conduct research, process inputs, and generate reports in a variety of languages.
 *   **Research Timeline Visualization:** Interactive tools to create and visualize research project timelines, milestones, and progress.
-*   **Voice-to-Text Research Notes:** Seamlessly capture ideas, notes, and observations on-the-go using audio input, automatically transcribed and organized.
 *   **Note-taking Apps Integration:** Direct synchronization of research notes, summaries, and reports with popular platforms like Notion and Obsidian.
 *   **Research Network Visualization:** Tools to map and explore connections between researchers, published papers, institutions, and key topics within a field.
 *   **Ethics Compliance Checker:** AI-assisted review to help identify potential ethical considerations and ensure research aligns with relevant guidelines.
@@ -62,6 +62,7 @@ Boost your productivity with these keyboard shortcuts:
 *   **Styling:** [Tailwind CSS](https://tailwindcss.com/)
 *   **Language:** [TypeScript](https://www.typescriptlang.org/)
 *   **Authentication:** [Firebase Authentication](https://firebase.google.com/docs/auth)
+*   **Speech Recognition:** Browser's Web Speech API
 *   **Deployment (Assumed):** Firebase Hosting or similar Node.js compatible platforms.
 *   **Particle Effects:** [tsParticles](https://particles.js.org/)
 *   **PDF Generation (Client-side):** jsPDF & html2canvas
@@ -77,6 +78,7 @@ Boost your productivity with these keyboard shortcuts:
     *   Ensure the "Generative Language API" (for Gemini models) is enabled.
     *   Set up appropriate API keys or service accounts for Genkit to access Google AI services.
     *   For Google Sign-In, ensure your OAuth 2.0 Client ID has the correct "Authorized JavaScript origins" and "Authorized redirect URIs" (including `http://localhost:[PORT]` for development).
+*   A modern web browser that supports the Web Speech API (for Voice Notes feature, e.g., Chrome, Edge, Safari on macOS/iOS).
 
 ## ⚙️ Environment Setup
 
@@ -168,7 +170,7 @@ foss-ai/
 │   │   ├── flows/        # Directory for individual Genkit flows
 │   │   └── genkit.ts     # Genkit initialization and global AI object
 │   ├── app/              # Next.js App Router: pages, layouts, actions
-│   │   ├── (page routes)/# e.g., dashboard/, about/, login/, interview-transcription/
+│   │   ├── (page routes)/# e.g., dashboard/, about/, login/, voice-notes/
 │   │   ├── actions.ts    # Server Actions
 │   │   ├── globals.css   # Global styles and Tailwind theme
 │   │   └── layout.tsx    # Root layout
@@ -181,6 +183,7 @@ foss-ai/
 │   └── lib/              # Utility functions and libraries
 │       ├── firebase.ts   # Firebase initialization
 │       ├── historyService.ts # Local storage for research history
+│       ├── voiceNotesService.ts # Local storage for voice notes
 │       └── utils.ts      # Utility functions (e.g., cn for Tailwind)
 ├── tailwind.config.ts    # Tailwind CSS configuration
 └── tsconfig.json         # TypeScript configuration
@@ -234,6 +237,7 @@ The `/account-settings` page allows users to:
 *   Set notification preferences (Email Notifications, Newsletter - saved to `localStorage`).
 *   Configure interface settings (Items Per Page, Experimental Features - saved to `localStorage`).
 *   View, export, and import their research activity history (managed via `localStorage`).
+*   Manage voice notes (view, edit, delete - stored in `localStorage`).
 
 ## 🤝 Contributing (Placeholder)
 
