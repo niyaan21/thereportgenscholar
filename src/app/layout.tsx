@@ -9,6 +9,7 @@ import ParticleBackground from '@/components/layout/ParticleBackground';
 import { ThemeProvider } from 'next-themes';
 import Footer from '@/components/layout/Footer';
 import PageProgressBar from '@/components/layout/PageProgressBar';
+import GlobalKeyboardShortcuts from '@/components/layout/GlobalKeyboardShortcuts'; // Import the new client component
 
 export const metadata: Metadata = {
   title: {
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Foss AI: Advanced AI Research & Report Generation',
     description: 'Elevate your research with Foss AI. Leverage cutting-edge AI for query formulation, knowledge synthesis, conceptual visualization, and comprehensive report generation.',
-    url: 'https://fossai.example.com', 
+    url: 'https://fossai.example.com',
     siteName: 'Foss AI',
     images: [
       {
@@ -53,6 +54,7 @@ export const metadata: Metadata = {
   manifest: '/site.webmanifest',
 };
 
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -64,6 +66,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <PageProgressBar />
           <ParticleBackground />
+          <GlobalKeyboardShortcuts />
           <div className="relative z-10 flex flex-col min-h-screen">
             <Navbar />
             <main className="flex-grow">

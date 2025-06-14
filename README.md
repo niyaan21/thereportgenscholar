@@ -25,6 +25,7 @@ Foss AI is a powerful Next.js web application designed to revolutionize your res
 *   **User Dashboard:** View activity stats, get daily research prompts, and quickly access features.
 *   **Account Settings:** Manage profile, preferences (theme, notifications, interface), and research history (with export/import).
 *   **Dynamic Particle Background:** Visually engaging background that adapts to light/dark themes.
+*   **Basic Keyboard Shortcuts:** Quick navigation and actions for power users.
 
 ## 🚀 Planned Future Features
 
@@ -40,6 +41,17 @@ Foss AI is continuously evolving. Here are some of the exciting capabilities on 
 *   **Ethics Compliance Checker:** AI-assisted review to help identify potential ethical considerations and ensure research aligns with relevant guidelines.
 *   **Custom Report Templates:** Ability for users to create, save, and share report templates tailored to specific academic fields, journal requirements, or organizational standards.
 *   **Advanced Keyboard Shortcuts:** A comprehensive set of keyboard shortcuts for power users to navigate and operate Foss AI features with maximum efficiency.
+
+## ⌨️ Keyboard Shortcuts
+
+Boost your productivity with these keyboard shortcuts:
+
+*   **`Cmd/Ctrl + K`**: Focus on the main research question input (when on the homepage).
+*   **`Cmd/Ctrl + Shift + H`**: Navigate to the Home page.
+*   **`Cmd/Ctrl + Shift + D`**: Navigate to your Dashboard.
+*   **`Cmd/Ctrl + Shift + ,`**: Navigate to Account Settings.
+
+(More shortcuts planned for future updates!)
 
 ## 🚀 Technology Stack
 

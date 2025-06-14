@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from '@/components/ui/button';
 import NextLink from 'next/link';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { BookOpenText, ArrowRight, Lightbulb, Workflow, Download, Sparkles, Settings, AlertTriangle, Search, Layers, FileTextIcon, UserCircle, HelpCircle, MessageSquareQuestion } from 'lucide-react';
+import { BookOpenText, ArrowRight, Lightbulb, Workflow, Download, Sparkles, Settings, AlertTriangle, Search, Layers, FileTextIcon, UserCircle, HelpCircle, MessageSquareQuestion, KeyboardIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -90,6 +90,24 @@ export default function DocsPage() {
               </AccordionContent>
             </AccordionItem>
             
+            <AccordionItem value="keyboard-shortcuts" className="bg-secondary/30 dark:bg-secondary/10 rounded-lg shadow-sm border border-border/50">
+              <AccordionTrigger className="px-5 py-4 text-xl font-semibold hover:no-underline text-primary">
+                <div className="flex items-center">
+                 <KeyboardIcon className="h-6 w-6 mr-3 text-accent" /> Keyboard Shortcuts
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-5 pb-5">
+                <p>Boost your productivity with these keyboard shortcuts. (Use <code className="bg-muted text-muted-foreground px-1.5 py-0.5 rounded-sm text-sm">Cmd</code> on macOS or <code className="bg-muted text-muted-foreground px-1.5 py-0.5 rounded-sm text-sm">Ctrl</code> on Windows/Linux).</p>
+                <ul className="list-disc list-outside space-y-2 pl-5 mt-3">
+                  <li><strong><code className="bg-muted text-muted-foreground px-1.5 py-0.5 rounded-sm text-sm">Modifier + K</code>:</strong> Focus on the main research question input (when on the homepage).</li>
+                  <li><strong><code className="bg-muted text-muted-foreground px-1.5 py-0.5 rounded-sm text-sm">Modifier + Shift + H</code>:</strong> Navigate to the Home page.</li>
+                  <li><strong><code className="bg-muted text-muted-foreground px-1.5 py-0.5 rounded-sm text-sm">Modifier + Shift + D</code>:</strong> Navigate to your Dashboard.</li>
+                  <li><strong><code className="bg-muted text-muted-foreground px-1.5 py-0.5 rounded-sm text-sm">Modifier + Shift + ,</code>:</strong> Navigate to Account Settings.</li>
+                </ul>
+                <p className="mt-3 text-sm text-muted-foreground">More shortcuts are planned for future updates!</p>
+              </AccordionContent>
+            </AccordionItem>
+
             <AccordionItem value="account-management" className="bg-secondary/30 dark:bg-secondary/10 rounded-lg shadow-sm border border-border/50">
               <AccordionTrigger className="px-5 py-4 text-xl font-semibold hover:no-underline text-primary">
                 <div className="flex items-center">
