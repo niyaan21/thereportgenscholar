@@ -31,9 +31,8 @@ const ChartSuggestionSchema = z.object({
   seriesDataKeys: z.array(z.object({
       key: z.string().describe('The key in the sample data objects for this series (e.g., "revenue", "users").'),
       label: z.string().describe('The display label for this series (e.g., "Total Revenue", "Active Users").')
-  })).min(1).optional().describe('Defines the data series for the chart. Important if chart type is not "none". For pie charts, use one series for values. For scatter, first key is Y, second (optional) is Z/size.'),
-  data: z.array(z.record(z.string(), z.string())) 
-    .min(2)
+  })).optional().describe('Defines the data series for the chart. Important if chart type is not "none". For pie charts, use one series for values. For scatter, first key is Y, second (optional) is Z/size.'),
+  data: z.array(z.record(z.string(), z.string()))
     .max(7)
     .optional()
     .describe('An array of 2-7 sample data objects for the chart. Keys within these objects MUST match the categoryDataKey and the keys defined in seriesDataKeys. All values in these records should be strings (e.g., numbers represented as "10"). Important if chart type is not "none".')
@@ -103,7 +102,7 @@ Key requirements for the report:
 7.  **Results and Analysis**: Provide 3-5 distinct sections. Each should have a 'sectionTitle', very detailed 'content' (approx. 300-400 words per section discussing patterns, trends, statistical significance if applicable, and nuanced interpretations), and an optional 'chartSuggestion'.
     *   For 'chartSuggestion': If a chart (bar, line, pie, scatter) would be beneficial for illustrating complex data or findings:
         *   Specify its 'type' (bar, line, pie, scatter, or none).
-        *   If type is NOT 'none', you MUST provide 'dataDescription', 'categoryDataKey', 'seriesDataKeys', and 'data'.
+        *   If type is NOT 'none', you MUST provide 'dataDescription', 'categoryDataKey', at least one item in 'seriesDataKeys', and 'data' (array of 2-7 objects).
         *   'title' for the chart is optional.
         *   'xAxisLabel' and 'yAxisLabel' are optional.
         *   'dataDescription' (what it shows, e.g., "Trends of X over Y time, segmented by Group Z").
@@ -142,4 +141,3 @@ const generateResearchReportFlow = ai.defineFlow(
     return output;
   }
 );
-

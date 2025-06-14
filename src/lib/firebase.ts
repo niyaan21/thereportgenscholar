@@ -26,4 +26,3 @@ const auth: Auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider(); // Create an instance of GoogleAuthProvider
 
 export { app, auth, googleProvider }; // Export googleProvider
-
