@@ -23,10 +23,7 @@ const ChartSuggestionSchema = z.object({
       key: z.string().describe('The key in the sample data objects for this series (e.g., "revenue", "users").'),
       label: z.string().describe('The display label for this series (e.g., "Total Revenue", "Active Users").')
   })).optional().describe('Defines the data series for the chart. Important if chart type is not "none". For pie charts, use one series for values. For scatter, first key is Y, second (optional) is Z/size.'),
-  data: z.array(z.record(z.string(), z.string()))
-    .max(7)
-    .optional()
-    .describe('An array of 2-7 sample data objects that are plausible and illustrative for the chart, based on the file content and guidance query. If possible, derive examples from the file, otherwise generate plausible data fitting the context. Avoid generic placeholders. Keys within these objects MUST match the categoryDataKey and the keys defined in seriesDataKeys. All values in these records should be strings (e.g., numbers represented as "10"). Important if chart type is not "none".')
+   data: z.string().optional().describe('A JSON string representing an array of 2-7 sample data objects. Example: \'[{"month": "Jan", "revenue": "1200"}, {"month": "Feb", "revenue": "1500"}]\'. If possible, derive examples from the file, otherwise generate plausible data fitting the context. Avoid generic placeholders. Keys within these objects MUST match the categoryDataKey and the keys defined in seriesDataKeys. All values in these records should be strings (e.g., numbers represented as "10"). Important if chart type is not "none".')
 });
 
 const ReportOutputSchema = z.object({
@@ -116,14 +113,14 @@ Key report requirements:
 7.  **Results and Analysis from File**: Present 2-4 sections. Each 'sectionTitle' and 'content' (approx. 200-300 words per section) analyzing data/information from the file. Include 'chartSuggestion' where appropriate.
     *   For 'chartSuggestion': If data in the file lends itself to visualization (or if hypothetical data related to the topic could be visualized):
         *   Specify its 'type' (bar, line, pie, scatter, or none).
-        *   If type is NOT 'none', you MUST provide 'dataDescription', 'categoryDataKey', at least one item in 'seriesDataKeys', and 'data' (array of 2-7 objects).
+        *   If type is NOT 'none', you MUST provide 'dataDescription', 'categoryDataKey', at least one item in 'seriesDataKeys'.
         *   'title' for the chart is optional.
         *   'xAxisLabel' and 'yAxisLabel' are optional.
         *   'dataDescription' (what it shows, e.g., "Trends of X over Y time, segmented by Group Z").
         *   'categoryDataKey' (the field name for categories/x-axis in your sample data, e.g., "item_name").
         *   'seriesDataKeys' (array of objects with 'key' for data field and 'label' for display, e.g., [{key: "score", label: "Score"}]).
-        *   Provide 2-7 plausible 'data' points as an array of objects. This data should be illustrative. If the uploaded file contains relevant figures or patterns, try to base this sample data on that information. If the file lacks specific numerical data, generate plausible sample data that logically fits the topic and your guidance query. Avoid generic mock data. Keys in 'data' objects MUST match 'categoryDataKey' and 'seriesDataKeys'. IMPORTANT FOR SCHEMA: All values within these data objects (e.g., for 'score') must be provided as STRINGS (e.g., "85", "92.5").
-            Example: If categoryDataKey is "topic" and seriesDataKeys is [{key: "relevance", label: "Relevance Score"}], data could be: [{topic: "AI Ethics", relevance: "85"}, {topic: "Data Privacy", relevance: "92"}].
+        *   For the 'data' field, provide a JSON STRING representing an array of 2-7 plausible data objects. This data should be illustrative. If the uploaded file contains relevant figures or patterns, try to base this sample data on that information. If the file lacks specific numerical data, generate plausible sample data that logically fits the topic and your guidance query. Avoid generic mock data. Keys in 'data' objects MUST match 'categoryDataKey' and 'seriesDataKeys'. IMPORTANT FOR SCHEMA: All values within these data objects (e.g., for 'score') must be provided as STRINGS (e.g., "85", "92.5").
+            Example: If categoryDataKey is "topic" and seriesDataKeys is [{key: "relevance", label: "Relevance Score"}], the JSON string for 'data' could be: '[{"topic": "AI Ethics", "relevance": "85"}, {"topic": "Data Privacy", "relevance": "92"}]'.
         *   If no chart is suitable, set chartSuggestion.type to 'none' and other chart-related fields can be omitted. Assume some data extraction or plausible sample data generation is possible if the file context suggests it.
 8.  **Discussion**: (approx. 400-600 words) Interpret findings from the file in light of the guidance query.
 9.  **Conclusion**: (approx. 250-350 words) Summarize the main takeaways from the file as per the guidance.

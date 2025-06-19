@@ -61,35 +61,58 @@ export default function PlaceholderChart({
     );
   }
 
-  const { 
-    type: chartType, 
-    title, 
-    dataDescription: description, 
-    data: chartData, // AI provided sample data
-    seriesDataKeys: seriesDataKeysConfig, // AI provided series config
-    categoryDataKey: categoryDataKeyConfig, // AI provided category config
+  const {
+    type: chartType,
+    title,
+    dataDescription: description,
+    data: rawChartDataString, // This is now expected to be a JSON string
+    seriesDataKeys: seriesDataKeysConfig,
+    categoryDataKey: categoryDataKeyConfig,
   } = chartSuggestion;
 
   const displayTitle = title || DEFAULT_CHART_TITLE;
   const displayDescription = description || DEFAULT_CHART_DESCRIPTION;
 
-  const hasValidChartData = chartData && Array.isArray(chartData) && chartData.length > 0 && chartData.every(item => typeof item === 'object' && item !== null);
-  const hasValidSeriesKeys = seriesDataKeysConfig && Array.isArray(seriesDataKeysConfig) && seriesDataKeysConfig.length > 0 && seriesDataKeysConfig.every(s => s && s.key && s.label);
-  // categoryDataKeyConfig is optional if chartType is 'scatter' but data for X is still needed from one of the series keys.
-  // For bar, line, pie, it's more critical.
-  const hasValidCategoryKey = (chartType === 'scatter' && hasValidChartData && seriesDataKeysConfig && seriesDataKeysConfig[0]?.key) || (categoryDataKeyConfig && categoryDataKeyConfig.trim() !== '');
+  let chartData: Record<string, string>[] | undefined | null = null;
+  let dataError: string | null = null;
+
+  if (chartType !== 'none') {
+    if (rawChartDataString && typeof rawChartDataString === 'string') {
+      try {
+        const parsedData = JSON.parse(rawChartDataString);
+        if (Array.isArray(parsedData) && parsedData.every(item => typeof item === 'object' && item !== null && Object.values(item).every(val => typeof val === 'string'))) {
+          chartData = parsedData as Record<string, string>[];
+        } else {
+          dataError = "AI-generated sample data string is not a valid JSON array of objects with string values.";
+        }
+      } catch (e) {
+        dataError = "Failed to parse AI-generated sample data JSON string.";
+        console.error("Chart data parsing error:", e, "Raw data string:", rawChartDataString);
+      }
+    } else if (rawChartDataString) {
+        dataError = "AI-generated sample data is in an unexpected format (expected a JSON string).";
+    }
 
 
-  let dataError = null;
-  if (!hasValidChartData) dataError = "AI-generated sample data is missing or empty.";
-  else if (!hasValidSeriesKeys && chartType !== 'pie') dataError = "AI-provided series data key configuration is missing or empty."; // Pie might infer from data structure
-  else if (!hasValidCategoryKey && (chartType === 'bar' || chartType === 'line' || chartType === 'pie')) dataError = "AI-provided category data key configuration is missing.";
-  else if (chartType === 'scatter' && (!categoryDataKeyConfig || seriesDataKeysConfig!.length < 1)) {
-      dataError = "Scatter charts require at least one series key for Y-axis values and a category key for X-axis values from the AI's sample data.";
+    if (!dataError && (!chartData || chartData.length === 0)) {
+      dataError = "AI-generated sample data is missing or empty after parsing.";
+    }
   }
-  
 
-  if (dataError) {
+
+  const hasValidSeriesKeys = seriesDataKeysConfig && Array.isArray(seriesDataKeysConfig) && seriesDataKeysConfig.length > 0 && seriesDataKeysConfig.every(s => s && s.key && s.label);
+  const hasValidCategoryKey = (chartType === 'scatter' && chartData && seriesDataKeysConfig && seriesDataKeysConfig[0]?.key) || (categoryDataKeyConfig && categoryDataKeyConfig.trim() !== '');
+
+  if (chartType !== 'none' && !dataError) {
+    if (!hasValidSeriesKeys && chartType !== 'pie') dataError = "AI-provided series data key configuration is missing or empty.";
+    else if (!hasValidCategoryKey && (chartType === 'bar' || chartType === 'line' || chartType === 'pie')) dataError = "AI-provided category data key configuration is missing.";
+    else if (chartType === 'scatter' && (!categoryDataKeyConfig || seriesDataKeysConfig!.length < 1)) {
+        dataError = "Scatter charts require at least one series key for Y-axis values and a category key for X-axis values from the AI's sample data.";
+    }
+  }
+
+
+  if (dataError && chartType !== 'none') {
     return (
       <Card id={pdfChartId} className="border-dashed border-destructive/40 bg-destructive/10 mt-3 shadow-sm flex flex-col items-center justify-center h-[260px] rounded-xl">
         <CardHeader className="pt-4 pb-2 px-4 text-center">
@@ -106,6 +129,7 @@ export default function PlaceholderChart({
     );
   }
 
+
   const dynamicChartConfig: ChartConfig = {};
   if(seriesDataKeysConfig) {
     seriesDataKeysConfig.forEach((series, index) => {
@@ -115,11 +139,11 @@ export default function PlaceholderChart({
         };
     });
   }
-  // Ensure category key has a config if it's used for pie charts nameKey
+
   if (chartType === 'pie' && categoryDataKeyConfig && !dynamicChartConfig[categoryDataKeyConfig]) {
       dynamicChartConfig[categoryDataKeyConfig] = {
-          label: categoryDataKeyConfig.charAt(0).toUpperCase() + categoryDataKeyConfig.slice(1), // Default label from key
-          color: `hsl(var(--chart-1))` // Default color
+          label: categoryDataKeyConfig.charAt(0).toUpperCase() + categoryDataKeyConfig.slice(1),
+          color: `hsl(var(--chart-1))`
       }
   }
   if (chartType === 'scatter' && categoryDataKeyConfig && seriesDataKeysConfig && seriesDataKeysConfig.length > 0) {
@@ -154,7 +178,7 @@ export default function PlaceholderChart({
           <ChartTooltip cursor={{ fill: 'hsl(var(--accent) / 0.1)' }} content={<ChartTooltipContent />} />
           <ChartLegend content={<ChartLegendContent />} />
           {seriesDataKeysConfig!.map(series => (
-            <Bar key={series.key} dataKey={series.key} fill={`var(--color-${series.key})`} radius={[4, 4, 0, 0]} barSize={chartData!.length > 10 ? 15 : 20} name={series.label}/>
+            <Bar key={series.key} dataKey={series.key} fill={`var(--color-${series.key})`} radius={[4, 4, 0, 0]} barSize={chartData && chartData.length > 10 ? 15 : 20} name={series.label}/>
           ))}
         </RechartsBarChartPrimitive>
       );
@@ -181,9 +205,8 @@ export default function PlaceholderChart({
       );
       break;
     case 'pie':
-      // For pie, we expect one seriesDataKey for the values, and categoryDataKey for the names/labels of slices
-      const valueKeyPie = seriesDataKeysConfig && seriesDataKeysConfig[0] ? seriesDataKeysConfig[0].key : 'value'; // Default to 'value' if not specified
-      const nameKeyPie = categoryDataKeyConfig || 'name'; // Default to 'name' if not specified
+      const valueKeyPie = seriesDataKeysConfig && seriesDataKeysConfig[0] ? seriesDataKeysConfig[0].key : 'value';
+      const nameKeyPie = categoryDataKeyConfig || 'name';
       ChartComponent = (
         <RechartsPieChartPrimitive>
           <ChartTooltip content={<ChartTooltipContent nameKey={nameKeyPie} hideLabel />} />
@@ -217,7 +240,7 @@ export default function PlaceholderChart({
       );
       break;
     case 'scatter':
-      const xKeyScatter = categoryDataKeyConfig!; // Should be validated by now
+      const xKeyScatter = categoryDataKeyConfig!;
       const yKeyScatter = seriesDataKeysConfig![0].key;
       const zKeyScatter = seriesDataKeysConfig!.length > 1 ? seriesDataKeysConfig![1].key : undefined;
 
@@ -251,7 +274,7 @@ export default function PlaceholderChart({
   }
 
   return (
-    <Card id={pdfChartId} className={cn("border-dashed border-accent/50 bg-accent/10 mt-3 shadow-md hover:shadow-accent/20 transition-shadow duration-300 rounded-xl", {"animate-pulse": !ChartComponent})}>
+    <Card id={pdfChartId} className={cn("border-dashed border-accent/50 bg-accent/10 mt-3 shadow-md hover:shadow-accent/20 transition-shadow duration-300 rounded-xl", {"animate-pulse": !ChartComponent && chartType !== 'none'})}>
       <CardHeader className="p-4 pb-2">
         <CardTitle className="text-base font-semibold text-accent-foreground flex items-center gap-2">
           {iconForTitle}
