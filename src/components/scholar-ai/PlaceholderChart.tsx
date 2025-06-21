@@ -65,8 +65,8 @@ export default function PlaceholderChart({
     type: chartType,
     title,
     dataDescription: description,
-    data: rawChartDataString, // This is now expected to be a JSON string
-    seriesDataKeys: seriesDataKeysConfig,
+    data: rawChartDataString,
+    seriesDataKeys: rawSeriesDataKeysString,
     categoryDataKey: categoryDataKeyConfig,
   } = chartSuggestion;
 
@@ -74,25 +74,44 @@ export default function PlaceholderChart({
   const displayDescription = description || DEFAULT_CHART_DESCRIPTION;
 
   let chartData: Record<string, string>[] | undefined | null = null;
+  let seriesDataKeysConfig: { key: string; label: string }[] | undefined | null = null;
   let dataError: string | null = null;
 
   if (chartType !== 'none') {
-    if (rawChartDataString && typeof rawChartDataString === 'string') {
+    // Parse seriesDataKeys first
+    if (rawSeriesDataKeysString && typeof rawSeriesDataKeysString === 'string') {
+        try {
+            const parsed = JSON.parse(rawSeriesDataKeysString);
+            if (Array.isArray(parsed) && parsed.every(item => item && typeof item.key === 'string' && typeof item.label === 'string')) {
+                seriesDataKeysConfig = parsed;
+            } else {
+                dataError = "AI-generated seriesDataKeys is not a valid JSON string of key/label objects.";
+            }
+        } catch (e) {
+            dataError = "Failed to parse AI-generated seriesDataKeys JSON string.";
+        }
+    }
+
+    // Parse chartData
+    if (!dataError && rawChartDataString && typeof rawChartDataString === 'string') {
       try {
         const parsedData = JSON.parse(rawChartDataString);
-        if (Array.isArray(parsedData) && parsedData.every(item => typeof item === 'object' && item !== null && Object.values(item).every(val => typeof val === 'string'))) {
-          chartData = parsedData as Record<string, string>[];
+        if (Array.isArray(parsedData) && parsedData.every(item => typeof item === 'object' && item !== null && Object.values(item).every(val => typeof val === 'string' || typeof val === 'number'))) {
+          // Convert all values to string for consistency
+          chartData = parsedData.map(item =>
+            Object.entries(item).reduce((acc, [key, value]) => {
+              acc[key] = String(value);
+              return acc;
+            }, {} as Record<string, string>)
+          );
         } else {
-          dataError = "AI-generated sample data string is not a valid JSON array of objects with string values.";
+          dataError = "AI-generated sample data string is not a valid JSON array of objects.";
         }
       } catch (e) {
         dataError = "Failed to parse AI-generated sample data JSON string.";
         console.error("Chart data parsing error:", e, "Raw data string:", rawChartDataString);
       }
-    } else if (rawChartDataString) {
-        dataError = "AI-generated sample data is in an unexpected format (expected a JSON string).";
     }
-
 
     if (!dataError && (!chartData || chartData.length === 0)) {
       dataError = "AI-generated sample data is missing or empty after parsing.";
@@ -104,7 +123,7 @@ export default function PlaceholderChart({
   const hasValidCategoryKey = (chartType === 'scatter' && chartData && seriesDataKeysConfig && seriesDataKeysConfig[0]?.key) || (categoryDataKeyConfig && categoryDataKeyConfig.trim() !== '');
 
   if (chartType !== 'none' && !dataError) {
-    if (!hasValidSeriesKeys && chartType !== 'pie') dataError = "AI-provided series data key configuration is missing or empty.";
+    if (!hasValidSeriesKeys) dataError = "AI-provided series data key configuration is missing or empty.";
     else if (!hasValidCategoryKey && (chartType === 'bar' || chartType === 'line' || chartType === 'pie')) dataError = "AI-provided category data key configuration is missing.";
     else if (chartType === 'scatter' && (!categoryDataKeyConfig || seriesDataKeysConfig!.length < 1)) {
         dataError = "Scatter charts require at least one series key for Y-axis values and a category key for X-axis values from the AI's sample data.";
@@ -290,4 +309,3 @@ export default function PlaceholderChart({
     </Card>
   );
 }
-

@@ -28,10 +28,7 @@ const ChartSuggestionSchema = z.object({
   xAxisLabel: z.string().optional().describe('Suggested X-axis label if applicable.'),
   yAxisLabel: z.string().optional().describe('Suggested Y-axis label if applicable.'),
   categoryDataKey: z.string().optional().describe('The key in the sample data objects that represents the category or X-axis values (e.g., "month", "productName"). Important if chart type is not "none".'),
-  seriesDataKeys: z.array(z.object({
-      key: z.string().describe('The key in the sample data objects for this series (e.g., "revenue", "users").'),
-      label: z.string().describe('The display label for this series (e.g., "Total Revenue", "Active Users").')
-  })).optional().describe('Defines the data series for the chart. Important if chart type is not "none". For pie charts, use one series for values. For scatter, first key is Y, second (optional) is Z/size.'),
+  seriesDataKeys: z.string().optional().describe('A JSON string representing an array of objects, where each object has a "key" and a "label". Example: \'[{"key": "revenue", "label": "Total Revenue"}, {"key": "users", "label": "Active Users"}]\'. Important if chart type is not "none". For pie charts, use one series for values. For scatter, first key is Y, second (optional) is Z/size.'),
   data: z.string().optional().describe('A JSON string representing an array of 2-7 sample data objects. Example: \'[{"month": "Jan", "revenue": "1200"}, {"month": "Feb", "revenue": "1500"}]\'. Keys within these objects MUST match the categoryDataKey and the keys defined in seriesDataKeys. All values in these records should be strings (e.g., numbers represented as "10"). Important if chart type is not "none".')
 });
 
@@ -43,19 +40,19 @@ const ResearchReportOutputSchema = z.object({
   keyThemes: z.array(z.object({
     theme: z.string().describe('A major theme or area of investigation derived from the research question.'),
     discussion: z.string().describe('A detailed discussion of this theme, synthesizing information and relevant concepts (approx. 250-350 words per theme).')
-  })).min(4).max(6).describe('A section outlining and discussing 4-6 key themes or areas investigated.'),
+  })).describe('A section outlining and discussing 4-6 key themes or areas investigated.'),
   detailedMethodology: z.string().describe('A comprehensive explanation of the typical or proposed methodologies for investigating such a research question. Include research design, data collection approaches (even if hypothetical), and analytical techniques (approx. 500-700 words).'),
   resultsAndAnalysis: z.array(z.object({
     sectionTitle: z.string().describe('A descriptive title for this specific result/analysis section.'),
     content: z.string().describe('Detailed presentation and in-depth analysis of a specific segment of results or data. Discuss patterns, trends, and statistical significance if applicable (approx. 300-400 words per section).'),
     chartSuggestion: ChartSuggestionSchema.optional().describe('Suggestion for a chart to visualize this result. If a chart is relevant, provide details including plausible, context-relevant sample data.')
-  })).min(3).max(5).describe('Detailed breakdown of 3-5 key results sections, each with analysis and an optional chart suggestion with plausible sample data.'),
+  })).describe('Detailed breakdown of 3-5 key results sections, each with analysis and an optional chart suggestion with plausible sample data.'),
   discussion: z.string().describe('An expanded discussion interpreting the overall findings, their implications, how they relate back to the research question and literature review. Connect different results (approx. 600-800 words).'),
   conclusion: z.string().describe('A robust conclusion summarizing the main findings, their significance, and restating the overall contribution of the research (approx. 350-450 words).'),
   limitations: z.string().optional().describe('A detailed discussion of potential limitations of the research, analysis, or typical approaches to this topic (approx. 200-300 words).'),
   futureWork: z.string().optional().describe('Specific and actionable suggestions for future research directions stemming from the report (approx. 200-300 words).'),
   ethicalConsiderations: z.string().optional().describe('Discussion of any relevant ethical considerations related to the research topic, data handling, or methodology (approx. 150-250 words).'),
-  references: z.array(z.string()).min(8).max(15).optional().describe('A list of 8-15 placeholder references in a generic academic format, like "AI Synthesized Reference X: [Relevant Topic/Concept from research question]".'),
+  references: z.array(z.string()).optional().describe('A list of 8-15 placeholder references in a generic academic format, like "AI Synthesized Reference X: [Relevant Topic/Concept from research question]".'),
   appendices: z.array(z.object({
     title: z.string().describe('Title of the appendix section (e.g., "Appendix A: Survey Instrument Example").'),
     content: z.string().describe('Content of the appendix, e.g., placeholder for detailed data tables, survey instruments, or complex figures.')
@@ -63,7 +60,7 @@ const ResearchReportOutputSchema = z.object({
   glossary: z.array(z.object({
     term: z.string().describe('A key technical term used in the report.'),
     definition: z.string().describe('A clear and concise definition of the term.')
-  })).min(7).max(10).optional().describe('A glossary of 7-10 key terms used in the report for clarity.'),
+  })).optional().describe('A glossary of 7-10 key terms used in the report for clarity.'),
 });
 export type GenerateResearchReportOutput = z.infer<
   typeof ResearchReportOutputSchema
@@ -99,15 +96,15 @@ Key requirements for the report:
 7.  **Results and Analysis**: Provide 3-5 distinct sections. Each should have a 'sectionTitle', very detailed 'content' (approx. 300-400 words per section discussing patterns, trends, statistical significance if applicable, and nuanced interpretations), and an optional 'chartSuggestion'.
     *   For 'chartSuggestion': If a chart (bar, line, pie, scatter) would be beneficial for illustrating complex data or findings:
         *   Specify its 'type' (bar, line, pie, scatter, or none).
-        *   If type is NOT 'none', you MUST provide 'dataDescription', 'categoryDataKey', at least one item in 'seriesDataKeys'.
+        *   If type is NOT 'none', you MUST provide 'dataDescription', 'categoryDataKey', 'seriesDataKeys', and 'data'.
         *   'title' for the chart is optional.
         *   'xAxisLabel' and 'yAxisLabel' are optional.
         *   'dataDescription' (what it shows, e.g., "Trends of X over Y time, segmented by Group Z").
         *   'categoryDataKey' (the field name for categories/x-axis in your sample data, e.g., "year" or "product_category").
-        *   'seriesDataKeys' as an array of objects, each with 'key' (the data field name, e.g., "sales_total" or "user_count") and 'label' (display name, e.g., "Total Sales" or "Active Users").
-        *   For the 'data' field, provide a JSON STRING representing an array of 2-7 plausible data objects. This data should be illustrative and contextually relevant to the report section and the overall research question, not generic mock data. Keys in these data objects MUST exactly match the 'categoryDataKey' and the 'key's defined in 'seriesDataKeys'. All values within these data objects (e.g., for 'sales_total') must be provided as STRINGS (e.g., "1200", "1500.75").
-            Example (bar/line): If categoryDataKey is "month" and seriesDataKeys is [{key: "revenue", label: "Revenue"}], the JSON string for 'data' could be: '[{"month": "Jan", "revenue": "1200"}, {"month": "Feb", "revenue": "1500"}, {"month": "Mar", "revenue": "1300"}]'.
-            Example (pie): If categoryDataKey is "segment" and seriesDataKeys is [{key: "percentage", label: "Market Share"}], the JSON string for 'data' could be: '[{"segment": "Alpha", "percentage": "40"}, {"segment": "Beta", "percentage": "30"}, {"segment": "Gamma", "percentage": "30"}]'.
+        *   'seriesDataKeys' must be a JSON STRING representing an array of objects, where each object has a "key" and a "label". Example: '[{"key": "revenue", "label": "Total Revenue"}]'.
+        *   'data' must be a JSON STRING representing an array of 2-7 plausible data objects. This data should be illustrative and contextually relevant to the report section and the overall research question, not generic mock data. Keys in these data objects MUST exactly match the 'categoryDataKey' and the 'key's defined in 'seriesDataKeys'. All values within these data objects (e.g., for 'sales_total') must be provided as STRINGS (e.g., "1200", "1500.75").
+            Example (bar/line): If categoryDataKey is "month" and seriesDataKeys is '[{"key": "revenue", "label": "Revenue"}]', the JSON string for 'data' could be: '[{"month": "Jan", "revenue": "1200"}, {"month": "Feb", "revenue": "1500"}, {"month": "Mar", "revenue": "1300"}]'.
+            Example (pie): If categoryDataKey is "segment" and seriesDataKeys is '[{"key": "percentage", "label": "Market Share"}]', the JSON string for 'data' could be: '[{"segment": "Alpha", "percentage": "40"}, {"segment": "Beta", "percentage": "30"}, {"segment": "Gamma", "percentage": "30"}]'.
         *   If no chart is suitable for a section, set chartSuggestion.type to 'none' and other chart-related fields can be omitted. Ensure chart suggestions are meaningful and add value.
 8.  **Discussion**: (approx. 600-800 words) Interpret the overall (hypothetical or synthesized) findings in great depth. Discuss their implications, how they relate back to the research question and literature review, and how they contribute to the field. Connect different results, address inconsistencies, and explore alternative interpretations.
 9.  **Conclusion**: (approx. 350-450 words) Provide a robust conclusion summarizing the main findings, their significance, and restating the overall contribution of the research. Reiterate the answers to the research objectives.
@@ -138,4 +135,3 @@ const generateResearchReportFlow = ai.defineFlow(
     return output;
   }
 );
-
