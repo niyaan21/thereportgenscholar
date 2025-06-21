@@ -8,8 +8,7 @@ import Navbar from '@/components/layout/Navbar';
 import ParticleBackground from '@/components/layout/ParticleBackground';
 import { ThemeProvider } from 'next-themes';
 import Footer from '@/components/layout/Footer';
-import PageProgressBar from '@/components/layout/PageProgressBar';
-import GlobalKeyboardShortcuts from '@/components/layout/GlobalKeyboardShortcuts'; // Import the new client component
+import GlobalKeyboardShortcuts from '@/components/layout/GlobalKeyboardShortcuts';
 
 export const metadata: Metadata = {
   title: {
@@ -64,7 +63,6 @@ export default function RootLayout({
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable} scroll-smooth`} suppressHydrationWarning>
       <body className="font-sans antialiased">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <PageProgressBar />
           <ParticleBackground />
           <GlobalKeyboardShortcuts />
           <div className="relative z-10 flex flex-col min-h-screen">

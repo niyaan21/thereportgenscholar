@@ -1,7 +1,7 @@
 // src/app/signup/page.tsx
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,8 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, UserPlus, Mail, Lock, AlertCircle } from 'lucide-react';
 import NextLink from 'next/link';
 import { useRouter } from 'next/navigation';
-import { auth, googleProvider } from '@/lib/firebase'; // Import googleProvider
-import { createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth'; // Import signInWithPopup
+import { auth, googleProvider } from '@/lib/firebase';
+import { createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 import { z } from 'zod';
 import { Separator } from '@/components/ui/separator';
 
@@ -59,9 +59,9 @@ export default function SignUpPage() {
     } catch (error: any) {
       let firebaseErrorMessage = "Failed to create account. Please try again.";
       if (error.code === 'auth/email-already-in-use') {
-        firebaseErrorMessage = 'This email address is already in use.';
+        firebaseErrorMessage = 'This email address is already in use by another account.';
       } else if (error.code === 'auth/weak-password') {
-        firebaseErrorMessage = 'The password is too weak.';
+        firebaseErrorMessage = 'The password is too weak. Please choose a stronger password.';
       } else if (error.code === 'auth/invalid-email') {
           firebaseErrorMessage = 'The email address is not valid.';
       }

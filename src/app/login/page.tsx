@@ -10,8 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, LogIn, Mail, Lock, AlertCircle } from 'lucide-react';
 import NextLink from 'next/link';
 import { useRouter } from 'next/navigation';
-import { auth, googleProvider } from '@/lib/firebase'; // Import googleProvider
-import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth'; // Import signInWithPopup
+import { auth, googleProvider } from '@/lib/firebase';
+import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 import { z } from 'zod';
 import { Separator } from '@/components/ui/separator';
 

@@ -1,17 +1,15 @@
-
 // src/lib/firebase.ts
 import { initializeApp, getApp, getApps, type FirebaseApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, type Auth } from "firebase/auth"; // Added GoogleAuthProvider
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { getAuth, GoogleAuthProvider, type Auth } from "firebase/auth";
 
+// Switched to environment variables for security and flexibility.
 const firebaseConfig = {
-  apiKey: "AIzaSyBYK_hGTQIhCGm6sxfFigbRcPBP4YEtwAI",
-  authDomain: "scholarai-v4ygd.firebaseapp.com",
-  projectId: "scholarai-v4ygd",
-  storageBucket: "scholarai-v4ygd.firebasestorage.app",
-  messagingSenderId: "839164332336",
-  appId: "1:839164332336:web:53607fd6f130a875dd20f5"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
 // Initialize Firebase
@@ -23,6 +21,6 @@ if (!getApps().length) {
 }
 
 const auth: Auth = getAuth(app);
-const googleProvider = new GoogleAuthProvider(); // Create an instance of GoogleAuthProvider
+const googleProvider = new GoogleAuthProvider();
 
-export { app, auth, googleProvider }; // Export googleProvider
+export { app, auth, googleProvider };
