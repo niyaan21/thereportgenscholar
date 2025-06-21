@@ -6,6 +6,7 @@ import { getAuth, GoogleAuthProvider, type Auth } from "firebase/auth";
 const firebaseConfig = {
   apiKey: "AIzaSyC5xFskWhpAizDPGyV701knL7R42-NIY88",
   authDomain: "scholarai-v4ygd.firebaseapp.com",
+  databaseURL: "https://scholarai-v4ygd-default-rtdb.firebaseio.com",
   projectId: "scholarai-v4ygd",
   storageBucket: "scholarai-v4ygd.firebasestorage.app",
   messagingSenderId: "839164332336",
