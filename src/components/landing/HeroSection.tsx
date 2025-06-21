@@ -6,7 +6,7 @@ import React from 'react';
 import NextLink from 'next/link';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
-import { ArrowRight, UploadCloud, Info, Sparkles, Brain, FileText } from 'lucide-react';
+import { ArrowRight, UploadCloud, Info, Sparkles, Brain, FileText, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface HeroSectionProps {
@@ -19,6 +19,47 @@ export default function HeroSection({ queryFormSlot, isAuthenticated, authLoadin
   const FADE_UP_ANIMATION_VARIANTS = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+  };
+
+  const PrimaryActionButton = () => {
+    const buttonClassName = "w-full sm:w-auto bg-gradient-to-r from-primary to-accent text-primary-foreground hover:shadow-2xl px-8 py-3 text-base sm:text-lg shadow-xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
+
+    if (authLoading) {
+      return (
+        <Button size="lg" className={buttonClassName} disabled>
+          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+          Loading...
+        </Button>
+      );
+    }
+
+    if (isAuthenticated) {
+      return (
+        <Button
+          size="lg"
+          className={buttonClassName}
+          onClick={() => {
+            const queryFormElement = document.getElementById('researchQuestion');
+            if (queryFormElement) {
+              queryFormElement.focus({ preventScroll: true });
+              const formCard = queryFormElement.closest('form')?.parentElement?.parentElement;
+              formCard?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }}
+        >
+          Start Research <ArrowRight className="ml-2 h-5 w-5" />
+        </Button>
+      );
+    }
+
+    // Not authenticated
+    return (
+      <Button asChild size="lg" className={buttonClassName}>
+        <NextLink href="/login">
+          Login to Start <ArrowRight className="ml-2 h-5 w-5" />
+        </NextLink>
+      </Button>
+    );
   };
 
   return (
@@ -68,28 +109,7 @@ export default function HeroSection({ queryFormSlot, isAuthenticated, authLoadin
             transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
             className="mt-8 flex flex-col sm:flex-row justify-center items-center gap-4"
         >
-            <Button
-                asChild
-                size="lg"
-                className={cn(
-                    "w-full sm:w-auto bg-gradient-to-r from-primary to-accent text-primary-foreground hover:shadow-2xl px-8 py-3 text-base sm:text-lg shadow-xl",
-                    "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                )}
-                onClick={() => {
-                  const queryFormElement = document.getElementById('researchQuestion');
-                  if (queryFormElement) {
-                    queryFormElement.focus({ preventScroll: true });
-                    const formCard = queryFormElement.closest('form')?.parentElement?.parentElement;
-                    formCard?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  }
-                }}
-                disabled={authLoading || (!isAuthenticated && !authLoading)}
-            >
-                <span>
-                    {authLoading ? "Loading..." : (isAuthenticated ? "Start Research" : "Login to Start")}
-                    {!authLoading && <ArrowRight className="ml-2 h-5 w-5" />}
-                </span>
-            </Button>
+            <PrimaryActionButton />
             <Button
                 asChild
                 variant="outline"
