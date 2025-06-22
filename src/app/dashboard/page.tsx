@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, LayoutDashboard, History, FileText, Settings, PlusCircle, BarChart2, ExternalLink, UserCircle, Info, BookOpen, Zap, UploadCloud, ClockIcon, Search, FileSignature, Activity, Filter as FilterIcon, PieChart as PieChartIcon, Lightbulb, RefreshCw, AlertCircleIcon } from 'lucide-react';
+import { Loader2, LayoutDashboard, History, FileText, Settings, PlusCircle, BarChart2, ExternalLink, UserCircle, Info, BookOpen, Zap, UploadCloud, ClockIcon, Search, FileSignature, Activity, Filter as FilterIcon, PieChart as PieChartIcon, Lightbulb, RefreshCw, AlertCircleIcon, Copy, Check } from 'lucide-react';
 import NextLink from 'next/link';
 // import type { Metadata } from 'next'; // Metadata cannot be used in client components
 import { getResearchHistory, type ResearchActivityItem } from '@/lib/historyService';
@@ -78,6 +78,7 @@ export default function DashboardPage() {
   const [dailyPrompt, setDailyPrompt] = useState<GenerateDailyPromptOutput | null>(null);
   const [dailyPromptLoading, setDailyPromptLoading] = useState(true);
   const [dailyPromptError, setDailyPromptError] = useState<string | null>(null);
+  const [isCopied, setIsCopied] = useState(false);
 
   const router = useRouter();
   const { toast } = useToast();
@@ -124,6 +125,25 @@ export default function DashboardPage() {
     return () => unsubscribe();
   }, [router, fetchDailyPrompt]);
 
+
+  const handleCopyToClipboard = (text: string) => {
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => {
+        toast({
+            title: "Prompt Copied!",
+            description: "The research spark has been copied to your clipboard.",
+        });
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000);
+    }).catch(err => {
+        console.error('Failed to copy text: ', err);
+        toast({
+            title: "Copy Failed",
+            description: "Could not copy the prompt to your clipboard.",
+            variant: "destructive"
+        });
+    });
+  };
 
   const activityChartData = useMemo(() => {
     if (!allActivities.length) return [];
@@ -231,8 +251,18 @@ export default function DashboardPage() {
               </div>
             )}
           </CardContent>
-          <CardFooter>
-            <Button variant="outline" onClick={fetchDailyPrompt} disabled={dailyPromptLoading || !currentUser} className="ml-auto">
+          <CardFooter className="flex justify-end gap-3">
+            {dailyPrompt && !dailyPromptLoading && !dailyPromptError && (
+                <Button
+                    variant="outline"
+                    onClick={() => handleCopyToClipboard(dailyPrompt.prompt)}
+                    disabled={isCopied}
+                >
+                    {isCopied ? <Check className="mr-2 h-4 w-4 text-green-500" /> : <Copy className="mr-2 h-4 w-4" />}
+                    {isCopied ? "Copied!" : "Copy Prompt"}
+                </Button>
+            )}
+            <Button variant="outline" onClick={fetchDailyPrompt} disabled={dailyPromptLoading || !currentUser}>
               <RefreshCw className={cn("mr-2 h-4 w-4", dailyPromptLoading && "animate-spin")} />
               {dailyPromptLoading ? 'Refreshing...' : 'New Spark'}
             </Button>
