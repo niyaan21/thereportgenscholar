@@ -22,7 +22,7 @@ export async function generateDailyPrompt(): Promise<GenerateDailyPromptOutput> 
 const promptTemplate = ai.definePrompt({
   name: 'generateDailyPromptSystemPrompt',
   output: {schema: GenerateDailyPromptOutputSchema},
-  model: 'googleai/gemini-pro',
+  model: 'gemini-pro',
   prompt: `You are an academic muse. Your task is to generate a single, novel, and thought-provoking research question suitable for a university-level student or an independent researcher. The question should encourage critical thinking, interdisciplinary exploration, or investigation into emerging trends.
 
 Please also provide a broad category for this question. Examples of categories include: Technology, Science, Humanities, Social Sciences, Arts, Environment, Health, Economics.
