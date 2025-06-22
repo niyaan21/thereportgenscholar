@@ -219,14 +219,15 @@ export default function LoginPage() {
                 <Label htmlFor="password" className="flex items-center">
                   <Lock className="mr-2 h-4 w-4 text-muted-foreground" /> Password
                 </Label>
-                <button
-                    type="button" 
+                <Button
+                    type="button"
+                    variant="link"
+                    className="h-auto p-0 text-xs text-muted-foreground hover:text-primary"
                     onClick={handleForgotPassword}
-                    className="text-xs text-muted-foreground hover:text-primary underline-offset-2 hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={isLoading || isGoogleLoading}
                 >
                     Forgot Password?
-                </button>
+                </Button>
               </div>
               <Input 
                 id="password" 
