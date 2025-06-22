@@ -4,14 +4,15 @@ import { getAuth, GoogleAuthProvider, type Auth } from "firebase/auth";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyC5xFskWhpAizDPGyV701knL7R42-NIY88",
+  apiKey: "AIzaSyBYK_hGTQIhCGm6sxfFigbRcPBP4YEtwAI",
   authDomain: "scholarai-v4ygd.firebaseapp.com",
   databaseURL: "https://scholarai-v4ygd-default-rtdb.firebaseio.com",
   projectId: "scholarai-v4ygd",
-  storageBucket: "scholarai-v4ygd.firebasestorage.app",
+  storageBucket: "scholarai-v4ygd.appspot.com",
   messagingSenderId: "839164332336",
   appId: "1:839164332336:web:53607fd6f130a875dd20f5"
 };
+
 
 // Initialize Firebase
 let app: FirebaseApp;

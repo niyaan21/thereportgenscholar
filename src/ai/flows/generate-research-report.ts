@@ -76,6 +76,26 @@ const prompt = ai.definePrompt({
   name: 'generateResearchReportPrompt',
   input: {schema: GenerateResearchReportInputSchema},
   output: {schema: ResearchReportOutputSchema},
+  config: {
+    safetySettings: [
+      {
+        category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+        threshold: 'BLOCK_NONE',
+      },
+      {
+        category: 'HARM_CATEGORY_HATE_SPEECH',
+        threshold: 'BLOCK_ONLY_HIGH',
+      },
+      {
+        category: 'HARM_CATEGORY_HARASSMENT',
+        threshold: 'BLOCK_MEDIUM_AND_ABOVE',
+      },
+      {
+        category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+        threshold: 'BLOCK_ONLY_HIGH',
+      },
+    ],
+  },
   prompt: `You are an expert research assistant tasked with generating a comprehensive and significantly lengthy academic research report.
 The central research question is: "{{researchQuestion}}"
 
