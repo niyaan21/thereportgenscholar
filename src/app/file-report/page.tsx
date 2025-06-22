@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useEffect, useTransition, useCallback } from 'react';
+import React, { useState, useEffect, useTransition, useCallback, useRef } from 'react';
 import { useActionState } from 'react';
 import NextLink from 'next/link';
 import { useToast } from '@/hooks/use-toast';
@@ -44,6 +44,7 @@ export default function FileReportPage() {
   const [fileName, setFileName] = useState<string | null>(null);
   const [showReport, setShowReport] = useState(false);
   const [guidanceQuery, setGuidanceQuery] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { toast } = useToast();
 
@@ -177,13 +178,30 @@ export default function FileReportPage() {
                   id="file"
                   name="file"
                   type="file"
+                  ref={fileInputRef}
                   required
                   onChange={handleFileChange}
                   disabled={isGenerating}
-                  className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 disabled:opacity-70"
+                  className="hidden"
                   accept=".txt,.md,.pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown,application/pdf"
                 />
-                {fileName && <p className="text-sm text-muted-foreground mt-1">Selected: {fileName}</p>}
+                <div 
+                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2"
+                >
+                    <span className="text-muted-foreground truncate pr-4">
+                        {fileName || "Select a file..."}
+                    </span>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isGenerating}
+                        className="shrink-0"
+                    >
+                        Choose File
+                    </Button>
+                </div>
                 {reportState.errors?.file && (
                   <p className="text-xs text-destructive flex items-center mt-1">
                     <AlertCircle className="mr-1 h-3 w-3" /> {reportState.errors.file.join(', ')}
