@@ -76,7 +76,7 @@ Boost your productivity with these keyboard shortcuts:
     *   Obtain your Firebase project configuration (API key, auth domain, etc.).
 *   A **Google Cloud Project** (often linked to your Firebase project):
     *   Ensure the "Generative Language API" (for Gemini models) is enabled.
-    *   Set up appropriate API keys or service accounts for Genkit to access Google AI services.
+    *   Create an API key for Genkit to access Google AI services.
     *   For Google Sign-In, ensure your OAuth 2.0 Client ID has the correct "Authorized JavaScript origins" and "Authorized redirect URIs" (including `http://localhost:[PORT]` for development).
 *   A modern web browser that supports the Web Speech API (for Voice Notes feature, e.g., Chrome, Edge, Safari on macOS/iOS).
 
@@ -99,7 +99,7 @@ Boost your productivity with these keyboard shortcuts:
     NEXT_PUBLIC_FIREBASE_APP_ID="1:123456789012:web:xxxxxxxxxxxxxxxxxxxxxx"
 
     # Google AI API Key for Genkit (REQUIRED for AI features)
-    # Get your key from Google AI Studio: https://aistudio.google.com/app/apikey
+    # Get your key from your Google Cloud project with the "Generative Language API" enabled.
     GOOGLE_API_KEY="your_google_ai_api_key_here"
     ```
     **Note:** The `src/lib/firebase.ts` file currently has hardcoded Firebase config values. It's highly recommended to modify this file to use the `NEXT_PUBLIC_FIREBASE_...` environment variables for better security and easier configuration.
@@ -152,13 +152,32 @@ Foss AI requires two development servers to run concurrently: one for the Next.j
     ```bash
     npm run start
     ```
-    For Genkit flows in production, you'll typically deploy them as part of your backend (e.g., to Firebase Functions or Cloud Run). The `genkit start` command is for development. Refer to Genkit documentation for production deployment strategies.
+    For Genkit flows in production, you'll typically deploy them as part of your backend (e.g., to Firebase Functions, Cloud Run, or Netlify Functions). Refer to the Deployment section below.
+
+## 🚀 Deployment
+
+This application is configured for easy deployment to platforms like Netlify or Vercel that support Next.js.
+
+### Deploying to Netlify
+
+This project includes a `netlify.toml` file which configures the project to be deployed seamlessly on Netlify.
+
+1.  **Push to a Git Repository:** Make sure your project is on GitHub, GitLab, or Bitbucket.
+2.  **Create a New Site on Netlify:** Log in to Netlify and click "Add new site" -> "Import an existing project".
+3.  **Connect to Your Git Provider:** Select your Git provider and choose your project's repository.
+4.  **Configure Build Settings:** Netlify should automatically detect that this is a Next.js project and use the settings from `netlify.toml`. The build command will be `npm run build` and the publish directory will be `.next`.
+5.  **Add Environment Variables:** This is a crucial step.
+    *   Go to your new site's settings: "Site configuration" -> "Environment variables".
+    *   Click "Add a variable" and add your `GOOGLE_API_KEY`.
+    *   Add all of your `NEXT_PUBLIC_FIREBASE_*` variables one by one.
+6.  **Deploy:** Click "Deploy site". Netlify will start the build process and deploy your application. The Genkit flows will be automatically deployed as serverless Netlify Functions thanks to the Next.js runtime.
 
 ## 📂 Key Project Structure
 
 ```
 foss-ai/
 ├── .env                  # Environment variables (Firebase config, API keys)
+├── netlify.toml          # Netlify deployment configuration
 ├── components.json       # ShadCN UI configuration
 ├── next.config.ts        # Next.js configuration
 ├── package.json          # Project dependencies and scripts
