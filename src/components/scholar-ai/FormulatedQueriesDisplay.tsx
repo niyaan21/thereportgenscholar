@@ -19,9 +19,9 @@ export interface FormulatedQueriesDisplayProps {
   isBusy: boolean; 
 }
 
-function SubmitButtonFormulatedQueries({ isBusy, isProcessingAction }: { isBusy: boolean, isProcessingAction?: boolean }) {
+function SubmitButtonFormulatedQueries({ isBusy }: { isBusy: boolean }) {
   const { pending } = useFormStatus();
-  const isDisabled = pending || isProcessingAction || isBusy; 
+  const isDisabled = pending || isBusy; 
   return (
     <Button
       type="submit"
@@ -29,14 +29,14 @@ function SubmitButtonFormulatedQueries({ isBusy, isProcessingAction }: { isBusy:
       className="w-full sm:w-auto shadow-xl hover:shadow-accent/50 bg-gradient-to-br from-accent via-accent/85 to-accent/70 text-accent-foreground text-sm sm:text-base py-3 sm:py-3.5 px-6 sm:px-8 rounded-lg sm:rounded-xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-all duration-300 ease-out group"
       aria-label="Synthesize Research and Illuminate Insights"
     >
-      {pending || isProcessingAction ? (
+      {pending ? (
           <Loader2 className="mr-2 h-4 w-4 sm:mr-2.5 sm:h-5 sm:w-5 animate-spin" />
         ) : isBusy ? ( 
           <Lock className="mr-2 h-4 w-4 sm:mr-2.5 sm:h-5 sm:w-5" />
         ) : (
           <Zap className="mr-2 h-4 w-4 sm:mr-2.5 sm:h-5 sm:w-5 group-hover:animate-pulse transition-transform duration-200" /> 
         )}
-      {isBusy && !pending && !isProcessingAction ? "Login to Synthesize" : "Synthesize & Illuminate"}
+      {isBusy && !pending ? "Login to Synthesize" : "Synthesize & Illuminate"}
       <ArrowRight className="ml-2 h-4 w-4 sm:ml-2.5 sm:h-5 sm:w-5 opacity-80 group-hover:opacity-100 group-hover:translate-x-1 transition-transform duration-200" />
     </Button>
   );
@@ -47,30 +47,24 @@ function FormulatedQueriesDisplayInner({
     alternativePhrasings,
     keyConcepts,
     potentialSubTopics,
-    isProcessingAction 
 }: { 
     queries: string[], 
     alternativePhrasings?: string[] | null,
     keyConcepts?: string[] | null,
     potentialSubTopics?: string[] | null,
-    isProcessingAction?: boolean 
 }) {
-  const { pending } = useFormStatus();
   const queryIcons = [FileSearch2, DatabaseZap, Telescope, Brain, Sparkles, Layers, Activity];
   
-  const showOverlay = pending || isProcessingAction;
-
   const renderListItems = (items: string[] | null | undefined, Icon: React.ElementType, itemClassName?: string) => {
     if (!items || items.length === 0) return <p className="text-sm text-muted-foreground italic px-1">None suggested for this query.</p>;
     return (
-      <ul className={cn("space-y-2", showOverlay && "opacity-50")}>
+      <ul className="space-y-2">
         {items.map((item, index) => (
           <li
             key={index}
             className={cn(
               "flex items-start space-x-2.5 p-2.5 bg-secondary/40 dark:bg-secondary/20 rounded-md shadow-sm border border-border/60",
-              itemClassName,
-              (isProcessingAction || pending) && "opacity-60 cursor-not-allowed"
+              itemClassName
             )}
           >
             <Icon className="h-4 w-4 text-accent flex-shrink-0 mt-0.5" />
@@ -84,15 +78,12 @@ function FormulatedQueriesDisplayInner({
   const renderKeyConcepts = (concepts: string[] | null | undefined) => {
     if (!concepts || concepts.length === 0) return <p className="text-sm text-muted-foreground italic px-1">None identified for this query.</p>;
     return (
-        <div className={cn("flex flex-wrap gap-2 pt-1", showOverlay && "opacity-50")}>
+        <div className="flex flex-wrap gap-2 pt-1">
             {concepts.map((concept, index) => (
                  <Badge 
                     key={index} 
                     variant="outline" 
-                    className={cn(
-                        "text-xs font-medium bg-accent/15 border-accent/40 text-accent-foreground hover:bg-accent/25 transition-colors",
-                        (isProcessingAction || pending) && "opacity-60 cursor-not-allowed"
-                    )}
+                    className="text-xs font-medium bg-accent/15 border-accent/40 text-accent-foreground hover:bg-accent/25 transition-colors"
                 >
                     <Tag className="h-3 w-3 mr-1.5"/>
                     {concept}
@@ -105,11 +96,6 @@ function FormulatedQueriesDisplayInner({
 
   return (
     <>
-      {showOverlay && (
-        <div className="absolute inset-0 bg-card/80 backdrop-blur-sm flex items-center justify-center z-10 rounded-b-xl sm:rounded-b-2xl -mt-px">
-          <Loader2 className="h-10 w-10 text-primary animate-spin" />
-        </div>
-      )}
       <Accordion type="multiple" defaultValue={["search-queries"]} className="w-full space-y-3">
         <AccordionItem value="search-queries" className="bg-card border-none rounded-lg shadow-md overflow-hidden">
           <AccordionTrigger className="px-4 py-3 text-md font-semibold hover:no-underline text-primary bg-primary/5 hover:bg-primary/10 transition-colors">
@@ -119,17 +105,13 @@ function FormulatedQueriesDisplayInner({
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4 pt-2">
             {queries.length > 0 ? (
-              <ul className={cn("space-y-3 sm:space-y-3", showOverlay && "opacity-50")}>
+              <ul className="space-y-3 sm:space-y-3">
                 {queries.map((query, index) => {
                   const IconComponent = queryIcons[index % queryIcons.length];
                   return (
                     <li
                       key={index}
-                      className={cn(
-                        "flex items-center space-x-3 sm:space-x-3 p-3 sm:p-3.5 bg-secondary/40 dark:bg-secondary/20 rounded-lg sm:rounded-xl shadow-md border border-border/70 transition-all duration-250 group",
-                        "hover:border-accent/50 hover:shadow-lg hover:bg-secondary/60 dark:hover:bg-secondary/30 hover:scale-[1.015] transform",
-                        (isProcessingAction || pending) && "opacity-60 cursor-not-allowed"
-                      )}
+                      className="flex items-center space-x-3 sm:space-x-3 p-3 sm:p-3.5 bg-secondary/40 dark:bg-secondary/20 rounded-lg sm:rounded-xl shadow-md border border-border/70 transition-all duration-250 group hover:border-accent/50 hover:shadow-lg hover:bg-secondary/60 dark:hover:bg-secondary/30 hover:scale-[1.015] transform"
                     >
                       <IconComponent className="h-4 w-4 sm:h-5 sm:w-5 text-accent flex-shrink-0 group-hover:scale-110 transition-transform" />
                       <span className="flex-grow text-sm sm:text-base text-foreground/90">
@@ -226,19 +208,18 @@ const FormulatedQueriesDisplay = React.memo(function FormulatedQueriesDisplay({
           action={isAuthLocked ? undefined : formAction}
           onSubmit={(e) => { if (isAuthLocked) e.preventDefault(); }}
         >
-          <CardContent className="p-4 sm:p-5 md:p-6 relative"> {/* Added relative here */}
+          <CardContent className="p-4 sm:p-5 md:p-6 relative">
              <FormulatedQueriesDisplayInner 
                 queries={queries} 
                 alternativePhrasings={alternativePhrasings}
                 keyConcepts={keyConcepts}
                 potentialSubTopics={potentialSubTopics}
-                isProcessingAction={isBusy && !isAuthLocked} 
             />
           </CardContent>
           {queries.length > 0 && (
             <CardFooter className="flex justify-end p-4 sm:p-5 md:p-6 pt-4 sm:pt-5 border-t border-border/40 bg-secondary/25 dark:bg-secondary/10">
               <input type="hidden" name="queries" value={JSON.stringify(queries)} />
-              <SubmitButtonFormulatedQueries isBusy={isAuthLocked} isProcessingAction={isBusy && !isAuthLocked} />
+              <SubmitButtonFormulatedQueries isBusy={isAuthLocked} />
             </CardFooter>
           )}
         </form>
@@ -248,4 +229,3 @@ const FormulatedQueriesDisplay = React.memo(function FormulatedQueriesDisplay({
 });
 FormulatedQueriesDisplay.displayName = 'FormulatedQueriesDisplay';
 export default FormulatedQueriesDisplay;
-

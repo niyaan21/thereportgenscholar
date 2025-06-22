@@ -40,18 +40,13 @@ function SubmitButtonQueryForm({ isDisabled }: { isDisabled?: boolean }) {
   );
 }
 
-function QueryFormInner({ formAction, isBusy, isDisabled, value, onChange }: QueryFormProps) {
+function QueryFormInner({ isBusy, isDisabled, value, onChange }: QueryFormProps) {
   const { pending } = useFormStatus();
   const actualIsDisabled = isBusy || isDisabled;
 
   return (
     <>
       <div className="relative">
-        {pending && (
-          <div className="absolute inset-0 bg-card/80 backdrop-blur-sm flex items-center justify-center z-10 rounded-b-xl sm:rounded-b-2xl -mt-px"> {/* Adjusted to cover content area */}
-            <Loader2 className="h-10 w-10 text-primary animate-spin" />
-          </div>
-        )}
         <Textarea
           id="researchQuestion"
           name="researchQuestion"
@@ -105,7 +100,7 @@ const QueryForm = React.memo(function QueryForm({ formAction, isBusy, isDisabled
             </div>
           </div>
         </CardHeader>
-        <CardContent className="p-4 sm:p-5 md:p-6 pt-5 sm:pt-6 relative"> {/* Added relative here */}
+        <CardContent className="p-4 sm:p-5 md:p-6 pt-5 sm:pt-6 relative">
           <form
             action={actualIsDisabled ? undefined : formAction}
             onSubmit={(e) => { if (actualIsDisabled) e.preventDefault(); }}

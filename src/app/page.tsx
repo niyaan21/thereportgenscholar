@@ -17,6 +17,8 @@ import QueryForm from '@/components/scholar-ai/QueryForm';
 import FormulatedQueriesDisplay from '@/components/scholar-ai/FormulatedQueriesDisplay';
 import ResearchSummaryDisplay from '@/components/scholar-ai/ResearchSummaryDisplay';
 import ResearchReportDisplay from '@/components/scholar-ai/ResearchReportDisplay';
+import GeneratingStateDisplay from '@/components/scholar-ai/GeneratingStateDisplay';
+
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge'; // Import Badge
@@ -353,11 +355,57 @@ export default function ScholarAIPage() {
 
 
   const renderCurrentStep = () => {
-    let content;
-    let animationClasses = "animate-in fade-in slide-in-from-bottom-6 duration-500 ease-out";
+    const animationClasses = "animate-in fade-in slide-in-from-bottom-6 duration-500 ease-out";
+
+    if (isFormulatingQueries) {
+      return (
+        <GeneratingStateDisplay
+          title="Forging Your Research Path..."
+          description="Our AI is analyzing your question to create a tailored research strategy."
+          steps={[
+            { text: 'Analyzing core concepts...', duration: 2000 },
+            { text: 'Identifying related topics...', duration: 2500 },
+            { text: 'Formulating optimal search vectors...', duration: 3000 },
+          ]}
+        />
+      );
+    }
+    
+    if (isSynthesizingResearch) {
+      return (
+        <GeneratingStateDisplay
+          title="Illuminating Key Insights..."
+          description="The AI is synthesizing information from its knowledge base to build a concise overview."
+          steps={[
+            { text: 'Processing search vectors...', duration: 2000 },
+            { text: 'Gathering conceptual information...', duration: 3000 },
+            { text: 'Synthesizing key themes...', duration: 3500 },
+            { text: 'Drafting initial summary...', duration: 2000 },
+          ]}
+        />
+      );
+    }
+    
+    if (isReportGenerating) {
+        return (
+          <GeneratingStateDisplay
+            title="Crafting Your Comprehensive Report..."
+            description="This is the most intensive step. The AI is now writing your multi-section report."
+            steps={[
+              { text: 'Structuring report outline...', duration: 3000 },
+              { text: 'Writing introduction & literature review...', duration: 7000 },
+              { text: 'Developing key themes & methodology...', duration: 7000 },
+              { text: 'Analyzing results & suggesting charts...', duration: 6000 },
+              { text: 'Drafting discussion & conclusion...', duration: 7000 },
+              { text: 'Assembling final document...', duration: 3000 },
+            ]}
+          />
+        );
+    }
+
     switch (appState) {
       case 'initial':
-        content = (
+        return (
           <div key="initial" className={cn("w-full", animationClasses)}>
             <HeroSection
               queryFormSlot={
@@ -372,15 +420,10 @@ export default function ScholarAIPage() {
               isAuthenticated={!!currentUser}
               authLoading={!authChecked}
             />
-            {/* Placeholder for where 3D element was, or add other landing content */}
-            {/* <HowItWorksSection /> */}
-            {/* <KeyFeaturesShowcase /> */}
-            {/* <FinalCTASection /> */}
           </div>
         );
-        break;
       case 'queries_formulated':
-        content = (
+        return (
           <div key="queries" className={cn("w-full space-y-6 md:space-y-8", animationClasses)}>
             <Card className="overflow-hidden shadow-xl border-accent/30 bg-card rounded-2xl">
               <CardHeader className="p-4 sm:p-5 md:p-6 bg-gradient-to-br from-accent/15 via-transparent to-accent/5 border-b border-accent/25">
@@ -421,9 +464,8 @@ export default function ScholarAIPage() {
             )}
           </div>
         );
-        break;
       case 'summary_generated':
-        content = (
+        return (
           <div key="summary" className={cn("w-full space-y-6 md:space-y-8", animationClasses)}>
             <ResearchSummaryDisplay
               summary={researchSummary}
@@ -459,9 +501,8 @@ export default function ScholarAIPage() {
             </CardFooter>
           </div>
         );
-        break;
       case 'report_generated':
-        content = (
+        return (
           <div key="report" className={cn("w-full space-y-6 md:space-y-8", animationClasses)} id="research-report-section">
             {reportActionState.researchReport && (
               <ResearchReportDisplay
@@ -494,11 +535,9 @@ export default function ScholarAIPage() {
             </CardFooter>
           </div>
         );
-        break;
       default:
-        content = null;
+        return null;
     }
-    return content;
   };
 
 
@@ -511,14 +550,15 @@ export default function ScholarAIPage() {
 
       <main className={cn(
         "flex-grow",
-        appState === 'initial' ?
-          "w-full" : 
+        appState === 'initial' || isLoading ?
+          "w-full flex items-center justify-center" : 
           "container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12"
       )}>
         <div className={cn(
-          appState === 'initial' ?
+          appState === 'initial' && !isLoading ?
             "w-full" : 
-            "max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto"
+            "max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto w-full",
+            isLoading && "px-4 sm:px-6 lg:px-8" 
         )}>
             {renderCurrentStep()}
         </div>
@@ -543,4 +583,3 @@ export default function ScholarAIPage() {
     </Dialog>
   );
 }
-
