@@ -62,8 +62,7 @@ export default function Navbar() {
     { href: "/", label: "Home", icon: Home },
     { href: "/file-report", label: "File Report", icon: FileReportIcon },
     { href: "/mindmap", label: "Mind Map", icon: MindMapIcon }, 
-    { href: "/voice-notes", label: "Voice Notes", icon: Mic },
-    { href: "/interview-transcription", label: "Transcription", icon: AudioLines },
+    { href: "/notes", label: "Notes & Transcription", icon: AudioLines },
     { href: "/features", label: "Features", icon: Sparkles },
     { href: "/pricing", label: "Pricing", icon: DollarSign },
     { href: "/about", label: "About", icon: Info },
@@ -261,4 +260,3 @@ export default function Navbar() {
     </nav>
   );
 }
-

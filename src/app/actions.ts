@@ -6,9 +6,10 @@ import { formulateResearchQuery, type FormulateResearchQueryInput, type Formulat
 import { summarizeResearchPapers, type SummarizeResearchPapersInput, type SummarizeResearchPapersOutput } from '@/ai/flows/summarize-research-papers';
 import { generateResearchImage, type GenerateResearchImageInput, type GenerateResearchImageOutput } from '@/ai/flows/generate-research-image';
 import { generateResearchReport, type GenerateResearchReportInput, type GenerateResearchReportOutput } from '@/ai/flows/generate-research-report';
-import { generateReportFromFile, type GenerateReportFromFileInput, type GenerateReportFromFileOutput } from '@/ai/flows/generate-report-from-file'; // New import
+import { generateReportFromFile, type GenerateReportFromFileInput, type GenerateReportFromFileOutput } from '@/ai/flows/generate-report-from-file';
 import { generateDailyPrompt, type GenerateDailyPromptOutput } from '@/ai/flows/generate-daily-prompt-flow';
-import { extractMindmapConcepts, type ExtractMindmapConceptsInput, type ExtractMindmapConceptsOutput } from '@/ai/flows/extract-mindmap-concepts'; // New import for mindmap
+import { extractMindmapConcepts, type ExtractMindmapConceptsInput, type ExtractMindmapConceptsOutput } from '@/ai/flows/extract-mindmap-concepts';
+import { transcribeAndAnalyze, type TranscribeAndAnalyzeInput, type TranscribeAndAnalyzeOutput } from '@/ai/flows/transcribe-and-analyze-flow';
 import { z } from 'zod';
 
 const formulateQuerySchema = z.object({
@@ -257,7 +258,7 @@ export async function handleGenerateReportAction(
 
 const MAX_FILE_SIZE_MB = 5;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
-const ALLOWED_FILE_TYPES = ['text/plain', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/markdown'];
+const ALLOWED_DOC_TYPES = ['text/plain', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/markdown'];
 
 const generateReportFromFileSchema = z.object({
   guidanceQuery: z.string().min(10, "Guidance query must be at least 10 characters.").max(1000, "Guidance query must be at most 1000 characters."),
@@ -265,7 +266,7 @@ const generateReportFromFileSchema = z.object({
     .instanceof(File, { message: "A file is required." })
     .refine((file) => file.size > 0, "File cannot be empty.")
     .refine((file) => file.size <= MAX_FILE_SIZE_BYTES, `File size must be less than ${MAX_FILE_SIZE_MB}MB.`)
-    .refine((file) => ALLOWED_FILE_TYPES.includes(file.type), "Invalid file type. Allowed types: .txt, .md, .pdf, .doc, .docx"),
+    .refine((file) => ALLOWED_DOC_TYPES.includes(file.type), "Invalid file type. Allowed types: .txt, .md, .pdf, .doc, .docx"),
 });
 
 export interface GenerateReportFromFileActionState {
@@ -406,3 +407,73 @@ export async function handleExtractMindmapConceptsAction(
   }
 }
 
+// Action for Transcription and Analysis
+const MAX_AUDIO_FILE_SIZE_MB = 50;
+const MAX_AUDIO_FILE_SIZE_BYTES = MAX_AUDIO_FILE_SIZE_MB * 1024 * 1024;
+const ALLOWED_AUDIO_TYPES = ['audio/mpeg', 'audio/wav', 'audio/mp4', 'video/mp4', 'video/quicktime'];
+
+const transcribeAndAnalyzeSchema = z.object({
+  analysisGuidance: z.string().max(1000, "Guidance must be at most 1000 characters.").optional(),
+  file: z
+    .instanceof(File, { message: "An audio or video file is required." })
+    .refine((file) => file.size > 0, "File cannot be empty.")
+    .refine((file) => file.size <= MAX_AUDIO_FILE_SIZE_BYTES, `File size must be less than ${MAX_AUDIO_FILE_SIZE_MB}MB.`)
+    .refine((file) => ALLOWED_AUDIO_TYPES.includes(file.type), "Invalid file type. Allowed: .mp3, .wav, .mp4, .mov"),
+});
+
+export interface TranscribeAndAnalyzeActionState {
+  success: boolean;
+  message: string;
+  analysisResult: TranscribeAndAnalyzeOutput | null;
+  errors: { analysisGuidance?: string[]; file?: string[] } | null;
+}
+
+export async function handleTranscribeAndAnalyzeAction(
+  prevState: TranscribeAndAnalyzeActionState,
+  formData: FormData
+): Promise<TranscribeAndAnalyzeActionState> {
+  const guidance = formData.get('analysisGuidance') as string;
+  const file = formData.get('file') as File;
+
+  const validation = transcribeAndAnalyzeSchema.safeParse({ analysisGuidance: guidance, file });
+
+  if (!validation.success) {
+    return {
+      success: false,
+      message: "Invalid input for transcription.",
+      analysisResult: null,
+      errors: validation.error.flatten().fieldErrors,
+    };
+  }
+
+  const { file: validatedFile, analysisGuidance: validatedGuidance } = validation.data;
+
+  try {
+    const arrayBuffer = await validatedFile.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const fileDataUri = `data:${validatedFile.type};base64,${buffer.toString('base64')}`;
+
+    const input: TranscribeAndAnalyzeInput = {
+      fileDataUri,
+      analysisGuidance: validatedGuidance,
+      fileName: validatedFile.name,
+    };
+
+    const result = await transcribeAndAnalyze(input);
+    return {
+      success: true,
+      message: "File transcribed and analyzed successfully.",
+      analysisResult: result,
+      errors: null,
+    };
+  } catch (error) {
+    console.error("Error in transcription/analysis action:", error);
+    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred during processing.";
+    return {
+      success: false,
+      message: `Processing failed: ${errorMessage}`,
+      analysisResult: null,
+      errors: null,
+    };
+  }
+}
