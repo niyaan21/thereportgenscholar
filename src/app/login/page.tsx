@@ -1,4 +1,3 @@
-
 // src/app/login/page.tsx
 'use client';
 
@@ -12,7 +11,7 @@ import { Loader2, LogIn, Mail, Lock, AlertCircle } from 'lucide-react';
 import NextLink from 'next/link';
 import { useRouter } from 'next/navigation';
 import { auth, googleProvider } from '@/lib/firebase';
-import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import { signInWithEmailAndPassword, signInWithPopup, sendPasswordResetEmail } from 'firebase/auth';
 import { z } from 'zod';
 import { Separator } from '@/components/ui/separator';
 
@@ -108,6 +107,51 @@ export default function LoginPage() {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast({
+        title: 'Email Required',
+        description: 'Please enter your email address in the field above to receive a password reset link.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    const emailValidation = z.string().email({ message: "Please enter a valid email address." }).safeParse(email);
+    if (!emailValidation.success) {
+        toast({
+            title: 'Invalid Email',
+            description: emailValidation.error.flatten().formErrors.join(', '),
+            variant: 'destructive',
+        });
+        return;
+    }
+
+    setIsLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, email);
+      toast({
+        title: 'Password Reset Email Sent',
+        description: 'If an account exists for that email, a password reset link has been sent.',
+        variant: 'default',
+        duration: 7000
+      });
+    } catch (error: any) {
+      // For security, don't reveal if an email is registered or not.
+      // So we show a generic success message regardless of success or failure on the backend.
+      // This is a common practice to prevent user enumeration attacks.
+       toast({
+        title: 'Password Reset Email Sent',
+        description: 'If an account exists for that email, a password reset link has been sent.',
+        variant: 'default',
+        duration: 7000
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background via-secondary/10 to-background p-4">
       <NextLink href="/" passHref className="mb-8">
@@ -171,9 +215,19 @@ export default function LoginPage() {
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password" className="flex items-center">
-                <Lock className="mr-2 h-4 w-4 text-muted-foreground" /> Password
-              </Label>
+              <div className="flex justify-between items-center">
+                <Label htmlFor="password" className="flex items-center">
+                  <Lock className="mr-2 h-4 w-4 text-muted-foreground" /> Password
+                </Label>
+                <button
+                    type="button" 
+                    onClick={handleForgotPassword}
+                    className="text-xs text-muted-foreground hover:text-primary underline-offset-2 hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={isLoading || isGoogleLoading}
+                >
+                    Forgot Password?
+                </button>
+              </div>
               <Input 
                 id="password" 
                 name="password" 
