@@ -88,7 +88,7 @@ Boost your productivity with these keyboard shortcuts:
     cd foss-ai # or your project directory
     ```
 
-2.  **Create a `.env` file** in the root of your project and add your Firebase project configuration:
+2.  **Create a `.env` file** in the root of your project and add your API keys. This is **required** for the application to function.
     ```env
     # Firebase Configuration (replace with your actual Firebase project config)
     NEXT_PUBLIC_FIREBASE_API_KEY="AIzaSyXXXXXXXXXXXXXXXXXXX"
@@ -98,12 +98,11 @@ Boost your productivity with these keyboard shortcuts:
     NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="123456789012"
     NEXT_PUBLIC_FIREBASE_APP_ID="1:123456789012:web:xxxxxxxxxxxxxxxxxxxxxx"
 
-    # Google AI API Key for Genkit (if required directly by your setup)
-    # Genkit often uses Application Default Credentials or service accounts when deployed.
-    # For local development, you might need to set GOOGLE_API_KEY if genkit.ts doesn't use ADC.
-    # GOOGLE_API_KEY="your_google_ai_api_key_if_needed"
+    # Google AI API Key for Genkit (REQUIRED for AI features)
+    # Get your key from Google AI Studio: https://aistudio.google.com/app/apikey
+    GOOGLE_API_KEY="your_google_ai_api_key_here"
     ```
-    **Note:** The `src/lib/firebase.ts` file uses hardcoded Firebase config values. It's highly recommended to move these to environment variables as shown above for better security and flexibility. If you update `firebase.ts` to use `process.env.NEXT_PUBLIC_FIREBASE_...`, then the `.env` file will be the source.
+    **Note:** The `src/lib/firebase.ts` file currently has hardcoded Firebase config values. It's highly recommended to modify this file to use the `NEXT_PUBLIC_FIREBASE_...` environment variables for better security and easier configuration.
 
 ## 🛠️ Installation
 
@@ -265,4 +264,3 @@ If you have any questions, feedback, or encounter issues, please reach out via:
 ---
 
 Thank you for using and exploring Foss AI! We hope it empowers your research endeavors.
-
