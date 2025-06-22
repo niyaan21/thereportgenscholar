@@ -48,11 +48,9 @@ const generateResearchImageFlow = ai.defineFlow(
   },
   async input => {
     const {media} = await ai.generate({
-      model: 'googleai/gemini-2.0-flash-preview-image-generation', // IMPORTANT: Using correct, recommended model for image generation
+      model: 'googleai/gemini-2.0-flash-preview-image-generation',
       prompt: `Generate an exceptionally detailed and visually captivating conceptual artwork that serves as a powerful metaphor for the research topic: "${input.topic}". The image must be abstract and symbolic, evoking a strong sense of intellectual depth, groundbreaking discovery, and the intricate interconnectedness of complex ideas. Emphasize dynamic visual elements, sophisticated and harmonious color palettes, and a modern, almost futuristic digital art style suitable for a keynote presentation or research publication. Strictly avoid any text, letters, numbers, or overly literal depictions of objects or people. The artwork should be thought-provoking, inspiring curiosity and contemplation. Aim for a highly polished, professional aesthetic with rich textures, intricate details, and a strong, balanced composition. The visual should be suitable for a discerning academic or professional audience. The artwork must be unique and specifically tailored to the nuances of the research topic, avoiding generic symbols or themes.`,
-      config: {
-        responseModalities: ['TEXT', 'IMAGE'], // MUST provide both TEXT and IMAGE
-      },
+      responseModalities: ['TEXT', 'IMAGE'], // Corrected: Moved from config to top-level
     });
 
     if (!media || !media.url) {
