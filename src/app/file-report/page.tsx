@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useEffect, useTransition, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useActionState } from 'react';
 import NextLink from 'next/link';
 import { useToast } from '@/hooks/use-toast';
@@ -12,22 +12,15 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import ResearchReportDisplay from '@/components/scholar-ai/ResearchReportDisplay';
+import MindmapDisplay from '@/components/scholar-ai/MindmapDisplay';
 import { handleGenerateReportFromFileAction, type GenerateReportFromFileActionState } from '@/app/actions';
-import type { GenerateReportFromFileOutput } from '@/ai/flows/generate-report-from-file';
-import { UploadCloud, FileText, Wand2, Loader2, ArrowLeft, RotateCcw, AlertCircle, Lock, Info } from 'lucide-react';
+import { UploadCloud, Wand2, Loader2, RotateCcw, AlertCircle, Lock, Info, BrainCircuit } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged, type User } from 'firebase/auth';
-import { addResearchActivity } from '@/lib/historyService'; // Import history service
-// import type { Metadata } from 'next'; // Client components cannot export metadata
-
-
-// Client components cannot export metadata directly.
-// This can be defined in a layout.tsx if SEO is critical for this page.
-// export const metadata: Metadata = {
-//   title: 'File-Powered Report Generation - Foss AI',
-//   description: 'Upload your document and provide guidance to generate a custom research report with Foss AI.',
-// };
+import { addResearchActivity } from '@/lib/historyService';
+import { Switch } from '@/components/ui/switch';
+import { Separator } from '@/components/ui/separator';
 
 const initialReportFromFileState: GenerateReportFromFileActionState = {
   success: false,
@@ -42,7 +35,7 @@ export default function FileReportPage() {
   const [authChecked, setAuthChecked] = useState(false);
   const [reportState, formAction, isGenerating] = useActionState(handleGenerateReportFromFileAction, initialReportFromFileState);
   const [fileName, setFileName] = useState<string | null>(null);
-  const [showReport, setShowReport] = useState(false);
+  const [showResult, setShowResult] = useState(false);
   const [guidanceQuery, setGuidanceQuery] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -65,7 +58,7 @@ export default function FileReportPage() {
           variant: 'default',
           duration: 7000,
         });
-        setShowReport(true);
+        setShowResult(true);
         if (currentUser && reportState.originalGuidance) {
            addResearchActivity({
             type: 'file-report-generation',
@@ -74,7 +67,6 @@ export default function FileReportPage() {
             executiveSummarySnippet: reportState.researchReport.executiveSummary?.substring(0, 150) + (reportState.researchReport.executiveSummary && reportState.researchReport.executiveSummary.length > 150 ? '...' : '')
           });
         }
-        // Scroll to report section
         document.getElementById('file-report-display-section')?.scrollIntoView({ behavior: 'smooth' });
       } else if (!reportState.success) {
         let description = reportState.message;
@@ -90,7 +82,7 @@ export default function FileReportPage() {
           variant: 'destructive',
           duration: 9000,
         });
-        setShowReport(false);
+        setShowResult(false);
       }
     }
   }, [reportState, isGenerating, toast, currentUser]);
@@ -105,14 +97,11 @@ export default function FileReportPage() {
   };
 
   const handleStartNew = () => {
-    setShowReport(false);
+    setShowResult(false);
     setFileName(null);
-    setGuidanceQuery(''); 
+    setGuidanceQuery('');
     const form = document.getElementById('fileReportForm') as HTMLFormElement;
     form?.reset();
-    // Visually clearing the form and allowing new submission.
-    // To truly reset useActionState, you might need to remount the component or use a key.
-    // For this prototype, visual reset is sufficient.
   };
   
   const isFormDisabled = (!currentUser && authChecked) || isGenerating;
@@ -159,7 +148,7 @@ export default function FileReportPage() {
         </Alert>
       )}
 
-      {authChecked && currentUser && !showReport && (
+      {authChecked && currentUser && !showResult && (
         <Card className="w-full max-w-xl mx-auto shadow-2xl border-primary/20 rounded-xl overflow-hidden">
           <form id="fileReportForm" action={formAction}>
             <CardHeader className="p-6 bg-gradient-to-br from-primary/10 via-transparent to-primary/5">
@@ -229,35 +218,50 @@ export default function FileReportPage() {
                   </p>
                 )}
               </div>
-                 <Alert variant="default" className="bg-secondary/30 dark:bg-secondary/10 border-border/50 text-foreground/80">
-                    <Info className="h-5 w-5 text-accent"/>
-                    <AlertTitle className="font-medium text-primary/90">Note on File Processing</AlertTitle>
-                    <AlertDescription className="text-xs">
-                        The AI will attempt to extract text and analyze content from your uploaded file. Complex PDFs or DOCX files might have limitations in automated text extraction by the AI model. Plain text or Markdown files generally yield the best results.
-                    </AlertDescription>
-                </Alert>
+              <Separator />
+               <div className="space-y-3">
+                 <Label className="text-base">Additional Outputs</Label>
+                 <div className="flex items-center space-x-3 p-3 rounded-lg bg-secondary/30 dark:bg-secondary/10 border border-border/50">
+                    <Switch id="generateMindmap" name="generateMindmap" disabled={isGenerating}/>
+                    <Label htmlFor="generateMindmap" className="flex flex-col space-y-0.5">
+                        <span className="font-medium text-primary/90">Generate Mind Map Concepts</span>
+                        <span className="text-xs text-muted-foreground">Extract a main idea and key concepts from the file.</span>
+                    </Label>
+                 </div>
+                 <p className="text-xs text-muted-foreground px-1">Need to create a mind map from different text? <NextLink href="/mindmap" className="text-accent hover:underline">Use the dedicated tool</NextLink>.</p>
+              </div>
+
+              <Alert variant="default" className="bg-secondary/30 dark:bg-secondary/10 border-border/50 text-foreground/80">
+                  <Info className="h-5 w-5 text-accent"/>
+                  <AlertTitle className="font-medium text-primary/90">Note on File Processing</AlertTitle>
+                  <AlertDescription className="text-xs">
+                      The AI will attempt to extract text and analyze content from your uploaded file. Complex PDFs or DOCX files might have limitations in automated text extraction by the AI model. Plain text or Markdown files generally yield the best results.
+                  </AlertDescription>
+              </Alert>
             </CardContent>
             <CardFooter className="p-6 bg-secondary/20 dark:bg-secondary/10 border-t">
-              <Button type="submit" className="w-full sm:w-auto ml-auto text-base py-3" disabled={isGenerating || !currentUser}>
+              <Button type="submit" className="w-full sm:w-auto ml-auto text-base py-3" disabled={isFormDisabled}>
                 {isGenerating ? (
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                 ) : (
                   <Wand2 className="mr-2 h-5 w-5" />
                 )}
-                {isGenerating ? 'Generating Report...' : 'Generate Report from File'}
+                {isGenerating ? 'Generating...' : 'Generate from File'}
               </Button>
             </CardFooter>
           </form>
         </Card>
       )}
 
-      {showReport && reportState.researchReport && (
-        <div id="file-report-display-section" className="mt-10">
+      {showResult && reportState.researchReport && (
+        <div id="file-report-display-section" className="mt-10 space-y-8">
           <ResearchReportDisplay
             report={reportState.researchReport}
             originalQuestion={reportState.originalGuidance || "Based on uploaded file"}
-            // generatedImageUrl can be added if this flow also generates images
           />
+          {reportState.researchReport.mindmapData && (
+            <MindmapDisplay data={reportState.researchReport.mindmapData} />
+          )}
           <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
             <Button onClick={handleStartNew} variant="outline" size="lg" className="w-full sm:w-auto">
               <RotateCcw className="mr-2 h-5 w-5" />

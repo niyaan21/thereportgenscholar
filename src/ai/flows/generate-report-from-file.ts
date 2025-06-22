@@ -23,6 +23,20 @@ const ChartSuggestionSchema = z.object({
    data: z.string().optional().describe('A JSON string representing an array of 2-7 sample data objects. Example: \'[{"month": "Jan", "revenue": "1200"}, {"month": "Feb", "revenue": "1500"}]\'. If possible, derive examples from the file, otherwise generate plausible data fitting the context. Avoid generic placeholders. Keys within these objects MUST match the categoryDataKey and the keys defined in seriesDataKeys. All values in these records should be strings (e.g., numbers represented as "10"). Important if chart type is not "none".')
 });
 
+// Mindmap Schemas (copied from extract-mindmap-concepts.ts)
+const ExtractedConceptSchema = z.object({
+  concept: z.string().describe("A main concept, idea, or entity identified in the text."),
+  relatedTerms: z.array(z.string()).describe("A list of 3-7 closely related terms, sub-ideas, properties, or examples connected to this main concept.")
+});
+
+const ExtractMindmapConceptsOutputSchema = z.object({
+  mainIdea: z.string().describe("The central theme or overarching main idea derived from the provided text."),
+  keyConcepts: z
+    .array(ExtractedConceptSchema)
+    .describe('An array of 3-10 key concepts extracted from the text, each with a few related terms or sub-ideas.'),
+});
+
+
 const ReportOutputSchema = z.object({
   title: z.string().describe('A concise and informative title for the research report (max 15 words).'),
   executiveSummary: z.string().describe('A brief, high-level summary of the entire report, covering the purpose, key findings, and main conclusions (approx. 300-400 words).'),
@@ -52,6 +66,7 @@ const ReportOutputSchema = z.object({
     term: z.string().describe('A key technical term used in the report related to the file.'),
     definition: z.string().describe('A clear and concise definition of the term.')
   })).optional().describe('A glossary of 3-7 key terms used in the report for clarity.'),
+  mindmapData: ExtractMindmapConceptsOutputSchema.optional().describe('Optional mind map data extracted from the document.'),
 });
 
 
@@ -69,12 +84,13 @@ const GenerateReportFromFileInputSchema = z.object({
       'Specific instructions or areas of focus for the report based on the file content.'
     ),
   fileName: z.string().optional().describe("The name of the uploaded file, for context."),
+  generateMindmap: z.boolean().optional().describe("Flag to indicate if mind map data should be generated."),
 });
 export type GenerateReportFromFileInput = z.infer<
   typeof GenerateReportFromFileInputSchema
 >;
 
-export type GenerateReportFromFileOutput = GenerateResearchReportOutput; // Reusing the existing output type
+export type GenerateReportFromFileOutput = z.infer<typeof ReportOutputSchema>; // Updated output type
 
 export async function generateReportFromFile(
   input: GenerateReportFromFileInput
@@ -147,6 +163,14 @@ Key report requirements:
 13. **References**: (3-10 placeholders) List references if mentioned in the file, or generic relevant ones.
 14. **Appendices (Optional)**: (1-2) e.g., for extracted data snippets.
 15. **Glossary (Optional)**: (3-7 terms) Define key terms from the file.
+
+{{#if generateMindmap}}
+In addition to the report, also analyze the file content to extract concepts for a mind map and populate the 'mindmapData' field.
+1.  **Main Idea**: Identify the single, overarching central theme of the document.
+2.  **Key Concepts**: Extract 3 to 10 key concepts, main ideas, or important entities from the text.
+3.  **Related Terms**: For each key concept, list 3 to 7 closely related terms, sub-ideas, properties, or illustrative examples found within or directly implied by the text.
+Ensure this mind map data is included in the final JSON output under the 'mindmapData' key.
+{{/if}}
 
 Ensure all sections are well-developed and directly utilize or refer to the provided file content as guided by the user's query. The language should be formal and academic.
 Generate the full research report now.

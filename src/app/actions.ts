@@ -267,6 +267,7 @@ const generateReportFromFileSchema = z.object({
     .refine((file) => file.size > 0, "File cannot be empty.")
     .refine((file) => file.size <= MAX_FILE_SIZE_BYTES, `File size must be less than ${MAX_FILE_SIZE_MB}MB.`)
     .refine((file) => ALLOWED_DOC_TYPES.includes(file.type), "Invalid file type. Allowed types: .txt, .md, .pdf, .doc, .docx"),
+  generateMindmap: z.boolean(),
 });
 
 export interface GenerateReportFromFileActionState {
@@ -274,7 +275,7 @@ export interface GenerateReportFromFileActionState {
   message: string;
   researchReport: GenerateReportFromFileOutput | null;
   originalGuidance?: string;
-  errors: { guidanceQuery?: string[]; file?: string[] } | null;
+  errors: { guidanceQuery?: string[]; file?: string[]; generateMindmap?: string[] } | null;
 }
 
 export async function handleGenerateReportFromFileAction(
@@ -283,8 +284,9 @@ export async function handleGenerateReportFromFileAction(
 ): Promise<GenerateReportFromFileActionState> {
   const guidanceQuery = formData.get('guidanceQuery') as string;
   const file = formData.get('file') as File;
+  const generateMindmap = formData.get('generateMindmap') === 'on';
 
-  const validation = generateReportFromFileSchema.safeParse({ guidanceQuery, file });
+  const validation = generateReportFromFileSchema.safeParse({ guidanceQuery, file, generateMindmap });
 
   if (!validation.success) {
     return {
@@ -296,8 +298,7 @@ export async function handleGenerateReportFromFileAction(
     };
   }
 
-  const validatedFile = validation.data.file;
-  const validatedQuery = validation.data.guidanceQuery;
+  const { file: validatedFile, guidanceQuery: validatedQuery, generateMindmap: validatedMindmapFlag } = validation.data;
 
   try {
     const arrayBuffer = await validatedFile.arrayBuffer();
@@ -308,6 +309,7 @@ export async function handleGenerateReportFromFileAction(
       fileDataUri,
       guidanceQuery: validatedQuery,
       fileName: validatedFile.name,
+      generateMindmap: validatedMindmapFlag,
     };
 
     const result = await generateReportFromFile(input);
