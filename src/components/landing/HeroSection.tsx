@@ -1,3 +1,4 @@
+
 // src/components/landing/HeroSection.tsx
 'use client';
 
@@ -14,7 +15,7 @@ interface HeroSectionProps {
   authLoading: boolean;
 }
 
-export default function HeroSection({ queryFormSlot, isAuthenticated, authLoading }: HeroSectionProps) {
+const HeroSection = React.memo(function HeroSection({ queryFormSlot, isAuthenticated, authLoading }: HeroSectionProps) {
   const FADE_UP_ANIMATION_VARIANTS = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
@@ -97,4 +98,6 @@ export default function HeroSection({ queryFormSlot, isAuthenticated, authLoadin
       </div>
     </section>
   );
-}
+});
+HeroSection.displayName = "HeroSection";
+export default HeroSection;

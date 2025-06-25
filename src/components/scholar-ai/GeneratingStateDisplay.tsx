@@ -13,7 +13,7 @@ interface GeneratingStateDisplayProps {
   steps: { text: string; duration: number }[];
 }
 
-const GeneratingStateDisplay: React.FC<GeneratingStateDisplayProps> = ({ title, description, steps }) => {
+const GeneratingStateDisplay: React.FC<GeneratingStateDisplayProps> = React.memo(function GeneratingStateDisplay({ title, description, steps }) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
   useEffect(() => {
@@ -94,6 +94,6 @@ const GeneratingStateDisplay: React.FC<GeneratingStateDisplayProps> = ({ title, 
       </Card>
     </motion.div>
   );
-};
-
+});
+GeneratingStateDisplay.displayName = "GeneratingStateDisplay";
 export default GeneratingStateDisplay;

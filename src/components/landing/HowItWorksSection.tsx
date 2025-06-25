@@ -35,7 +35,7 @@ const steps = [
   },
 ];
 
-export default function HowItWorksSection() {
+const HowItWorksSection = React.memo(function HowItWorksSection() {
   const FADE_IN_ANIMATION_VARIANTS = {
     hidden: { opacity: 0, y: 20 },
     visible: (i: number) => ({
@@ -125,4 +125,6 @@ export default function HowItWorksSection() {
       </div>
     </section>
   );
-}
+});
+HowItWorksSection.displayName = "HowItWorksSection";
+export default HowItWorksSection;

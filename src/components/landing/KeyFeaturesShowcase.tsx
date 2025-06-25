@@ -88,7 +88,7 @@ const FeatureCard: React.FC<{ icon: React.ElementType; title: string; descriptio
 };
 
 
-export default function KeyFeaturesShowcase() {
+const KeyFeaturesShowcase = React.memo(function KeyFeaturesShowcase() {
   const sectionVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -153,4 +153,6 @@ export default function KeyFeaturesShowcase() {
       </div>
     </section>
   );
-}
+});
+KeyFeaturesShowcase.displayName = "KeyFeaturesShowcase";
+export default KeyFeaturesShowcase;

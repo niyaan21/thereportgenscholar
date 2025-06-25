@@ -10,12 +10,17 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { FileText, BookOpen, ListChecks, MessageSquareQuote, SearchCode, Lightbulb, AlertTriangle, ThumbsUp, Telescope, Edit3, BarChartHorizontalBig, Users, ShieldCheck, BookCopy, BookMarked, TrendingUp, FileJson, GanttChartSquare, PieChartIcon, LineChartIcon, BarChartIcon, ScatterChartIcon, Brain, LightbulbIcon, MaximizeIcon, Settings, FileQuestion, Activity, Library, UsersRound, ShieldAlert, ClipboardList, Milestone, Scale, GitBranch, DownloadCloud, Share2Icon, BookText, FileType, Image as ImageIconLucide, Info as InfoIcon, Loader2 } from 'lucide-react';
 import NextImage from 'next/image';
 import { cn } from '@/lib/utils';
-import PlaceholderChart from './PlaceholderChart';
 import { Button } from '@/components/ui/button';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import dynamic from 'next/dynamic';
+
+const PlaceholderChart = dynamic(() => import('./PlaceholderChart'), {
+  ssr: false,
+  loading: () => <div className="h-[260px] w-full rounded-xl bg-muted/50 animate-pulse flex items-center justify-center"><Loader2 className="h-8 w-8 text-muted-foreground animate-spin" /></div>,
+});
 
 
 export interface ResearchReportDisplayProps {
