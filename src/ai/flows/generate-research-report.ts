@@ -40,13 +40,13 @@ const ResearchReportOutputSchema = z.object({
   keyThemes: z.array(z.object({
     theme: z.string().describe('A major theme or area of investigation derived from the research question.'),
     discussion: z.string().describe('A detailed discussion of this theme, synthesizing information and relevant concepts (approx. 250-350 words per theme).')
-  })).describe('A section outlining and discussing 4-6 key themes or areas investigated.'),
+  })).optional().describe('A section outlining and discussing 4-6 key themes or areas investigated.'),
   detailedMethodology: z.string().describe('A comprehensive explanation of the typical or proposed methodologies for investigating such a research question. Include research design, data collection approaches (even if hypothetical), and analytical techniques (approx. 500-700 words).'),
   resultsAndAnalysis: z.array(z.object({
     sectionTitle: z.string().describe('A descriptive title for this specific result/analysis section.'),
     content: z.string().describe('Detailed presentation and in-depth analysis of a specific segment of results or data. Discuss patterns, trends, and statistical significance if applicable (approx. 300-400 words per section).'),
     chartSuggestion: ChartSuggestionSchema.optional().describe('Suggestion for a chart to visualize this result. If a chart is relevant, provide details including plausible, context-relevant sample data.')
-  })).describe('Detailed breakdown of 3-5 key results sections, each with analysis and an optional chart suggestion with plausible sample data.'),
+  })).optional().describe('Detailed breakdown of 3-5 key results sections, each with analysis and an optional chart suggestion with plausible sample data.'),
   discussion: z.string().describe('An expanded discussion interpreting the overall findings, their implications, how they relate back to the research question and literature review. Connect different results (approx. 600-800 words).'),
   conclusion: z.string().describe('A robust conclusion summarizing the main findings, their significance, and restating the overall contribution of the research (approx. 350-450 words).'),
   limitations: z.string().optional().describe('A detailed discussion of potential limitations of the research, analysis, or typical approaches to this topic (approx. 200-300 words).'),
