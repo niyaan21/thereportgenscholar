@@ -182,8 +182,11 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
         doc.setTextColor(50, 50, 50);
     };
     
+    // Add title and ensure spacing for multiline titles
+    const titleLines = doc.splitTextToSize(report.title || "Generated Research Report", contentWidth);
     addTextToPdf(report.title || "Generated Research Report", 18, { bold: true });
-    yPosition += 5; // Space between title and question
+    yPosition += 5 * (titleLines.length - 1); // Add extra space for each wrapped line of the title
+
     addTextToPdf(`Original Research Question: ${originalQuestion}`, 11, { italic: true, color: "#555555" });
     yPosition += 20; // Space after header block
     
@@ -343,7 +346,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
 
   return (
     <div>
-    <Card className="w-full shadow-2xl border-primary/30 rounded-xl sm:rounded-2xl flex flex-col max-h-[calc(100vh-10rem)] bg-gradient-to-br from-card via-background/5 to-card">
+    <Card className="w-full shadow-2xl border-primary/30 rounded-xl sm:rounded-2xl flex flex-col bg-gradient-to-br from-card via-background/5 to-card">
       <CardHeader className="p-4 sm:p-5 md:p-6 bg-gradient-to-r from-primary/95 via-primary to-primary/90 text-primary-foreground border-b border-primary/50">
         <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 md:space-x-6">
           <div
