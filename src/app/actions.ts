@@ -4,7 +4,6 @@
 
 import { formulateResearchQuery, type FormulateResearchQueryInput, type FormulateResearchQueryOutput } from '@/ai/flows/formulate-research-query';
 import { summarizeResearchPapers, type SummarizeResearchPapersInput, type SummarizeResearchPapersOutput } from '@/ai/flows/summarize-research-papers';
-import { generateResearchImage, type GenerateResearchImageInput, type GenerateResearchImageOutput } from '@/ai/flows/generate-research-image';
 import { generateResearchReport, type GenerateResearchReportInput, type GenerateResearchReportOutput } from '@/ai/flows/generate-research-report';
 import { generateReportFromFile, type GenerateReportFromFileInput, type GenerateReportFromFileOutput } from '@/ai/flows/generate-report-from-file';
 import { generateDailyPrompt, type GenerateDailyPromptOutput } from '@/ai/flows/generate-daily-prompt-flow';
@@ -149,55 +148,6 @@ export async function handleSynthesizeResearchAction(
       message: "Failed to synthesize research. An unexpected error occurred.",
       researchSummary: null,
       summarizedPaperTitles: null,
-      errors: null,
-    };
-  }
-}
-
-
-export interface GenerateImageActionState {
-  success: boolean;
-  message: string;
-  imageDataUri: string | null;
-  errors: { topic?: string[] } | null;
-}
-
-const generateImageSchema = z.object({
-  topic: z.string().min(5, "Topic must be at least 5 characters long.").max(200, "Topic must be at most 200 characters long."),
-});
-
-export async function handleGenerateImageAction(
-  prevState: GenerateImageActionState,
-  formData: FormData
-): Promise<GenerateImageActionState> {
-  const topic = formData.get('topic') as string;
-
-  const validation = generateImageSchema.safeParse({ topic });
-  if (!validation.success) {
-    return {
-      success: false,
-      message: "Invalid topic for image generation.",
-      imageDataUri: null,
-      errors: validation.error.flatten().fieldErrors,
-    };
-  }
-
-  try {
-    const input: GenerateResearchImageInput = { topic: validation.data.topic };
-    const result = await generateResearchImage(input);
-    return {
-      success: true,
-      message: "Image generated successfully.",
-      imageDataUri: result.imageDataUri,
-      errors: null,
-    };
-  } catch (error) {
-    console.error("Error generating image:", error);
-    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
-    return {
-      success: false,
-      message: `Failed to generate image: ${errorMessage}`,
-      imageDataUri: null,
       errors: null,
     };
   }

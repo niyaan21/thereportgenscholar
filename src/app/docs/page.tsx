@@ -92,10 +92,6 @@ export default function DocsPage() {
                   <p>Input a block of text, and Foss AI will identify the main idea and key concepts with related terms. This provides a structured starting point for building a detailed mind map, helping you visualize connections and organize your thoughts. Access this via the "Mind Map" link in the navigation.</p>
                 </div>
                  <div>
-                  <h4 className="text-lg font-medium text-primary/90 flex items-center mb-2"><Workflow className="h-5 w-5 mr-2 text-accent/80"/>Conceptual Image Visualization</h4>
-                  <p>To help illustrate your research concepts, Foss AI can generate abstract, symbolic images based on your research topic or summary. These visuals can be useful for presentations or for stimulating further thought.</p>
-                </div>
-                 <div>
                   <h4 className="text-lg font-medium text-primary/90 flex items-center mb-2"><Download className="h-5 w-5 mr-2 text-accent/80"/>Downloadable Outputs</h4>
                   <p>Generated research reports can be downloaded in both JSON format (for data structure and programmatic use) and as a formatted PDF document, suitable for sharing and offline review.</p>
                 </div>
@@ -228,4 +224,3 @@ export default function DocsPage() {
     </div>
   );
 }
-

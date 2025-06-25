@@ -33,11 +33,9 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import {
   handleFormulateQueryAction,
   handleSynthesizeResearchAction,
-  handleGenerateImageAction,
   handleGenerateReportAction,
   type FormulateQueryActionState,
   type SynthesizeResearchActionState,
-  type GenerateImageActionState,
   type GenerateReportActionState,
 } from '@/app/actions';
 import type { GenerateResearchReportOutput } from '@/ai/flows/generate-research-report';
@@ -77,13 +75,6 @@ const initialSynthesizeResearchActionState: SynthesizeResearchActionState = {
     errors: null,
 };
 
-const initialImageActionState: GenerateImageActionState = {
-  success: false,
-  message: '',
-  imageDataUri: null,
-  errors: null,
-};
-
 const initialReportActionState: GenerateReportActionState = {
   success: false,
   message: '',
@@ -109,11 +100,7 @@ export default function ScholarAIPage() {
 
   const [formulateQueryState, formulateQueryFormAction, isFormulatingQueries] = useActionState(handleFormulateQueryAction, initialFormulateQueryActionState);
   const [synthesizeResearchState, synthesizeResearchFormAction, isSynthesizingResearch] = useActionState(handleSynthesizeResearchAction, initialSynthesizeResearchActionState);
-  const [imageActionState, imageFormAction, isImageGenerating] = useActionState(handleGenerateImageAction, initialImageActionState);
   const [reportActionState, reportFormAction, isReportGenerating] = useActionState(handleGenerateReportAction, initialReportActionState);
-
-  const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
-  const [isImagePreviewDialogOpen, setIsImagePreviewDialogOpen] = useState(false);
 
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
@@ -143,7 +130,6 @@ export default function ScholarAIPage() {
       setKeyConcepts(kConcepts || []);
       setPotentialSubTopics(subTopics || []);
       setAppState('queries_formulated');
-      setGeneratedImageUrl(null);
       if (currentUser) {
         addResearchActivity({ type: 'query-formulation', question });
       }
@@ -195,33 +181,6 @@ export default function ScholarAIPage() {
     }
   }, [synthesizeResearchState, isSynthesizingResearch, toast, handleResearchSynthesizedCallback]);
 
-
-  useEffect(() => {
-    if (imageActionState.message && !isImageGenerating) {
-      if (imageActionState.success && imageActionState.imageDataUri) {
-        setGeneratedImageUrl(imageActionState.imageDataUri);
-        toast({
-          title: "🖼️ Visual Concept Generated!",
-          description: imageActionState.message,
-          variant: 'default',
-          duration: 5000,
-          action: (
-            <ToastAction altText="View Image" onClick={(e) => {
-              e.preventDefault();
-              setIsImagePreviewDialogOpen(true);
-            }}>View</ToastAction>
-          )
-        });
-      } else if (!imageActionState.success) {
-        let fullErrorMessage = imageActionState.message;
-        if (imageActionState.errors?.topic) {
-            fullErrorMessage += ` Details: ${imageActionState.errors.topic.join(' ')}`;
-        }
-        toast({ title: "🚫 Image Generation Failed", description: fullErrorMessage, variant: "destructive", duration: 7000 });
-      }
-    }
-  }, [imageActionState, isImageGenerating, toast, setIsImagePreviewDialogOpen]);
-
   useEffect(() => {
     if (reportActionState.message && !isReportGenerating) {
       if (reportActionState.success && reportActionState.researchReport) {
@@ -261,7 +220,6 @@ export default function ScholarAIPage() {
       setPotentialSubTopics([]);
       setResearchSummary('');
       setSummarizedPaperTitles([]);
-      setGeneratedImageUrl(null);
       // Reset action states if possible, or rely on new form submissions to overwrite
     });
   }, []);
@@ -283,35 +241,6 @@ export default function ScholarAIPage() {
       }
     });
   }, [appState, researchQuestion]);
-
-  const handleGenerateImageForTopic = useCallback(() => {
-     if (!currentUser) {
-      toast({ title: "Authentication Required", description: "Please log in or sign up to generate images.", variant: "destructive", duration: 5000 });
-      return;
-    }
-    let topicForImage = researchQuestion.trim();
-
-    if (!topicForImage || topicForImage.length < 5) {
-      toast({
-        title: "🚫 Cannot Generate Image",
-        description: "A valid research question (min. 5 characters) is required to generate a visual concept.",
-        variant: "destructive",
-        duration: 6000,
-      });
-      return;
-    }
-
-    if (topicForImage.length > 195) {
-      topicForImage = topicForImage.substring(0, 195) + "...";
-    }
-
-    startTransition(() => {
-      const formData = new FormData();
-      formData.append('topic', topicForImage);
-      imageFormAction(formData);
-    });
-  }, [researchQuestion, imageFormAction, toast, currentUser]);
-
 
   const handleGenerateFullReport = useCallback(() => {
      if (!currentUser) {
@@ -339,11 +268,7 @@ export default function ScholarAIPage() {
     });
   }, [researchQuestion, researchSummary, reportFormAction, toast, currentUser]);
 
-  const openImagePreviewDialog = useCallback(() => {
-    setIsImagePreviewDialogOpen(true);
-  }, []);
-
-  const isLoading = isFormulatingQueries || isSynthesizingResearch || isImageGenerating || isReportGenerating;
+  const isLoading = isFormulatingQueries || isSynthesizingResearch || isReportGenerating;
   const isFormDisabled = (!currentUser && authChecked) || isLoading;
 
   const ActionButton: React.FC<React.ComponentProps<typeof Button> & { icon?: React.ElementType, isProcessing?: boolean, label: string, pending?: boolean }> = ({ icon: Icon, isProcessing, pending, label, children, ...props }) => (
@@ -472,10 +397,6 @@ export default function ScholarAIPage() {
               onSummaryChange={setResearchSummary} // Pass setter to allow editing
               originalQuestion={researchQuestion}
               summarizedPaperTitles={summarizedPaperTitles}
-              onGenerateImage={handleGenerateImageForTopic}
-              generatedImageUrl={generatedImageUrl}
-              isGeneratingImage={isImageGenerating}
-              onOpenImagePreview={openImagePreviewDialog}
             />
             <CardFooter className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4 p-0 pt-6 md:pt-8 border-t border-border/40 mt-6 md:mt-8">
                 <ActionButton
@@ -508,8 +429,6 @@ export default function ScholarAIPage() {
               <ResearchReportDisplay
                 report={reportActionState.researchReport}
                 originalQuestion={researchQuestion}
-                generatedImageUrl={generatedImageUrl}
-                onOpenImagePreview={openImagePreviewDialog}
               />
             )}
             <CardFooter className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4 p-0 pt-6 md:pt-8 border-t border-border/40 mt-6 md:mt-8">
@@ -542,10 +461,6 @@ export default function ScholarAIPage() {
 
 
   return (
-    <Dialog open={isImagePreviewDialogOpen} onOpenChange={setIsImagePreviewDialogOpen}>
-      <DialogTrigger asChild>
-        <button className="hidden">Hidden Dialog Trigger for Programmatic Control</button>
-      </DialogTrigger>
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/10 to-background flex flex-col overflow-x-hidden antialiased selection:bg-accent/20 selection:text-accent-foreground">
 
       <main className={cn(
@@ -564,22 +479,5 @@ export default function ScholarAIPage() {
         </div>
       </main>
     </div>
-    <DialogContent className="w-[95vw] max-w-xs sm:max-w-lg md:max-w-2xl lg:max-w-4xl xl:max-w-5xl p-1 sm:p-2 bg-transparent border-none shadow-none !rounded-lg">
-        <DialogHeader>
-            <DialogTitle className="sr-only">Image Preview</DialogTitle>
-            <DialogDescription className="sr-only">Full-size view of the generated image.</DialogDescription>
-        </DialogHeader>
-        {generatedImageUrl && (
-          <NextImage
-            src={generatedImageUrl}
-            alt="Full-size conceptual visualization"
-            width={1200}
-            height={1200}
-            className="rounded-lg sm:rounded-xl object-contain w-full h-auto max-h-[85svh] shadow-2xl bg-black/50 backdrop-blur-md"
-            data-ai-hint="research concept fullsize"
-          />
-        )}
-    </DialogContent>
-    </Dialog>
   );
 }

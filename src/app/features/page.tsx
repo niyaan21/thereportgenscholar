@@ -92,11 +92,6 @@ export default function FeaturesPage() {
       description: "Analyzes text to identify main ideas and key concepts, providing a structured start for mind mapping and visualizing connections.",
     },
     {
-      icon: Palette,
-      title: "Conceptual Image Visualization",
-      description: "Brings research to life with AI-generated abstract images representing core concepts, perfect for presentations and creative insights.",
-    },
-    {
       icon: ShieldCheck,
       title: "Secure User Authentication",
       description: "Protects your work with robust Firebase authentication, ensuring secure access to Foss AI's full suite of features.",
@@ -205,4 +200,3 @@ export default function FeaturesPage() {
     </div>
   );
 }
-

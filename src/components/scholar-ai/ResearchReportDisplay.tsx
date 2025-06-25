@@ -1,3 +1,4 @@
+
 // src/components/scholar-ai/ResearchReportDisplay.tsx
 'use client';
 
@@ -20,8 +21,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 export interface ResearchReportDisplayProps {
   report: GenerateResearchReportOutput;
   originalQuestion: string;
-  generatedImageUrl?: string | null;
-  onOpenImagePreview: () => void;
 }
 
 const Section: React.FC<{ title: string; icon?: React.ReactNode; children: React.ReactNode; className?: string, defaultOpen?: boolean, value: string }> = ({ title, icon, children, className, defaultOpen = false, value }) => (
@@ -42,7 +41,7 @@ const Section: React.FC<{ title: string; icon?: React.ReactNode; children: React
   </div>
 );
 
-const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report, originalQuestion, generatedImageUrl, onOpenImagePreview }: ResearchReportDisplayProps) {
+const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report, originalQuestion }: ResearchReportDisplayProps) {
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const { toast } = useToast();
 
@@ -75,7 +74,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
   };
 
   const getDefaultOpenAccordionItems = () => {
-    const items = ['conceptual-overview', 'executive-summary', 'introduction'];
+    const items = ['executive-summary', 'introduction'];
     if (report.resultsAndAnalysis && report.resultsAndAnalysis.length > 0) {
         items.push('results-and-analysis');
     }
@@ -101,11 +100,10 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
     references: <ClipboardList size={sectionIconSize}/>,
     appendices: <BookText size={sectionIconSize}/>,
     glossary: <BookMarked size={sectionIconSize}/>,
-    conceptualOverview: <Brain size={sectionIconSize}/>,
   };
 
   const handleDownloadReportJson = () => {
-    const reportString = JSON.stringify({ report, originalQuestion, generatedImageUrl }, null, 2);
+    const reportString = JSON.stringify({ report, originalQuestion }, null, 2);
     const blob = new Blob([reportString], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -124,13 +122,6 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
       description: (
         <div className="flex flex-col gap-2 text-xs">
             <p>This may take a few moments. Report quality is best when viewed online.</p>
-            <Alert variant="default" className="bg-primary/5 border-primary/20 p-2">
-                <InfoIcon className="h-4 w-4 text-primary" />
-                <AlertTitle className="text-xs font-medium text-primary">Important for Chart Accuracy:</AlertTitle>
-                <AlertDescription className="text-xs text-primary/80">
-                    Ensure all report sections containing charts are <strong className="text-primary">EXPANDED</strong> in the web view before starting the PDF generation. This helps include them accurately.
-                </AlertDescription>
-            </Alert>
         </div>
       ),
       duration: 10000, 
@@ -186,53 +177,10 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
         doc.setTextColor(50, 50, 50);
     };
     
-    const addImageToPdf = async (imageDataUri: string, format: string) => {
-      return new Promise<void>((resolve, reject) => {
-        const img = new window.Image();
-        img.onload = () => {
-          const imgWidthOriginal = img.width;
-          const imgHeightOriginal = img.height;
-          let imgWidthPdf = contentWidth * 0.75;
-          let imgHeightPdf = (imgHeightOriginal * imgWidthPdf) / imgWidthOriginal;
-
-          if (imgHeightPdf > pageHeight * 0.4) { 
-            imgHeightPdf = pageHeight * 0.4;
-            imgWidthPdf = (imgWidthOriginal * imgHeightPdf) / imgHeightOriginal;
-          }
-           if (imgWidthPdf > contentWidth) {
-            imgWidthPdf = contentWidth;
-            imgHeightPdf = (imgHeightOriginal * imgWidthPdf) / imgWidthOriginal;
-          }
-
-
-          if (yPosition + imgHeightPdf > pageHeight - margin - 20) { doc.addPage(); yPosition = margin; }
-          doc.addImage(imageDataUri, format.toUpperCase(), margin + (contentWidth - imgWidthPdf) / 2, yPosition, imgWidthPdf, imgHeightPdf);
-          yPosition += imgHeightPdf + lineHeight * 1.5;
-          resolve();
-        };
-        img.onerror = () => {
-          console.error("Error loading image for PDF.");
-          addTextToPdf("[Error embedding image in PDF. Please view on web.]", 10, {italic: true, color: "#AA0000"});
-          yPosition += lineHeight * 1.5;
-          resolve(); 
-        };
-        img.src = imageDataUri;
-      });
-    };
-
-
     addTextToPdf(report.title || "Generated Research Report", 18, { bold: true });
     yPosition += lineHeight;
     addTextToPdf(`Original Research Question: ${originalQuestion}`, 11, { italic: true, color: "#555555" });
     yPosition += lineHeight * 1.5;
-
-    if (generatedImageUrl && generatedImageUrl.startsWith('data:image/')) {
-        addTextToPdf("Conceptual Visualization:", 12, { bold: true });
-        yPosition += lineHeight / 2;
-        const MimeTypeMatch = generatedImageUrl.match(/data:(image\/[^;]+);/);
-        await addImageToPdf(generatedImageUrl, MimeTypeMatch ? MimeTypeMatch[1].split('/')[1] : 'PNG');
-    }
-    
     
     const addPdfSection = async (title: string, content?: string | any[] | null, renderFn?: (item: any, index: number, doc: jsPDF, currentY: number, addTextFn: typeof addTextToPdf) => Promise<number>) => {
         const isOptionalAndEmpty = (["Acknowledged Limitations", "Future Research Avenues", "Ethical Considerations & Impact", "Supplementary Appendices", "Glossary of Key Terms"].includes(title) && (!content || (Array.isArray(content) && content.length === 0)) && !renderFn);
@@ -427,27 +375,15 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
             </AlertDescription>
           </Alert>
 
-          <Accordion type="multiple" defaultValue={getDefaultOpenAccordionItems()} className="w-full space-y-3 sm:space-y-4">
-            {generatedImageUrl && (
-              <Section title="Visual Conceptualization" icon={sectionIcons.conceptualOverview} value="conceptual-overview" defaultOpen>
-                 <div className="my-4 sm:my-5 p-3 sm:p-4 border border-border/80 rounded-lg sm:rounded-xl bg-secondary/40 dark:bg-secondary/15 shadow-lg flex justify-center items-center overflow-hidden">
-                    <div onClick={onOpenImagePreview} className="relative overflow-hidden rounded-md sm:rounded-lg cursor-pointer group">
-                        <NextImage
-                            src={generatedImageUrl}
-                            alt="Conceptual visualization for the research report"
-                            width={600}
-                            height={450}
-                            className="rounded-md sm:rounded-lg object-contain shadow-xl max-h-[300px] sm:max-h-[400px]"
-                            data-ai-hint="research visualization abstract"
-                        />
-                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                            <MaximizeIcon className="h-8 w-8 sm:h-10 sm:w-10 text-white/80" />
-                        </div>
-                    </div>
-                </div>
-              </Section>
-            )}
+          <Alert variant="default" className="mb-4 sm:mb-6 bg-primary/5 border-primary/20 text-primary dark:bg-primary/10 dark:border-primary/30 dark:text-primary-foreground/90 shadow-md">
+              <InfoIcon className="h-5 w-5 text-primary" />
+              <AlertTitle className="font-semibold text-primary">Tip for PDF Export</AlertTitle>
+              <AlertDescription className="text-primary/80 dark:text-primary-foreground/80 mt-1 text-sm">
+                  For the best results when downloading a PDF, especially to include charts, please expand all the report sections you want to capture before clicking the download button.
+              </AlertDescription>
+          </Alert>
 
+          <Accordion type="multiple" defaultValue={getDefaultOpenAccordionItems()} className="w-full space-y-3 sm:space-y-4">
             <Section title="Executive Summary" icon={sectionIcons.executiveSummary} value="executive-summary" defaultOpen>
               {renderParagraphs(report.executiveSummary)}
             </Section>
