@@ -137,19 +137,20 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
     const pageWidth = doc.internal.pageSize.getWidth();
     const margin = 40;
     const contentWidth = pageWidth - 2 * margin;
-    const lineHeight = 14;
 
     const addTextToPdf = (text: string, fontSize: number, styles: { bold?: boolean, italic?: boolean, color?: string } = {}, indent = 0) => {
         if (!text || text.trim() === "") {
-            if (yPosition + lineHeight > pageHeight - margin) { doc.addPage(); yPosition = margin; }
-            yPosition += lineHeight / 2; return;
+            if (yPosition + 10 > pageHeight - margin) { doc.addPage(); yPosition = margin; }
+            yPosition += 10 / 2; return;
         }
         doc.setFontSize(fontSize);
         doc.setFont(undefined, styles.bold ? 'bold' : (styles.italic ? 'italic' : 'normal'));
         if (styles.color) doc.setTextColor(styles.color); else doc.setTextColor(50, 50, 50);
 
+        const calculatedLineHeight = fontSize * 1.25;
+
         const splitText = text.split(/\n\s*\n|\n(?=\s*(?:•|-|\*)\s)|\n(?=\s*\d+\.\s)/);
-        splitText.forEach(paragraphText => {
+        splitText.forEach((paragraphText, pIndex) => {
             if (paragraphText.trim() === "") return;
             if (paragraphText.match(/^(\s*(?:•|-|\*)\s|[ \t]*\d+\.\s+)/m)) {
                 const listItems = paragraphText.split('\n').map(item => item.trim()).filter(item => item);
@@ -158,36 +159,41 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
                     const itemContent = item.replace(/^\s*(?:•|-|\*|\d+\.)\s*/, '');
                     const lines = doc.splitTextToSize(itemMarker + itemContent, contentWidth - indent - (itemMarker.length * (fontSize * 0.5)));
                     lines.forEach((line: string) => {
-                        if (yPosition + lineHeight > pageHeight - margin) { doc.addPage(); yPosition = margin; }
+                        if (yPosition + calculatedLineHeight > pageHeight - margin) { doc.addPage(); yPosition = margin; }
                         doc.text(line, margin + indent + (itemMarker.length > 2 ? 0 : 10), yPosition);
-                        yPosition += lineHeight;
+                        yPosition += calculatedLineHeight;
                     });
                 });
-                yPosition += lineHeight / 2;
+                 if (pIndex < splitText.length - 1) {
+                    yPosition += calculatedLineHeight / 2;
+                }
             } else {
                 const lines = doc.splitTextToSize(paragraphText, contentWidth - indent);
                 lines.forEach((line: string) => {
-                    if (yPosition + lineHeight > pageHeight - margin) { doc.addPage(); yPosition = margin; }
+                    if (yPosition + calculatedLineHeight > pageHeight - margin) { doc.addPage(); yPosition = margin; }
                     doc.text(line, margin + indent, yPosition);
-                    yPosition += lineHeight;
+                    yPosition += calculatedLineHeight;
                 });
-                yPosition += lineHeight / 2;
+                if (pIndex < splitText.length - 1) {
+                    yPosition += calculatedLineHeight * 0.5;
+                }
             }
         });
         doc.setTextColor(50, 50, 50);
     };
     
     addTextToPdf(report.title || "Generated Research Report", 18, { bold: true });
-    yPosition += lineHeight;
+    yPosition += 5; // Space between title and question
     addTextToPdf(`Original Research Question: ${originalQuestion}`, 11, { italic: true, color: "#555555" });
-    yPosition += lineHeight * 1.5;
+    yPosition += 20; // Space after header block
     
     const addPdfSection = async (title: string, content?: string | any[] | null, renderFn?: (item: any, index: number, doc: jsPDF, currentY: number, addTextFn: typeof addTextToPdf) => Promise<number>) => {
         const isOptionalAndEmpty = (["Acknowledged Limitations", "Future Research Avenues", "Ethical Considerations & Impact", "Supplementary Appendices", "Glossary of Key Terms"].includes(title) && (!content || (Array.isArray(content) && content.length === 0)) && !renderFn);
         if (isOptionalAndEmpty) return;
 
-        if (yPosition + lineHeight * 3 > pageHeight - margin) { doc.addPage(); yPosition = margin; }
+        if (yPosition + 30 > pageHeight - margin) { doc.addPage(); yPosition = margin; }
         addTextToPdf(title, 14, { bold: true });
+        yPosition += 5;
 
         if (typeof content === 'string') {
             addTextToPdf(content, 10);
@@ -202,7 +208,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
         } else if ((typeof content === 'string' && content.trim() === "") || (!content && !renderFn)) {
             addTextToPdf("Content for this section was not provided.", 10, { italic: true });
         }
-        yPosition += lineHeight;
+        yPosition += 20;
     };
 
     await addPdfSection("Executive Summary", report.executiveSummary);
@@ -213,7 +219,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
         yPosition = currentY; 
         addTextFn(`${index + 1}. ${theme.theme}`, 12, { bold: true });
         addTextFn(theme.discussion, 10, {}, 15);
-        yPosition += lineHeight;
+        yPosition += 10;
         return yPosition;
     });
 
@@ -221,8 +227,9 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
 
     
     const resultsSectionTitle = "Results Presentation & Analysis";
-    if (yPosition + lineHeight * 3 > pageHeight - margin) { doc.addPage(); yPosition = margin; }
+    if (yPosition + 30 > pageHeight - margin) { doc.addPage(); yPosition = margin; }
     addTextToPdf(resultsSectionTitle, 14, { bold: true });
+    yPosition += 5;
     
     if (report.resultsAndAnalysis && report.resultsAndAnalysis.length > 0) {
         for (let i = 0; i < report.resultsAndAnalysis.length; i++) {
@@ -235,7 +242,6 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
                 const chartElement = document.getElementById(chartElementId);
                 if (chartElement) {
                     try {
-                        if (yPosition + (pageHeight * 0.3) > pageHeight - margin) { doc.addPage(); yPosition = margin; } 
                         const canvas = await html2canvas(chartElement, { scale: 1.5, backgroundColor: '#FFFFFF', logging: false, useCORS: true });
                         const imgData = canvas.toDataURL('image/png');
                         
@@ -259,12 +265,12 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
 
                                 if (yPosition + chartImgHeightPdf > pageHeight - margin) { doc.addPage(); yPosition = margin; }
                                 doc.addImage(imgData, 'PNG', margin + (contentWidth - chartImgWidthPdf) / 2, yPosition, chartImgWidthPdf, chartImgHeightPdf);
-                                yPosition += chartImgHeightPdf + lineHeight;
+                                yPosition += chartImgHeightPdf + 14;
                                 resolve();
                             };
                             chartImg.onerror = () => {
                                 addTextToPdf(`[Chart: ${result.chartSuggestion.title || 'Chart'} - Could not render image. View in web app.]`, 9, { italic: true, color: "#AA0000" }, 20);
-                                yPosition += lineHeight * 1.5;
+                                yPosition += 14 * 1.5;
                                 resolve();
                             };
                             chartImg.src = imgData;
@@ -274,19 +280,19 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
                     } catch (e) {
                         console.error(`Error capturing chart ${chartElementId}:`, e);
                         addTextToPdf(`[Chart: ${result.chartSuggestion.title || 'Chart'} - Error during capture. View in web app.]`, 9, { italic: true, color: "#AA0000" }, 20);
-                        yPosition += lineHeight * 1.5;
+                        yPosition += 14 * 1.5;
                     }
                 } else {
                     addTextToPdf(`[Chart: ${result.chartSuggestion.title || 'Chart'} - Not embedded. Ensure section is expanded in web view to include in PDF.]`, 9, { italic: true, color: "#006699" }, 20);
-                    yPosition += lineHeight * 1.5;
+                    yPosition += 14 * 1.5;
                 }
             }
-            yPosition += lineHeight;
+            yPosition += 14;
         }
     } else {
         addTextToPdf("Content for this section was not provided.", 10, { italic: true });
     }
-     yPosition += lineHeight;
+     yPosition += 14;
 
 
     await addPdfSection("Holistic Discussion of Findings", report.discussion);
@@ -300,7 +306,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
         await addPdfSection("References (AI Synthesized)", report.references, async (ref: string, index: number, docRef, currentY, addTextFn) => {
             yPosition = currentY;
             addTextFn(`${index + 1}. ${ref}`, 9, {}, 15);
-            yPosition += lineHeight / 2;
+            yPosition += 14 / 2;
             return yPosition;
         });
     }
@@ -310,7 +316,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
             yPosition = currentY;
             addTextFn(appendix.title, 12, { bold: true });
             addTextFn(appendix.content, 10, {}, 15);
-            yPosition += lineHeight;
+            yPosition += 14;
             return yPosition;
         });
     }
@@ -320,7 +326,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
             yPosition = currentY;
             addTextFn(`${item.term}:`, 9, { bold: true });
             addTextFn(item.definition, 9, {}, 15);
-            yPosition += lineHeight / 2;
+            yPosition += 14 / 2;
             return yPosition;
         });
     }
@@ -337,7 +343,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
 
   return (
     <div>
-    <Card className="w-full shadow-2xl border-primary/30 rounded-xl sm:rounded-2xl overflow-hidden bg-gradient-to-br from-card via-background/5 to-card">
+    <Card className="w-full shadow-2xl border-primary/30 rounded-xl sm:rounded-2xl flex flex-col max-h-[calc(100vh-10rem)] bg-gradient-to-br from-card via-background/5 to-card">
       <CardHeader className="p-4 sm:p-5 md:p-6 bg-gradient-to-r from-primary/95 via-primary to-primary/90 text-primary-foreground border-b border-primary/50">
         <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 md:space-x-6">
           <div
@@ -365,7 +371,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
         </div>
       </CardHeader>
 
-      <ScrollArea className="max-h-[50vh] sm:max-h-[60vh] md:max-h-[calc(100svh-350px)] lg:max-h-[calc(100svh-320px)] bg-background/50">
+      <ScrollArea className="flex-grow min-h-0 bg-background/50">
         <CardContent className="p-4 sm:p-5 md:p-6 lg:p-7">
           <Alert variant="default" className="mb-4 sm:mb-6 bg-secondary/40 dark:bg-secondary/15 border-border/60">
             <ShieldAlert className="h-5 w-5 text-accent" />
