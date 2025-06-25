@@ -1,4 +1,3 @@
-
 // src/components/layout/Footer.tsx
 'use client';
 
@@ -22,7 +21,6 @@ export default function Footer() {
           <NextLink href="/pricing" className="hover:text-accent hover:underline">Pricing</NextLink>
           <NextLink href="/contact" className="hover:text-accent hover:underline">Contact</NextLink>
           <NextLink href="/docs" className="hover:text-accent hover:underline">Docs</NextLink>
-          <NextLink href="/api-docs" className="hover:text-accent hover:underline">API</NextLink>
         </div>
         <div className="flex flex-wrap justify-center items-center gap-x-4 gap-y-2 mb-4">
           <NextLink href="/privacy-policy" className="text-xs hover:text-accent hover:underline">Privacy Policy</NextLink>
