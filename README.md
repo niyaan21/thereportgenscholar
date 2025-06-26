@@ -1,4 +1,3 @@
-
 # Foss AI: Intelligent Research & Report Generation Platform
 
 [![Next.js](https://img.shields.io/badge/Next.js-15.x-black?logo=next.js&logoColor=white)](https://nextjs.org/)

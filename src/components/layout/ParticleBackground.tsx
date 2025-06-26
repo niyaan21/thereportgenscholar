@@ -6,27 +6,30 @@ import * as TSParticlesReact from '@tsparticles/react'; // Changed to @tsparticl
 import type { Container, Engine } from '@tsparticles/engine'; // Import types from @tsparticles/engine
 import { loadSlim } from '@tsparticles/slim'; // Corrected import path
 import { useTheme } from 'next-themes';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const ParticleBackground: React.FC = () => {
   const [init, setInit] = useState(false);
   const { theme, systemTheme } = useTheme();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
-    // Use TSParticlesReact.initParticlesEngine
+    // Prevent initialization on mobile devices
+    if (isMobile) {
+      if (init) setInit(false);
+      return;
+    }
+    
     TSParticlesReact.initParticlesEngine(async (engine: Engine) => {
-      // console.log('Particles engine initializing');
-      await loadSlim(engine); // loadSlim is called with the engine from initParticlesEngine
-      // console.log('Slim bundle loaded into engine');
+      await loadSlim(engine);
     }).then(() => {
       setInit(true);
-      // console.log('Particles engine initialized successfully');
     }).catch((error) => {
       console.error("Error initializing particles engine:", error);
     });
-  }, []);
+  }, [isMobile, init]);
 
   const particlesLoaded = useCallback(async (container?: Container) => {
-    // console.log('Particles container loaded', container);
   }, []);
 
   const getCurrentTheme = () => {
@@ -40,7 +43,7 @@ const ParticleBackground: React.FC = () => {
   const linkColor = getCurrentTheme() === 'dark' ? '#ffffff' : '#555555';
 
 
-  if (!init) {
+  if (!init || isMobile) {
     return null;
   }
 

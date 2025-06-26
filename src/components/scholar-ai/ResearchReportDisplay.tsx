@@ -1,13 +1,12 @@
 
-// src/components/scholar-ai/ResearchReportDisplay.tsx
 'use client';
 
-import React, { useState } from 'react'; 
+import React, { useState, useEffect } from 'react'; 
 import type { GenerateResearchReportOutput } from '@/ai/flows/generate-research-report';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { FileText, BookOpen, ListChecks, MessageSquareQuote, SearchCode, Lightbulb, AlertTriangle, ThumbsUp, Telescope, Edit3, BarChartHorizontalBig, Users, ShieldCheck, BookCopy, BookMarked, TrendingUp, FileJson, GanttChartSquare, PieChartIcon, LineChartIcon, BarChartIcon, ScatterChartIcon, Brain, LightbulbIcon, MaximizeIcon, Settings, FileQuestion, Activity, Library, UsersRound, ShieldAlert, ClipboardList, Milestone, Scale, GitBranch, DownloadCloud, Share2Icon, BookText, FileType, Image as ImageIconLucide, Info as InfoIcon, Loader2 } from 'lucide-react';
+import { FileText, BookOpen, ListChecks, MessageSquareQuote, SearchCode, Lightbulb, AlertTriangle, ThumbsUp, Telescope, Edit3, BarChartHorizontalBig, Users, ShieldCheck, BookCopy, BookMarked, TrendingUp, FileJson, GanttChartSquare, PieChartIcon, LineChartIcon, BarChartIcon, ScatterChartIcon, Brain, LightbulbIcon, MaximizeIcon, Settings, FileQuestion, Activity, Library, UsersRound, ShieldAlert, ClipboardList, Milestone, Scale, GitBranch, DownloadCloud, Share2Icon, BookText, FileType, Image as ImageIconLucide, Info as InfoIcon, Loader2, Maximize2, Minimize2 } from 'lucide-react';
 import NextImage from 'next/image';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -28,7 +27,7 @@ export interface ResearchReportDisplayProps {
   originalQuestion: string;
 }
 
-const Section: React.FC<{ title: string; icon?: React.ReactNode; children: React.ReactNode; className?: string, defaultOpen?: boolean, value: string }> = ({ title, icon, children, className, defaultOpen = false, value }) => (
+const Section: React.FC<{ title: string; icon?: React.ReactNode; children: React.ReactNode; className?: string, value: string }> = ({ title, icon, children, className, value }) => (
   <div>
     <AccordionItem value={value} className={cn('border-b-0 mb-3 sm:mb-3.5 rounded-lg sm:rounded-xl overflow-hidden shadow-lg bg-card hover:shadow-primary/15 transition-all duration-300', className)}>
       <AccordionTrigger className="py-3 px-4 sm:py-4 sm:px-6 hover:no-underline hover:bg-secondary/70 dark:hover:bg-secondary/35 transition-colors duration-200 rounded-t-lg sm:rounded-t-xl data-[state=open]:rounded-b-none data-[state=open]:border-b data-[state=open]:border-border/80 data-[state=open]:bg-accent/10 dark:data-[state=open]:bg-accent/20 group">
@@ -49,6 +48,35 @@ const Section: React.FC<{ title: string; icon?: React.ReactNode; children: React
 const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report, originalQuestion }: ResearchReportDisplayProps) {
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const { toast } = useToast();
+  const [openSections, setOpenSections] = useState<string[]>([]);
+  const [allSectionKeys, setAllSectionKeys] = useState<string[]>([]);
+
+  useEffect(() => {
+    const sections = [
+      'executive-summary',
+      'introduction',
+      'literature-review',
+      'key-themes',
+      'detailed-methodology',
+      'results-and-analysis',
+      'discussion-of-findings',
+      'conclusion',
+      report.limitations && 'limitations',
+      report.futureWork && 'future-work',
+      report.ethicalConsiderations && 'ethical-considerations',
+      report.references && report.references.length > 0 && 'references',
+      report.appendices && report.appendices.length > 0 && 'appendices',
+      report.glossary && report.glossary.length > 0 && 'glossary',
+    ].filter(Boolean) as string[];
+    
+    setAllSectionKeys(sections);
+
+    const defaultOpen = ['executive-summary', 'introduction', 'results-and-analysis', 'conclusion'].filter(key => sections.includes(key));
+    setOpenSections(defaultOpen);
+  }, [report]);
+
+  const handleExpandAll = () => setOpenSections(allSectionKeys);
+  const handleCollapseAll = () => setOpenSections([]);
 
   const renderParagraphs = (text: string | undefined | null): JSX.Element[] | JSX.Element => {
     if (!text) return <p className="italic text-muted-foreground my-3 sm:my-3.5 text-sm sm:text-base">Content for this section was not provided.</p>;
@@ -77,17 +105,6 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
       return <p key={index} className="mb-3 sm:mb-4 last:mb-0 leading-relaxed text-foreground/85 text-sm sm:text-base">{trimmedParagraph}</p>;
     });
   };
-
-  const getDefaultOpenAccordionItems = () => {
-    const items = ['executive-summary', 'introduction'];
-    if (report.resultsAndAnalysis && report.resultsAndAnalysis.length > 0) {
-        items.push('results-and-analysis');
-    }
-    if (report.conclusion) {
-        items.push('conclusion');
-    }
-    return items.map(item => item.replace(/\s+/g, '-').toLowerCase());
-  }
 
   const sectionIconSize = 20;
   const sectionIcons = {
@@ -368,6 +385,12 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
             </CardDescription>
           </div>
            <div className="flex-shrink-0 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 mt-3 sm:mt-0 self-stretch sm:self-center w-full sm:w-auto">
+             <Button variant="outline" size="sm" onClick={handleExpandAll} disabled={isGeneratingPdf} className="bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-md sm:rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm group w-full sm:w-auto">
+                <Maximize2 size={16} className="mr-1.5 sm:mr-2" /> Expand All
+             </Button>
+             <Button variant="outline" size="sm" onClick={handleCollapseAll} disabled={isGeneratingPdf} className="bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-md sm:rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm group w-full sm:w-auto">
+                <Minimize2 size={16} className="mr-1.5 sm:mr-2" /> Collapse All
+             </Button>
              <Button variant="outline" size="sm" onClick={handleDownloadReportJson} disabled={isGeneratingPdf} className="bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-md sm:rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm group w-full sm:w-auto">
                 <FileJson size={16} className="mr-1.5 sm:mr-2 group-hover:animate-pulse" /> Download JSON
              </Button>
@@ -379,7 +402,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
         </div>
       </CardHeader>
 
-      <ScrollArea className="flex-grow min-h-0 bg-background/50">
+      <div className="flex-grow min-h-0 bg-background/50">
         <CardContent className="p-4 sm:p-5 md:p-6 lg:p-7">
           <Alert variant="default" className="mb-4 sm:mb-6 bg-secondary/40 dark:bg-secondary/15 border-border/60">
             <ShieldAlert className="h-5 w-5 text-accent" />
@@ -389,20 +412,20 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
             </AlertDescription>
           </Alert>
 
-          <Alert variant="default" className="mb-4 sm:mb-6 bg-primary/5 border-primary/20 text-primary dark:bg-primary/10 dark:border-primary/30 dark:text-primary-foreground/90 shadow-md">
-              <InfoIcon className="h-5 w-5 text-primary" />
-              <AlertTitle className="font-semibold text-primary">Tip for PDF Export</AlertTitle>
-              <AlertDescription className="text-primary/80 dark:text-primary-foreground/80 mt-1 text-sm">
+          <Alert variant="default" className="mb-4 sm:mb-6 bg-accent/10 border-accent/25 text-accent-foreground shadow-md">
+              <InfoIcon className="h-5 w-5 text-accent" />
+              <AlertTitle className="font-semibold text-accent-foreground">Tip for PDF Export</AlertTitle>
+              <AlertDescription className="text-accent-foreground/80 mt-1 text-sm">
                   For the best results when downloading a PDF, especially to include charts, please expand all the report sections you want to capture before clicking the download button.
               </AlertDescription>
           </Alert>
 
-          <Accordion type="multiple" defaultValue={getDefaultOpenAccordionItems()} className="w-full space-y-3 sm:space-y-4">
-            <Section title="Executive Summary" icon={sectionIcons.executiveSummary} value="executive-summary" defaultOpen>
+          <Accordion type="multiple" value={openSections} onValueChange={setOpenSections} className="w-full space-y-3 sm:space-y-4">
+            <Section title="Executive Summary" icon={sectionIcons.executiveSummary} value="executive-summary">
               {renderParagraphs(report.executiveSummary)}
             </Section>
 
-            <Section title="Introduction & Background" icon={sectionIcons.introduction} value="introduction" defaultOpen>
+            <Section title="Introduction & Background" icon={sectionIcons.introduction} value="introduction">
               {renderParagraphs(report.introduction)}
             </Section>
 
@@ -428,7 +451,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
               {renderParagraphs(report.detailedMethodology)}
             </Section>
 
-            <Section title="Results Presentation & Analysis" icon={sectionIcons.resultsAndAnalysis} value="results-and-analysis" defaultOpen>
+            <Section title="Results Presentation & Analysis" icon={sectionIcons.resultsAndAnalysis} value="results-and-analysis">
               {report.resultsAndAnalysis && report.resultsAndAnalysis.length > 0 ? (
                 report.resultsAndAnalysis.map((result, index) => (
                   <div key={index} className="mb-4 sm:mb-5 p-3.5 sm:p-4.5 bg-secondary/35 dark:bg-secondary/10 rounded-lg sm:rounded-xl border border-border/60 shadow-md last:mb-0">
@@ -471,7 +494,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
               {renderParagraphs(report.discussion)}
             </Section>
 
-            <Section title="Concluding Remarks & Implications" icon={sectionIcons.conclusion} value="conclusion" defaultOpen>
+            <Section title="Concluding Remarks & Implications" icon={sectionIcons.conclusion} value="conclusion">
               {renderParagraphs(report.conclusion)}
             </Section>
 
@@ -528,7 +551,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
 
           </Accordion>
         </CardContent>
-      </ScrollArea>
+      </div>
       <CardFooter className="p-4 sm:p-5 md:p-6 lg:p-7 border-t border-border/40 bg-secondary/25 dark:bg-secondary/10 text-center">
         <p className="text-sm sm:text-base text-muted-foreground w-full">This comprehensive report was meticulously generated by FossAI using advanced AI models.</p>
       </CardFooter>
