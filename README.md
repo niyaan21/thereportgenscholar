@@ -1,3 +1,4 @@
+
 # Foss AI: Intelligent Research & Report Generation Platform
 
 [![Next.js](https://img.shields.io/badge/Next.js-15.x-black?logo=next.js&logoColor=white)](https://nextjs.org/)
@@ -17,27 +18,28 @@ Foss AI is a powerful Next.js web application designed to revolutionize your res
 *   **Comprehensive Report Generation:** Automatically generates structured, multi-section academic-style reports with sections like executive summary, literature review, methodology, results (with chart suggestions), discussion, and references.
 *   **File-Powered Guided Reporting:** Upload documents (TXT, MD, PDF, DOCX) and provide specific guidance to generate tailored reports based on the file's content.
 *   **Voice-to-Text Research Notes:** Capture ideas, notes, and observations on-the-go using audio input. Transcribed notes can be edited and saved locally in the browser.
+*   **Interview Transcription & Analysis:** Upload audio/video files for automated transcription and AI-powered thematic analysis, sentiment detection, and key insight extraction.
 *   **Mind Map Concept Extraction:** Analyzes text input to identify a main idea and key concepts with related terms, providing a structured starting point for mind mapping.
+*   **Text-to-Speech for Reports:** Listen to generated report sections with AI-powered audio playback.
 *   **Secure User Authentication:** Robust Firebase authentication (Email/Password, Sign in with Google).
 *   **Intuitive User Interface:** Clean, modern, and responsive UI built with Next.js, ShadCN UI, and Tailwind CSS.
 *   **Downloadable Outputs:** Export reports in structured JSON and formatted PDF.
 *   **User Dashboard:** View activity stats (local), get daily research sparks (prompts), and quickly access features.
 *   **Account Settings:** Manage profile, preferences (theme, notifications, interface - saved to `localStorage`), and research/voice note history (with export/import for research history).
-*   **Dynamic Particle Background:** Visually engaging background that adapts to light/dark themes.
+*   **Dynamic Particle Background:** Visually engaging background that adapts to light/dark themes (disabled on mobile for performance).
 *   **Basic Keyboard Shortcuts:** Quick navigation and actions for power users.
 
 ## 🚀 Planned Future Features
 
 Foss AI is continuously evolving. Here are some of the exciting capabilities on our roadmap:
 
-*   **Interview Transcription & Analysis:** Upload audio/video files for automated transcription and AI-powered thematic analysis, sentiment detection, and key insight extraction. (Placeholder UI exists)
-*   **Plagiarism Detection:** Integrated similarity checking for generated content to ensure originality and proper attribution. (Placeholder UI in report view)
-*   **Multi-language Support:** Capabilities to conduct research, process inputs, and generate reports in a variety of languages.
-*   **Research Timeline Visualization:** Interactive tools to create and visualize research project timelines, milestones, and progress.
-*   **Note-taking Apps Integration:** Direct synchronization of research notes, summaries, and reports with popular platforms like Notion and Obsidian.
-*   **Research Network Visualization:** Tools to map and explore connections between researchers, published papers, institutions, and key topics within a field.
-*   **Ethics Compliance Checker:** AI-assisted review to help identify potential ethical considerations and ensure research aligns with relevant guidelines.
+*   **Plagiarism Detection:** Integrated similarity checking for generated content to ensure originality and proper attribution. (Enhanced placeholder UI exists).
+*   **Multi-language Support:** Capabilities to conduct research, process inputs, and generate reports in a variety of languages. (Placeholder UI exists).
+*   **Note-taking Apps Integration:** Direct synchronization of research notes, summaries, and reports with popular platforms like Notion and Obsidian. (Placeholder UI exists).
 *   **Custom Report Templates:** Ability for users to create, save, and share report templates tailored to specific academic fields, journal requirements, or organizational standards.
+*   **Research Timeline Visualization:** Interactive tools to create and visualize research project timelines, milestones, and progress. (Placeholder UI exists).
+*   **Research Network Visualization:** Tools to map and explore connections between researchers, published papers, institutions, and key topics within a field.
+*   **Ethics Compliance Checker:** AI-assisted review to help identify potential ethical considerations and ensure research aligns with relevant guidelines. (Placeholder UI exists).
 *   **Advanced Keyboard Shortcuts:** A comprehensive set of keyboard shortcuts for power users to navigate and operate Foss AI features with maximum efficiency.
 
 ## ⌨️ Keyboard Shortcuts
@@ -48,6 +50,8 @@ Boost your productivity with these keyboard shortcuts:
 *   **`Cmd/Ctrl + Shift + H`**: Navigate to the Home page.
 *   **`Cmd/Ctrl + Shift + D`**: Navigate to your Dashboard.
 *   **`Cmd/Ctrl + Shift + ,`**: Navigate to Account Settings.
+*   **`Cmd/Ctrl + Shift + U`**: Navigate to the File Report / Analysis Tools page.
+*   **`Cmd/Ctrl + Shift + N`**: Navigate to the Notes & Transcription page.
 
 (More shortcuts planned for future updates!)
 
@@ -60,7 +64,7 @@ Boost your productivity with these keyboard shortcuts:
 *   **Styling:** [Tailwind CSS](https://tailwindcss.com/)
 *   **Language:** [TypeScript](https://www.typescriptlang.org/)
 *   **Authentication:** [Firebase Authentication](https://firebase.google.com/docs/auth)
-*   **Speech Recognition:** Browser's Web Speech API
+*   **Speech Recognition & Synthesis:** Browser's Web Speech API & Genkit TTS
 *   **Deployment (Assumed):** Firebase Hosting or similar Node.js compatible platforms.
 *   **Particle Effects:** [tsParticles](https://particles.js.org/)
 *   **PDF Generation (Client-side):** jsPDF & html2canvas
@@ -226,7 +230,9 @@ Foss AI uses **Genkit for Firebase** to integrate with Google's Gemini AI models
 *   `generate-report-from-file.ts`: Generates a report based on an uploaded file and user guidance.
 *   `generate-daily-prompt-flow.ts`: Creates a "Prompt of the Day" for the dashboard.
 *   `extract-mindmap-concepts.ts`: Extracts key concepts and a main idea from text for mind mapping.
-*   (Planned) Flows for interview transcription, plagiarism detection, multi-language processing, etc.
+*   `transcribe-and-analyze-flow.ts`: Transcribes audio/video files and performs thematic analysis.
+*   `text-to-speech-flow.ts`: Converts text from report sections into playable audio.
+*   (Planned) Flows for plagiarism detection, multi-language processing, etc.
 
 These flows are called by Next.js Server Actions defined in `src/app/actions.ts`.
 

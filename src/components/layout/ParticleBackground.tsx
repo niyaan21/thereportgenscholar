@@ -20,13 +20,16 @@ const ParticleBackground: React.FC = () => {
       return;
     }
     
-    TSParticlesReact.initParticlesEngine(async (engine: Engine) => {
-      await loadSlim(engine);
-    }).then(() => {
-      setInit(true);
-    }).catch((error) => {
-      console.error("Error initializing particles engine:", error);
-    });
+    // Only initialize if not on mobile and not already initialized
+    if (!init && !isMobile) {
+        TSParticlesReact.initParticlesEngine(async (engine: Engine) => {
+          await loadSlim(engine);
+        }).then(() => {
+          setInit(true);
+        }).catch((error) => {
+          console.error("Error initializing particles engine:", error);
+        });
+    }
   }, [isMobile, init]);
 
   const particlesLoaded = useCallback(async (container?: Container) => {

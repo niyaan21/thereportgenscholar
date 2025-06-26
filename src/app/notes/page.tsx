@@ -47,7 +47,7 @@ const initialTranscriptionState: TranscribeAndAnalyzeActionState = {
   errors: null,
 };
 
-const TranscriptionResultDisplay = ({ result }: { result: NonNullable<TranscribeAndAnalyzeActionState['analysisResult']> }) => {
+const TranscriptionResultDisplay = ({ result, onReset }: { result: NonNullable<TranscribeAndAnalyzeActionState['analysisResult']>, onReset: () => void }) => {
   const sentimentColor = {
     Positive: 'text-green-500 bg-green-500/10 border-green-500/20',
     Negative: 'text-red-500 bg-red-500/10 border-red-500/20',
@@ -56,19 +56,23 @@ const TranscriptionResultDisplay = ({ result }: { result: NonNullable<Transcribe
   };
 
   return (
-    <Card className="mt-8 shadow-xl border-accent/20">
+    <Card className="mt-8 shadow-xl border-accent/20 animate-in fade-in-50 duration-500">
       <CardHeader>
-        <CardTitle className="text-2xl text-primary">Transcription &amp; Analysis Results</CardTitle>
+        <CardTitle className="text-2xl text-primary flex items-center justify-between">
+            <span>Transcription &amp; Analysis Results</span>
+            <Button variant="ghost" size="icon" onClick={onReset} className="text-muted-foreground hover:text-destructive">
+                <XCircle className="h-5 w-5"/>
+                <span className="sr-only">Close Results</span>
+            </Button>
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Summary & Sentiment */}
         <div className="p-4 bg-secondary/30 rounded-lg">
           <h3 className="font-semibold text-lg mb-2 flex items-center"><MessageSquare className="h-5 w-5 mr-2 text-accent" /> Summary</h3>
           <p className="text-foreground/80">{result.summary}</p>
           <Badge className={cn("mt-3", sentimentColor[result.sentiment])}>{result.sentiment} Sentiment</Badge>
         </div>
 
-        {/* Key Themes */}
         <div>
           <h3 className="font-semibold text-lg mb-2 flex items-center"><Brain className="h-5 w-5 mr-2 text-accent" /> Key Themes</h3>
           <div className="flex flex-wrap gap-2">
@@ -78,7 +82,6 @@ const TranscriptionResultDisplay = ({ result }: { result: NonNullable<Transcribe
           </div>
         </div>
 
-        {/* Action Items */}
         {result.actionItems && result.actionItems.length > 0 && (
           <div>
             <h3 className="font-semibold text-lg mb-2 flex items-center"><Activity className="h-5 w-5 mr-2 text-accent" /> Action Items</h3>
@@ -88,7 +91,6 @@ const TranscriptionResultDisplay = ({ result }: { result: NonNullable<Transcribe
           </div>
         )}
 
-        {/* Full Transcription */}
         <div>
           <h3 className="font-semibold text-lg mb-2 flex items-center"><FileText className="h-5 w-5 mr-2 text-accent" /> Full Transcription</h3>
           <ScrollArea className="h-64 bg-background/50 border rounded-md p-3">
@@ -106,13 +108,9 @@ export default function NotesPage() {
   const [authChecked, setAuthChecked] = useState(false);
   const { toast } = useToast();
 
-  // Transcription State
   const [transcriptionState, formAction, isProcessing] = useActionState(handleTranscribeAndAnalyzeAction, initialTranscriptionState);
-  const [fileName, setFileName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-
-  // Voice Notes State
   const [isRecording, setIsRecording] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState('');
   const [finalTranscript, setFinalTranscript] = useState('');
@@ -123,7 +121,6 @@ export default function NotesPage() {
   const [permissionError, setPermissionError] = useState<string | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   
-  // Auth Effect
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
@@ -139,7 +136,14 @@ export default function NotesPage() {
     return () => unsubscribe();
   }, []);
 
-  // Transcription Effects
+  const resetTranscriptionForm = () => {
+    if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+    }
+    // This is a way to reset the action state. It's a bit of a workaround.
+    formAction(new FormData());
+  };
+
   useEffect(() => {
     if (!isProcessing && transcriptionState.message) {
       if (transcriptionState.success) {
@@ -158,13 +162,6 @@ export default function NotesPage() {
     }
   }, [transcriptionState, isProcessing, toast]);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    setFileName(file ? file.name : null);
-  };
-
-
-  // --- Voice Notes Logic ---
   const setupRecognition = useCallback(() => {
     if (!apiSupported || !currentUser) return;
     const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -276,7 +273,6 @@ export default function NotesPage() {
     setInterimTranscript('');
   };
 
-  // --- Render Logic ---
   if (!authChecked) {
     return (
       <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center">
@@ -304,7 +300,6 @@ export default function NotesPage() {
 
   return (
     <div className="container mx-auto min-h-[calc(100vh-8rem)] py-10 sm:py-12 px-4 sm:px-6 lg:px-8 space-y-12">
-      {/* Transcription Section */}
       <section>
         <header className="mb-8 text-center">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-primary tracking-tight">
@@ -315,38 +310,40 @@ export default function NotesPage() {
           </p>
         </header>
 
-        <Card className="w-full max-w-2xl mx-auto shadow-2xl border-primary/20 rounded-xl overflow-hidden">
-          <form action={formAction}>
-            <CardHeader className="p-6">
-              <CardTitle className="text-2xl flex items-center"><UploadCloud className="mr-3 h-7 w-7 text-accent"/>Upload &amp; Guide</CardTitle>
-              <CardDescription>Supported: .mp3, .wav, .mp4, .mov (Max 50MB).</CardDescription>
-            </CardHeader>
-            <CardContent className="p-6 space-y-6">
-              <div>
-                <Label htmlFor="file" className="text-base">Audio/Video File</Label>
-                <Input id="file" name="file" type="file" ref={fileInputRef} required disabled={isProcessing} onChange={handleFileChange} accept="audio/*,video/*" />
-                {transcriptionState.errors?.file && <p className="text-sm text-destructive mt-1">{transcriptionState.errors.file.join(', ')}</p>}
-              </div>
-              <div>
-                <Label htmlFor="analysisGuidance" className="text-base">Analysis Guidance (Optional)</Label>
-                <Textarea id="analysisGuidance" name="analysisGuidance" placeholder="e.g., Identify key themes, sentiment shifts..." rows={3} disabled={isProcessing} />
-                {transcriptionState.errors?.analysisGuidance && <p className="text-sm text-destructive mt-1">{transcriptionState.errors.analysisGuidance.join(', ')}</p>}
-              </div>
-            </CardContent>
-            <CardFooter className="p-6 bg-secondary/20 border-t">
-              <Button type="submit" className="w-full sm:w-auto ml-auto" disabled={isProcessing}>
-                {isProcessing ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Wand2 className="mr-2 h-5 w-5" />}
-                {isProcessing ? 'Processing...' : 'Transcribe &amp; Analyze'}
-              </Button>
-            </CardFooter>
-          </form>
-        </Card>
-        {transcriptionState.success && transcriptionState.analysisResult && <TranscriptionResultDisplay result={transcriptionState.analysisResult} />}
+        {transcriptionState.success && transcriptionState.analysisResult ? (
+            <TranscriptionResultDisplay result={transcriptionState.analysisResult} onReset={resetTranscriptionForm} />
+        ) : (
+            <Card className="w-full max-w-2xl mx-auto shadow-2xl border-primary/20 rounded-xl overflow-hidden">
+                <form action={formAction}>
+                    <CardHeader className="p-6">
+                    <CardTitle className="text-2xl flex items-center"><UploadCloud className="mr-3 h-7 w-7 text-accent"/>Upload &amp; Guide</CardTitle>
+                    <CardDescription>Supported: .mp3, .wav, .mp4, .mov (Max 50MB).</CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-6 space-y-6">
+                    <div>
+                        <Label htmlFor="file" className="text-base">Audio/Video File</Label>
+                        <Input id="file" name="file" type="file" ref={fileInputRef} required disabled={isProcessing} accept="audio/*,video/*" />
+                        {transcriptionState.errors?.file && <p className="text-sm text-destructive mt-1">{transcriptionState.errors.file.join(', ')}</p>}
+                    </div>
+                    <div>
+                        <Label htmlFor="analysisGuidance" className="text-base">Analysis Guidance (Optional)</Label>
+                        <Textarea id="analysisGuidance" name="analysisGuidance" placeholder="e.g., Identify key themes, sentiment shifts..." rows={3} disabled={isProcessing} />
+                        {transcriptionState.errors?.analysisGuidance && <p className="text-sm text-destructive mt-1">{transcriptionState.errors.analysisGuidance.join(', ')}</p>}
+                    </div>
+                    </CardContent>
+                    <CardFooter className="p-6 bg-secondary/20 border-t">
+                    <Button type="submit" className="w-full sm:w-auto ml-auto" disabled={isProcessing}>
+                        {isProcessing ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Wand2 className="mr-2 h-5 w-5" />}
+                        {isProcessing ? 'Processing...' : 'Transcribe &amp; Analyze'}
+                    </Button>
+                    </CardFooter>
+                </form>
+            </Card>
+        )}
       </section>
 
       <Separator />
 
-      {/* Voice Notes Section */}
       <section>
         <header className="mb-8 text-center">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-primary tracking-tight">

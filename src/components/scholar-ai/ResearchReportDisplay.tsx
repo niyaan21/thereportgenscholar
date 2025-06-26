@@ -1,13 +1,11 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react'; 
+import React, { useState, useEffect, useCallback, useRef } from 'react'; 
 import type { GenerateResearchReportOutput } from '@/ai/flows/generate-research-report';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { FileText, BookOpen, ListChecks, MessageSquareQuote, SearchCode, Lightbulb, AlertTriangle, ThumbsUp, Telescope, Edit3, BarChartHorizontalBig, Users, ShieldCheck, BookCopy, BookMarked, TrendingUp, FileJson, GanttChartSquare, PieChartIcon, LineChartIcon, BarChartIcon, ScatterChartIcon, Brain, LightbulbIcon, MaximizeIcon, Settings, FileQuestion, Activity, Library, UsersRound, ShieldAlert, ClipboardList, Milestone, Scale, GitBranch, DownloadCloud, Share2Icon, BookText, FileType, Image as ImageIconLucide, Info as InfoIcon, Loader2, Maximize2, Minimize2 } from 'lucide-react';
-import NextImage from 'next/image';
+import { FileText, BookOpen, MessageSquareQuote, ThumbsUp, Settings, LightbulbIcon, ShieldAlert, Library, UsersRound, ClipboardList, Milestone, Scale, GitBranch, DownloadCloud, BookText as AppendixIcon, BookMarked, Activity, FileType, FileJson, Loader2, Maximize, Minimize, Volume2, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import jsPDF from 'jspdf';
@@ -15,6 +13,8 @@ import html2canvas from 'html2canvas';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import dynamic from 'next/dynamic';
+import { handleTextToSpeechAction, type TextToSpeechActionState } from '@/app/actions';
+import { Progress } from '@/components/ui/progress';
 
 const PlaceholderChart = dynamic(() => import('./PlaceholderChart'), {
   ssr: false,
@@ -27,17 +27,23 @@ export interface ResearchReportDisplayProps {
   originalQuestion: string;
 }
 
-const Section: React.FC<{ title: string; icon?: React.ReactNode; children: React.ReactNode; className?: string, value: string }> = ({ title, icon, children, className, value }) => (
+const Section: React.FC<{ title: string; icon?: React.ReactNode; children: React.ReactNode; className?: string, value: string, onReadAloud: () => void, isReading: boolean, canRead: boolean }> = ({ title, icon, children, className, value, onReadAloud, isReading, canRead }) => (
   <div>
     <AccordionItem value={value} className={cn('border-b-0 mb-3 sm:mb-3.5 rounded-lg sm:rounded-xl overflow-hidden shadow-lg bg-card hover:shadow-primary/15 transition-all duration-300', className)}>
       <AccordionTrigger className="py-3 px-4 sm:py-4 sm:px-6 hover:no-underline hover:bg-secondary/70 dark:hover:bg-secondary/35 transition-colors duration-200 rounded-t-lg sm:rounded-t-xl data-[state=open]:rounded-b-none data-[state=open]:border-b data-[state=open]:border-border/80 data-[state=open]:bg-accent/10 dark:data-[state=open]:bg-accent/20 group">
-        <h3 className="text-md sm:text-lg md:text-xl font-semibold flex items-center text-primary group-hover:text-accent transition-colors duration-200">
-          {icon && <span className="mr-2.5 sm:mr-3.5 text-accent group-data-[state=open]:text-accent-foreground transition-colors duration-200">{icon}</span>}
-          {title}
-        </h3>
+        <div className="flex-1 flex items-center text-left">
+           {icon && <span className="mr-2.5 sm:mr-3.5 text-accent group-data-[state=open]:text-accent-foreground transition-colors duration-200">{icon}</span>}
+          <h3 className="text-md sm:text-lg md:text-xl font-semibold text-primary group-hover:text-accent transition-colors duration-200">
+            {title}
+          </h3>
+        </div>
+         <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onReadAloud(); }} disabled={!canRead} className="h-8 w-8 rounded-full hover:bg-accent/20 focus:bg-accent/20 text-muted-foreground hover:text-accent-foreground ml-2">
+            {isReading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Volume2 className="h-5 w-5" />}
+            <span className="sr-only">Read aloud</span>
+        </Button>
       </AccordionTrigger>
       <AccordionContent className="bg-card rounded-b-lg sm:rounded-b-xl">
-        <div className="text-foreground/90 text-sm sm:text-base leading-relaxed prose prose-sm sm:prose-base dark:prose-invert max-w-none marker:text-accent px-4 py-4 sm:px-6 sm:py-5 pt-3 sm:pt-4">
+        <div id={`section-content-${value}`} className="text-foreground/90 text-sm sm:text-base leading-relaxed prose prose-sm sm:prose-base dark:prose-invert max-w-none marker:text-accent px-4 py-4 sm:px-6 sm:py-5 pt-3 sm:pt-4">
           {children}
         </div>
       </AccordionContent>
@@ -50,6 +56,10 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
   const { toast } = useToast();
   const [openSections, setOpenSections] = useState<string[]>([]);
   const [allSectionKeys, setAllSectionKeys] = useState<string[]>([]);
+
+  const [readingSection, setReadingSection] = useState<string | null>(null);
+  const [audioDataUri, setAudioDataUri] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
     const sections = [
@@ -77,6 +87,46 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
 
   const handleExpandAll = () => setOpenSections(allSectionKeys);
   const handleCollapseAll = () => setOpenSections([]);
+
+  const handleReadAloud = useCallback(async (sectionKey: string, content: string | undefined | null) => {
+    if (readingSection) {
+      audioRef.current?.pause();
+      setReadingSection(null);
+      setAudioDataUri(null);
+      if (readingSection === sectionKey) return;
+    }
+
+    if (!content) {
+      toast({ title: "No content to read", variant: "destructive" });
+      return;
+    }
+
+    setReadingSection(sectionKey);
+    try {
+      const result: TextToSpeechActionState = await handleTextToSpeechAction(content);
+      if (result.success && result.audioDataUri) {
+        setAudioDataUri(result.audioDataUri);
+      } else {
+        toast({ title: "Text-to-Speech Failed", description: result.message, variant: "destructive" });
+        setReadingSection(null);
+      }
+    } catch (e) {
+      toast({ title: "An error occurred during TTS", variant: "destructive" });
+      setReadingSection(null);
+    }
+  }, [readingSection, toast]);
+
+  useEffect(() => {
+    if (audioDataUri && audioRef.current) {
+      audioRef.current.src = audioDataUri;
+      audioRef.current.play().catch(e => {
+          console.error("Audio playback failed:", e);
+          toast({ title: "Audio playback failed", description: "Your browser might be blocking autoplay.", variant: "destructive" });
+          setReadingSection(null);
+      });
+    }
+  }, [audioDataUri, toast]);
+
 
   const renderParagraphs = (text: string | undefined | null): JSX.Element[] | JSX.Element => {
     if (!text) return <p className="italic text-muted-foreground my-3 sm:my-3.5 text-sm sm:text-base">Content for this section was not provided.</p>;
@@ -106,10 +156,27 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
     });
   };
 
+  const getSectionContentAsString = (sectionKey: string): string => {
+      switch(sectionKey) {
+          case 'executive-summary': return report.executiveSummary || '';
+          case 'introduction': return report.introduction || '';
+          case 'literature-review': return report.literatureReview || '';
+          case 'key-themes': return report.keyThemes?.map(t => `${t.theme}\n${t.discussion}`).join('\n\n') || '';
+          case 'detailed-methodology': return report.detailedMethodology || '';
+          case 'results-and-analysis': return report.resultsAndAnalysis?.map(r => `${r.sectionTitle}\n${r.content}`).join('\n\n') || '';
+          case 'discussion-of-findings': return report.discussion || '';
+          case 'conclusion': return report.conclusion || '';
+          case 'limitations': return report.limitations || '';
+          case 'future-work': return report.futureWork || '';
+          case 'ethical-considerations': return report.ethicalConsiderations || '';
+          default: return '';
+      }
+  };
+
   const sectionIconSize = 20;
   const sectionIcons = {
-    executiveSummary: <Telescope size={sectionIconSize}/>,
-    introduction: <BookOpen size={sectionIconSize}/>,
+    executiveSummary: <BookOpen size={sectionIconSize}/>,
+    introduction: <Milestone size={sectionIconSize}/>,
     literatureReview: <Library size={sectionIconSize}/>,
     keyThemes: <UsersRound size={sectionIconSize}/>,
     detailedMethodology: <Settings size={sectionIconSize}/>,
@@ -120,7 +187,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
     futureWork: <LightbulbIcon size={sectionIconSize}/>,
     ethicalConsiderations: <Scale size={sectionIconSize}/>,
     references: <ClipboardList size={sectionIconSize}/>,
-    appendices: <BookText size={sectionIconSize}/>,
+    appendices: <AppendixIcon size={sectionIconSize}/>,
     glossary: <BookMarked size={sectionIconSize}/>,
   };
 
@@ -368,6 +435,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
 
   return (
     <div>
+    <audio ref={audioRef} onEnded={() => setReadingSection(null)} onPause={() => setReadingSection(null)} className="hidden" />
     <Card className="w-full shadow-2xl border-primary/30 rounded-xl sm:rounded-2xl flex flex-col bg-gradient-to-br from-card via-background/5 to-card">
       <CardHeader className="p-4 sm:p-5 md:p-6 bg-gradient-to-r from-primary/95 via-primary to-primary/90 text-primary-foreground border-b border-primary/50">
         <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 md:space-x-6">
@@ -386,10 +454,10 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
           </div>
            <div className="flex-shrink-0 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 mt-3 sm:mt-0 self-stretch sm:self-center w-full sm:w-auto">
              <Button variant="outline" size="sm" onClick={handleExpandAll} disabled={isGeneratingPdf} className="bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-md sm:rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm group w-full sm:w-auto">
-                <Maximize2 size={16} className="mr-1.5 sm:mr-2" /> Expand All
+                <Maximize size={16} className="mr-1.5 sm:mr-2" /> Expand All
              </Button>
              <Button variant="outline" size="sm" onClick={handleCollapseAll} disabled={isGeneratingPdf} className="bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-md sm:rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm group w-full sm:w-auto">
-                <Minimize2 size={16} className="mr-1.5 sm:mr-2" /> Collapse All
+                <Minimize size={16} className="mr-1.5 sm:mr-2" /> Collapse All
              </Button>
              <Button variant="outline" size="sm" onClick={handleDownloadReportJson} disabled={isGeneratingPdf} className="bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-md sm:rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm group w-full sm:w-auto">
                 <FileJson size={16} className="mr-1.5 sm:mr-2 group-hover:animate-pulse" /> Download JSON
@@ -404,16 +472,27 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
 
       <div className="flex-grow min-h-0 bg-background/50">
         <CardContent className="p-4 sm:p-5 md:p-6 lg:p-7">
-          <Alert variant="default" className="mb-4 sm:mb-6 bg-secondary/40 dark:bg-secondary/15 border-border/60">
-            <ShieldAlert className="h-5 w-5 text-accent" />
-            <AlertTitle className="font-semibold text-accent-foreground">Originality Check (Planned Feature)</AlertTitle>
-            <AlertDescription className="text-muted-foreground text-xs sm:text-sm">
-              Foss AI aims to help you produce original work. A built-in plagiarism detection feature is planned for future updates to scan generated content against known sources. This feature is not yet active.
-            </AlertDescription>
-          </Alert>
+          <Card className="mb-4 sm:mb-6 bg-secondary/30 dark:bg-secondary/10 border-border/50 shadow-md">
+              <CardHeader>
+                  <CardTitle className="text-lg flex items-center text-primary/90">
+                      <ShieldCheck className="h-5 w-5 mr-3 text-accent"/>
+                      Originality Check (Planned Feature)
+                  </CardTitle>
+                  <CardDescription className="text-muted-foreground text-xs sm:text-sm">
+                    Foss AI aims to help you produce original work. A plagiarism detection feature is planned to scan content and provide similarity scores.
+                  </CardDescription>
+              </CardHeader>
+              <CardContent className="text-sm">
+                  <div className="flex items-center gap-4">
+                      <Progress value={15} aria-label="15% similarity check" className="w-1/2" />
+                      <span className="font-mono text-primary/80 text-xs">Similarity: ~15% (placeholder)</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2.5">This feature is not yet active. The UI is a conceptual placeholder.</p>
+              </CardContent>
+          </Card>
 
           <Alert variant="default" className="mb-4 sm:mb-6 bg-accent/10 border-accent/25 text-accent-foreground shadow-md">
-              <InfoIcon className="h-5 w-5 text-accent" />
+              <LightbulbIcon className="h-5 w-5 text-accent" />
               <AlertTitle className="font-semibold text-accent-foreground">Tip for PDF Export</AlertTitle>
               <AlertDescription className="text-accent-foreground/80 mt-1 text-sm">
                   For the best results when downloading a PDF, especially to include charts, please expand all the report sections you want to capture before clicking the download button.
@@ -421,19 +500,19 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
           </Alert>
 
           <Accordion type="multiple" value={openSections} onValueChange={setOpenSections} className="w-full space-y-3 sm:space-y-4">
-            <Section title="Executive Summary" icon={sectionIcons.executiveSummary} value="executive-summary">
+             <Section title="Executive Summary" icon={sectionIcons.executiveSummary} value="executive-summary" onReadAloud={() => handleReadAloud('executive-summary', getSectionContentAsString('executive-summary'))} isReading={readingSection === 'executive-summary'} canRead={!!report.executiveSummary}>
               {renderParagraphs(report.executiveSummary)}
             </Section>
 
-            <Section title="Introduction & Background" icon={sectionIcons.introduction} value="introduction">
+            <Section title="Introduction & Background" icon={sectionIcons.introduction} value="introduction" onReadAloud={() => handleReadAloud('introduction', getSectionContentAsString('introduction'))} isReading={readingSection === 'introduction'} canRead={!!report.introduction}>
               {renderParagraphs(report.introduction)}
             </Section>
 
-            <Section title="Comprehensive Literature Review" icon={sectionIcons.literatureReview} value="literature-review">
+            <Section title="Comprehensive Literature Review" icon={sectionIcons.literatureReview} value="literature-review" onReadAloud={() => handleReadAloud('literature-review', getSectionContentAsString('literature-review'))} isReading={readingSection === 'literature-review'} canRead={!!report.literatureReview}>
               {renderParagraphs(report.literatureReview)}
             </Section>
 
-            <Section title="Key Themes & In-Depth Discussion" icon={sectionIcons.keyThemes} value="key-themes">
+            <Section title="Key Themes & In-Depth Discussion" icon={sectionIcons.keyThemes} value="key-themes" onReadAloud={() => handleReadAloud('key-themes', getSectionContentAsString('key-themes'))} isReading={readingSection === 'key-themes'} canRead={!!report.keyThemes && report.keyThemes.length > 0}>
               {report.keyThemes && report.keyThemes.length > 0 ? (
                 report.keyThemes.map((themeObj, index) => (
                   <div key={index} className="mb-4 sm:mb-5 p-3.5 sm:p-4.5 bg-secondary/35 dark:bg-secondary/10 rounded-lg sm:rounded-xl border border-border/60 shadow-md last:mb-0">
@@ -447,11 +526,11 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
               ) : renderParagraphs(undefined)}
             </Section>
 
-            <Section title="Detailed Research Methodology" icon={sectionIcons.detailedMethodology} value="detailed-methodology">
+            <Section title="Detailed Research Methodology" icon={sectionIcons.detailedMethodology} value="detailed-methodology" onReadAloud={() => handleReadAloud('detailed-methodology', getSectionContentAsString('detailed-methodology'))} isReading={readingSection === 'detailed-methodology'} canRead={!!report.detailedMethodology}>
               {renderParagraphs(report.detailedMethodology)}
             </Section>
 
-            <Section title="Results Presentation & Analysis" icon={sectionIcons.resultsAndAnalysis} value="results-and-analysis">
+            <Section title="Results Presentation & Analysis" icon={sectionIcons.resultsAndAnalysis} value="results-and-analysis" onReadAloud={() => handleReadAloud('results-and-analysis', getSectionContentAsString('results-and-analysis'))} isReading={readingSection === 'results-and-analysis'} canRead={!!report.resultsAndAnalysis && report.resultsAndAnalysis.length > 0}>
               {report.resultsAndAnalysis && report.resultsAndAnalysis.length > 0 ? (
                 report.resultsAndAnalysis.map((result, index) => (
                   <div key={index} className="mb-4 sm:mb-5 p-3.5 sm:p-4.5 bg-secondary/35 dark:bg-secondary/10 rounded-lg sm:rounded-xl border border-border/60 shadow-md last:mb-0">
@@ -464,21 +543,6 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
                     </div>
                     {result.chartSuggestion && result.chartSuggestion.type !== 'none' && (
                       <div className="mt-4 sm:mt-5 pt-4 sm:pt-5 border-t border-dashed border-border/50">
-                        <h5 className="text-sm sm:text-base font-medium text-muted-foreground mb-2 sm:mb-2.5 flex items-center">
-                          {result.chartSuggestion.type === 'bar' && <BarChartIcon className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-2.5 text-muted-foreground/80" />}
-                          {result.chartSuggestion.type === 'line' && <LineChartIcon className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-2.5 text-muted-foreground/80" />}
-                          {result.chartSuggestion.type === 'pie' && <PieChartIcon className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-2.5 text-muted-foreground/80" />}
-                          {result.chartSuggestion.type === 'scatter' && <ScatterChartIcon className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-2.5 text-muted-foreground/80" />}
-                          {result.chartSuggestion.type !== 'bar' && result.chartSuggestion.type !== 'line' && result.chartSuggestion.type !== 'pie' && result.chartSuggestion.type !== 'scatter' && <ImageIconLucide className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-2.5 text-muted-foreground/80" />}
-                          Suggested Visualization: {result.chartSuggestion.title || result.chartSuggestion.type.charAt(0).toUpperCase() + result.chartSuggestion.type.slice(1) + " Chart"}
-                        </h5>
-                         {result.chartSuggestion.dataDescription && <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3 italic">Description: {result.chartSuggestion.dataDescription}</p>}
-                        {(result.chartSuggestion.xAxisLabel || result.chartSuggestion.yAxisLabel) && (
-                           <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3">
-                            {result.chartSuggestion.xAxisLabel && `X-axis: ${result.chartSuggestion.xAxisLabel}. `}
-                            {result.chartSuggestion.yAxisLabel && `Y-axis: ${result.chartSuggestion.yAxisLabel}.`}
-                           </p>
-                        )}
                         <PlaceholderChart
                           chartSuggestion={result.chartSuggestion}
                           pdfChartId={`pdf-chart-results-${index}`} 
@@ -490,34 +554,34 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
               ) : renderParagraphs(undefined)}
             </Section>
 
-            <Section title="Holistic Discussion of Findings" icon={sectionIcons.discussion} value="discussion-of-findings">
+            <Section title="Holistic Discussion of Findings" icon={sectionIcons.discussion} value="discussion-of-findings" onReadAloud={() => handleReadAloud('discussion-of-findings', getSectionContentAsString('discussion-of-findings'))} isReading={readingSection === 'discussion-of-findings'} canRead={!!report.discussion}>
               {renderParagraphs(report.discussion)}
             </Section>
 
-            <Section title="Concluding Remarks & Implications" icon={sectionIcons.conclusion} value="conclusion">
+            <Section title="Concluding Remarks & Implications" icon={sectionIcons.conclusion} value="conclusion" onReadAloud={() => handleReadAloud('conclusion', getSectionContentAsString('conclusion'))} isReading={readingSection === 'conclusion'} canRead={!!report.conclusion}>
               {renderParagraphs(report.conclusion)}
             </Section>
 
             {report.limitations && (
-              <Section title="Acknowledged Limitations" icon={sectionIcons.limitations} value="limitations">
+              <Section title="Acknowledged Limitations" icon={sectionIcons.limitations} value="limitations" onReadAloud={() => handleReadAloud('limitations', getSectionContentAsString('limitations'))} isReading={readingSection === 'limitations'} canRead={!!report.limitations}>
                 {renderParagraphs(report.limitations)}
               </Section>
             )}
 
             {report.futureWork && (
-              <Section title="Future Research Avenues" icon={sectionIcons.futureWork} value="future-work">
+              <Section title="Future Research Avenues" icon={sectionIcons.futureWork} value="future-work" onReadAloud={() => handleReadAloud('future-work', getSectionContentAsString('future-work'))} isReading={readingSection === 'future-work'} canRead={!!report.futureWork}>
                 {renderParagraphs(report.futureWork)}
               </Section>
             )}
 
             {report.ethicalConsiderations && (
-              <Section title="Ethical Considerations & Impact" icon={sectionIcons.ethicalConsiderations} value="ethical-considerations">
+              <Section title="Ethical Considerations & Impact" icon={sectionIcons.ethicalConsiderations} value="ethical-considerations" onReadAloud={() => handleReadAloud('ethical-considerations', getSectionContentAsString('ethical-considerations'))} isReading={readingSection === 'ethical-considerations'} canRead={!!report.ethicalConsiderations}>
                 {renderParagraphs(report.ethicalConsiderations)}
               </Section>
             )}
 
             {report.references && report.references.length > 0 && (
-              <Section title="References (AI Synthesized)" icon={sectionIcons.references} value="references">
+              <Section title="References (AI Synthesized)" icon={sectionIcons.references} value="references" onReadAloud={() => {}} isReading={false} canRead={false}>
                 <ul className="list-decimal list-inside space-y-2 sm:space-y-2.5 text-xs sm:text-sm">
                   {report.references.map((ref, index) => (
                     <li key={index} className="leading-normal text-foreground/80">{ref}</li>
@@ -527,7 +591,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
             )}
 
             {report.appendices && report.appendices.length > 0 && (
-               <Section title="Supplementary Appendices" icon={sectionIcons.appendices} value="appendices">
+               <Section title="Supplementary Appendices" icon={sectionIcons.appendices} value="appendices" onReadAloud={() => {}} isReading={false} canRead={false}>
                 {report.appendices.map((appendix, index) => (
                   <div key={index} className="mb-3.5 sm:mb-4.5 p-3 sm:p-4 bg-secondary/35 dark:bg-secondary/10 rounded-lg sm:rounded-xl border border-border/60 shadow-sm last:mb-0">
                     <h4 className="font-medium text-sm sm:text-base text-accent-foreground mb-2 sm:mb-2.5">{appendix.title}</h4>
@@ -538,7 +602,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
             )}
 
             {report.glossary && report.glossary.length > 0 && (
-               <Section title="Glossary of Key Terms" icon={sectionIcons.glossary} value="glossary">
+               <Section title="Glossary of Key Terms" icon={sectionIcons.glossary} value="glossary" onReadAloud={() => {}} isReading={false} canRead={false}>
                 <ul className="space-y-2.5 sm:space-y-3 text-xs sm:text-sm">
                   {report.glossary.map((item, index) => (
                     <li key={index} className="border-b border-dashed border-border/40 pb-2 sm:pb-2.5 last:border-b-0 last:pb-0">

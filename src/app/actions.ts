@@ -9,6 +9,7 @@ import { generateReportFromFile, type GenerateReportFromFileInput, type Generate
 import { generateDailyPrompt, type GenerateDailyPromptOutput } from '@/ai/flows/generate-daily-prompt-flow';
 import { extractMindmapConcepts, type ExtractMindmapConceptsInput, type ExtractMindmapConceptsOutput } from '@/ai/flows/extract-mindmap-concepts';
 import { transcribeAndAnalyze, type TranscribeAndAnalyzeInput, type TranscribeAndAnalyzeOutput } from '@/ai/flows/transcribe-and-analyze-flow';
+import { textToSpeech, type TextToSpeechInput, type TextToSpeechOutput, TextToSpeechInputSchema } from '@/ai/flows/text-to-speech-flow';
 import { z } from 'zod';
 
 const formulateQuerySchema = z.object({
@@ -428,4 +429,44 @@ export async function handleTranscribeAndAnalyzeAction(
       errors: null,
     };
   }
+}
+
+// Action for Text-to-Speech
+export interface TextToSpeechActionState {
+    success: boolean;
+    message: string;
+    audioDataUri: string | null;
+    error?: string | null;
+}
+
+export async function handleTextToSpeechAction(
+    text: string
+): Promise<TextToSpeechActionState> {
+    const validation = TextToSpeechInputSchema.safeParse({ text });
+    if (!validation.success) {
+        return {
+            success: false,
+            message: "Invalid text for speech synthesis.",
+            audioDataUri: null,
+            error: validation.error.flatten().fieldErrors.text?.join(', ') || "Validation failed.",
+        };
+    }
+
+    try {
+        const result = await textToSpeech({ text });
+        return {
+            success: true,
+            message: "Speech generated successfully.",
+            audioDataUri: result.audioDataUri,
+        };
+    } catch (error) {
+        console.error("Error in text-to-speech action:", error);
+        const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
+        return {
+            success: false,
+            message: `Failed to generate speech: ${errorMessage}`,
+            audioDataUri: null,
+            error: errorMessage,
+        };
+    }
 }

@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from '@/components/ui/button';
 import NextLink from 'next/link';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { BookOpenText, ArrowRight, Lightbulb, Workflow, Download, Sparkles, Settings, AlertTriangle, Search, Layers, FileTextIcon, UserCircle, HelpCircle, MessageSquareQuestion, KeyboardIcon, Mic, BrainCircuit, UploadCloud, ShieldCheck } from 'lucide-react';
+import { BookOpenText, ArrowRight, Lightbulb, Workflow, Download, Sparkles, Settings, AlertTriangle, Search, Layers, FileTextIcon, UserCircle, HelpCircle, MessageSquareQuestion, KeyboardIcon, Mic, BrainCircuit, UploadCloud, ShieldCheck, AudioLines } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -81,15 +81,19 @@ export default function DocsPage() {
                 </div>
                  <div>
                   <h4 className="text-lg font-medium text-primary/90 flex items-center mb-2"><UploadCloud className="h-5 w-5 mr-2 text-accent/80"/>File-Powered Guided Reporting</h4>
-                  <p>Upload your documents (TXT, MD, PDF, DOCX) and provide specific guidance to generate tailored reports based on your file's content. This allows Foss AI to analyze and report on information you provide directly. Access this via the "File Report" link in the navigation.</p>
+                  <p>Upload your documents (TXT, MD, PDF, DOCX) and provide specific guidance to generate tailored reports based on your file's content. Access this via the "File Report" link in the navigation.</p>
                 </div>
                  <div>
                   <h4 className="text-lg font-medium text-primary/90 flex items-center mb-2"><Mic className="h-5 w-5 mr-2 text-accent/80"/>Voice-to-Text Research Notes</h4>
                   <p>Capture ideas, notes, and observations on-the-go using audio input. Your spoken words are transcribed, and you can edit and save these notes locally in your browser for future reference. Access this feature via the "Voice Notes" link in the navigation.</p>
                 </div>
+                <div>
+                  <h4 className="text-lg font-medium text-primary/90 flex items-center mb-2"><AudioLines className="h-5 w-5 mr-2 text-accent/80"/>Interview Transcription & Analysis</h4>
+                  <p>On the "Notes & Transcription" page, upload an audio or video file to receive a full transcription, a concise summary, key thematic analysis, sentiment assessment, and a list of action items.</p>
+                </div>
                  <div>
                   <h4 className="text-lg font-medium text-primary/90 flex items-center mb-2"><BrainCircuit className="h-5 w-5 mr-2 text-accent/80"/>Mind Map Concept Extraction</h4>
-                  <p>Input a block of text, and Foss AI will identify the main idea and key concepts with related terms. This provides a structured starting point for building a detailed mind map, helping you visualize connections and organize your thoughts. Access this via the "Mind Map" link in the navigation.</p>
+                  <p>Input a block of text, and Foss AI will identify the main idea and key concepts with related terms. This provides a structured starting point for building a detailed mind map, helping you visualize connections and organize your thoughts. Access this via the "File Report" page.</p>
                 </div>
                  <div>
                   <h4 className="text-lg font-medium text-primary/90 flex items-center mb-2"><Download className="h-5 w-5 mr-2 text-accent/80"/>Downloadable Outputs</h4>
@@ -111,6 +115,8 @@ export default function DocsPage() {
                   <li><strong><code className="bg-muted text-muted-foreground px-1.5 py-0.5 rounded-sm text-sm">Modifier + Shift + H</code>:</strong> Navigate to the Home page.</li>
                   <li><strong><code className="bg-muted text-muted-foreground px-1.5 py-0.5 rounded-sm text-sm">Modifier + Shift + D</code>:</strong> Navigate to your Dashboard.</li>
                   <li><strong><code className="bg-muted text-muted-foreground px-1.5 py-0.5 rounded-sm text-sm">Modifier + Shift + ,</code>:</strong> Navigate to Account Settings.</li>
+                  <li><strong><code className="bg-muted text-muted-foreground px-1.5 py-0.5 rounded-sm text-sm">Modifier + Shift + U</code>:</strong> Navigate to File Report / Analysis Tools.</li>
+                  <li><strong><code className="bg-muted text-muted-foreground px-1.5 py-0.5 rounded-sm text-sm">Modifier + Shift + N</code>:</strong> Navigate to Notes & Transcription.</li>
                 </ul>
                 <p className="mt-3 text-sm text-muted-foreground">More shortcuts are planned for future updates!</p>
               </AccordionContent>

@@ -41,6 +41,18 @@ export default function GlobalKeyboardShortcuts() {
               router.push('/account-settings');
             }
             break;
+          case 'u': // For Upload / File Report
+             if (event.shiftKey) {
+              event.preventDefault();
+              router.push('/file-report');
+            }
+            break;
+           case 'n': // For Notes
+             if (event.shiftKey) {
+              event.preventDefault();
+              router.push('/notes');
+            }
+            break;
         }
       }
     };
