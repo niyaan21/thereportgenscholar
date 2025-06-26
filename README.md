@@ -19,7 +19,6 @@ Foss AI is a powerful Next.js web application designed to revolutionize your res
 *   **File-Powered Guided Reporting:** Upload documents (TXT, MD, PDF, DOCX) and provide specific guidance to generate tailored reports based on the file's content.
 *   **Voice-to-Text Research Notes:** Capture ideas, notes, and observations on-the-go using audio input. Transcribed notes can be edited and saved locally in the browser.
 *   **Mind Map Concept Extraction:** Analyzes text input to identify a main idea and key concepts with related terms, providing a structured starting point for mind mapping.
-*   **Conceptual Image Visualization:** Generates abstract images representing core research concepts, useful for presentations and creative insights.
 *   **Secure User Authentication:** Robust Firebase authentication (Email/Password, Sign in with Google).
 *   **Intuitive User Interface:** Clean, modern, and responsive UI built with Next.js, ShadCN UI, and Tailwind CSS.
 *   **Downloadable Outputs:** Export reports in structured JSON and formatted PDF.
@@ -225,7 +224,6 @@ Foss AI uses **Genkit for Firebase** to integrate with Google's Gemini AI models
 *   `formulate-research-query.ts`: Takes a user's research question and generates optimized search queries, alternative phrasings, key concepts, and sub-topics.
 *   `summarize-research-papers.ts`: (Conceptual) Takes paper abstracts/queries and synthesizes a summary.
 *   `generate-research-report.ts`: Generates a detailed, multi-section academic-style report based on a research question and an optional summary.
-*   `generate-research-image.ts`: Creates a conceptual image for a given research topic.
 *   `generate-report-from-file.ts`: Generates a report based on an uploaded file and user guidance.
 *   `generate-daily-prompt-flow.ts`: Creates a "Prompt of the Day" for the dashboard.
 *   `extract-mindmap-concepts.ts`: Extracts key concepts and a main idea from text for mind mapping.
