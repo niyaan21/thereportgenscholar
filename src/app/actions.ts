@@ -9,7 +9,7 @@ import { generateReportFromFile, type GenerateReportFromFileInput, type Generate
 import { generateDailyPrompt, type GenerateDailyPromptOutput } from '@/ai/flows/generate-daily-prompt-flow';
 import { extractMindmapConcepts, type ExtractMindmapConceptsInput, type ExtractMindmapConceptsOutput } from '@/ai/flows/extract-mindmap-concepts';
 import { transcribeAndAnalyze, type TranscribeAndAnalyzeInput, type TranscribeAndAnalyzeOutput } from '@/ai/flows/transcribe-and-analyze-flow';
-import { textToSpeech, type TextToSpeechInput, type TextToSpeechOutput, TextToSpeechInputSchema } from '@/ai/flows/text-to-speech-flow';
+import { textToSpeech, type TextToSpeechInput, type TextToSpeechOutput } from '@/ai/flows/text-to-speech-flow';
 import { z } from 'zod';
 
 const formulateQuerySchema = z.object({
@@ -430,6 +430,11 @@ export async function handleTranscribeAndAnalyzeAction(
     };
   }
 }
+
+// Define the schema here to avoid exporting it from a 'use server' file
+const TextToSpeechInputSchema = z.object({
+  text: z.string().min(1, 'Text cannot be empty.').max(5000, 'Text cannot exceed 5000 characters.'),
+});
 
 // Action for Text-to-Speech
 export interface TextToSpeechActionState {
