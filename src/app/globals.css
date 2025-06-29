@@ -105,6 +105,9 @@
   * {
     @apply border-border transition-colors duration-200 ease-in-out; /* Subtle transition */
   }
+  html, body {
+    overflow-x: hidden;
+  }
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-geist-sans), sans-serif;

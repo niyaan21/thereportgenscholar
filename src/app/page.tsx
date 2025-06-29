@@ -468,7 +468,7 @@ export default function ScholarAIPage() {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/10 to-background flex flex-col overflow-x-hidden antialiased selection:bg-accent/20 selection:text-accent-foreground">
+    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/10 to-background flex flex-col antialiased selection:bg-accent/20 selection:text-accent-foreground">
 
       <main className={cn(
         "flex-grow",
