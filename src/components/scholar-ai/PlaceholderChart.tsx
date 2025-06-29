@@ -49,15 +49,7 @@ export default function PlaceholderChart({
   const { t } = useTranslation();
 
   if (!chartSuggestion || chartSuggestion.type === 'none') {
-    return (
-      <Card id={pdfChartId} className="border-dashed border-border/40 bg-secondary/20 mt-3 shadow-sm flex items-center justify-center h-[260px] rounded-xl">
-        <CardContent className="p-4 text-center">
-          <ImageIconLucide className="h-10 w-10 text-muted-foreground mx-auto mb-2.5" />
-          <p className="text-sm font-medium text-muted-foreground">{t('placeholderChart.noChartTitle')}</p>
-          <p className="text-xs text-muted-foreground/80 mt-1">{t('placeholderChart.noChartDescription')}</p>
-        </CardContent>
-      </Card>
-    );
+    return null;
   }
 
   const {

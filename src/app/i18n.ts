@@ -1,3 +1,4 @@
+
 'use client';
 
 import i18n from 'i18next';
@@ -713,7 +714,7 @@ const resources = {
       hero: {
         badge: 'Advanced AI Research Platform',
         title: 'Uncover Deeper Insights with Foss AI',
-        subtitle: 'Leverage cutting-edge AI to formulate research queries, synthesize knowledge, visualize concepts, and generate comprehensive reports effortlessly.',
+        subtitle: 'Generate AI-powered research reports in under a minute.',
         analyzeFile: 'Or, Analyze Your Own File',
         authPrompt: 'Sign up or log in to access the full suite of Foss AI research tools.',
       },
@@ -1356,7 +1357,7 @@ const resources = {
       hero: {
         badge: 'Plataforma de Investigación IA Avanzada',
         title: 'Descubra Perspectivas Más Profundas con Foss AI',
-        subtitle: 'Aproveche la IA de vanguardia para formular consultas de investigación, sintetizar conocimientos, visualizar conceptos y generar informes completos sin esfuerzo.',
+        subtitle: 'Genere informes de investigación con IA en menos de un minuto.',
         analyzeFile: 'O, Analice Su Propio Archivo',
         authPrompt: 'Regístrese o inicie sesión para acceder al conjunto completo de herramientas de investigación de Foss AI.',
       },
