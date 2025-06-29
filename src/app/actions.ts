@@ -9,7 +9,7 @@ import { generateReportFromFile, type GenerateReportFromFileInput, type Generate
 import { generateDailyPrompt, type GenerateDailyPromptOutput } from '@/ai/flows/generate-daily-prompt-flow';
 import { extractMindmapConcepts, type ExtractMindmapConceptsInput, type ExtractMindmapConceptsOutput } from '@/ai/flows/extract-mindmap-concepts';
 import { transcribeAndAnalyze, type TranscribeAndAnalyzeInput, type TranscribeAndAnalyzeOutput } from '@/ai/flows/transcribe-and-analyze-flow';
-import { textToSpeech, type TextToSpeechInput, type TextToSpeechOutput } from '@/ai/flows/text-to-speech-flow';
+import { textToSpeech } from '@/ai/flows/text-to-speech-flow';
 import { z } from 'zod';
 
 const formulateQuerySchema = z.object({

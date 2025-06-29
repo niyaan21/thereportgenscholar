@@ -16,12 +16,12 @@ import wav from 'wav';
 const TextToSpeechInputSchema = z.object({
   text: z.string().min(1, 'Text cannot be empty.').max(5000, 'Text cannot exceed 5000 characters.'),
 });
-export type TextToSpeechInput = z.infer<typeof TextToSpeechInputSchema>;
+type TextToSpeechInput = z.infer<typeof TextToSpeechInputSchema>;
 
 const TextToSpeechOutputSchema = z.object({
   audioDataUri: z.string().describe("The generated audio as a data URI in WAV format. Expected format: 'data:audio/wav;base64,<encoded_data>'."),
 });
-export type TextToSpeechOutput = z.infer<typeof TextToSpeechOutputSchema>;
+type TextToSpeechOutput = z.infer<typeof TextToSpeechOutputSchema>;
 
 export async function textToSpeech(input: TextToSpeechInput): Promise<TextToSpeechOutput> {
   return textToSpeechFlow(input);

@@ -35,8 +35,9 @@ const Section: React.FC<{ title: string; icon?: React.ReactNode; children: React
         <AccordionTrigger className="flex-1 text-left px-4 py-3 sm:py-4 sm:px-6 hover:no-underline bg-transparent">
           <div className="flex items-center">
             {icon && <span className="mr-2.5 sm:mr-3.5 text-accent group-data-[state=open]:text-accent-foreground transition-colors duration-200">{icon}</span>}
-            <h3 className="text-md sm:text-lg md:text-xl font-semibold text-primary group-hover:text-accent transition-colors duration-200">
+            <h3 className="text-md sm:text-lg md:text-xl font-semibold text-primary group-hover:text-accent transition-colors duration-200 flex items-center">
               {title}
+              <ChevronDown className="h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-300 ease-out group-data-[state=open]:text-accent-foreground group-data-[state=open]:rotate-180 ml-auto pl-2" />
             </h3>
           </div>
         </AccordionTrigger>
