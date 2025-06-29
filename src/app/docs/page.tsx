@@ -57,8 +57,8 @@ export default function DocsPage() {
               <AccordionContent className="px-5 pb-5">
                 <p>{t('docsPage.gettingStartedText')}</p>
                 <ol className="list-decimal list-outside space-y-2 pl-5 mt-3">
-                  <li><strong>{t('docsPage.gettingStartedS1')}</strong> <NextLink href="/signup" className="text-accent hover:underline font-medium">{t('docsPage.gettingStartedS1Link1')}</NextLink>. Existing users can <NextLink href="/login" className="text-accent hover:underline font-medium">{t('docsPage.gettingStartedS1Link2')}</NextLink>. Authentication is required to use Foss AI's core features.</li>
-                  <li><strong>{t('docsPage.gettingStartedS2')}</strong> <NextLink href="/" className="text-accent hover:underline font-medium">{t('docsPage.gettingStartedS2Link')}</NextLink>. This is where you'll initiate your research.</li>
+                  <li><strong>{t('docsPage.gettingStartedS1')}</strong> <NextLink href="/signup" className="text-accent hover:underline font-medium">{t('docsPage.gettingStartedS1Link1')}</NextLink>. {t('login.or')} <NextLink href="/login" className="text-accent hover:underline font-medium">{t('docsPage.gettingStartedS1Link2')}</NextLink>.</li>
+                  <li><strong>{t('docsPage.gettingStartedS2')}</strong> <NextLink href="/" className="text-accent hover:underline font-medium">{t('docsPage.gettingStartedS2Link')}</NextLink>.</li>
                   <li><strong>{t('docsPage.gettingStartedS3')}</strong></li>
                 </ol>
               </AccordionContent>

@@ -1244,7 +1244,7 @@ const resources = {
         tipsTitle: 'Advanced Tips & Best Practices',
         tipsText: 'Maximize your research efficiency with these tips:',
         tipsS1: "Refine Initial Questions: While Foss AI can handle broad queries, a more focused initial question can lead to more precise results. Consider including key terms or specific aspects you're interested in.",
-        tipsS2: 'Iterative Process: Research is often iterative. Use the "Go Back" functionality to refine queries or summaries if the initial results aren\'t perfectly aligned with your needs.',
+        tipsS2: 'Iterative Process: Research is often iterative. Use the \"Go Back\" functionality to refine queries or summaries if the initial results aren\'t perfectly aligned with your needs.',
         tipsS3: "Edit AI Summaries: Before generating a full report, take advantage of the ability to edit the AI-generated summary. This allows you to fine-tune the report's foundation.",
         tipsS4: "Contextual Summary for Reports: Providing a rich, well-synthesized summary (or refining the AI-generated one) as input for the full report generation can significantly enhance the report's quality and relevance.",
         tipsS5: "Voice Notes for Quick Capture: Use the Voice Notes feature for quickly capturing thoughts or summaries when typing isn't convenient. You can edit the transcript before saving.",
