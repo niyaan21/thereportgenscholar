@@ -149,7 +149,7 @@ Key report requirements:
     Include 'chartSuggestion' where appropriate.
     *   For 'chartSuggestion': If data in the file lends itself to visualization (or if hypothetical data related to the topic could be visualized):
         *   Specify its 'type' (bar, line, pie, scatter, or none).
-        *   If type is NOT 'none', you MUST provide 'dataDescription', 'categoryDataKey', 'seriesDataKeys', and 'data'.
+        *   If type is NOT 'none', you MUST provide 'dataDescription', 'categoryDataKey', 'seriesDataKeys', and 'data'. If you determine a chart is appropriate, you MUST generate valid sample data for it; failure to do so will result in an error.
         *   'title' for the chart is optional.
         *   'xAxisLabel' and 'yAxisLabel' are optional.
         *   'dataDescription' (what it shows, e.g., "Trends of X over Y time, segmented by Group Z").

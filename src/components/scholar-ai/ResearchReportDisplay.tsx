@@ -120,7 +120,8 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
         setReadingSection(null);
       }
     } catch (e) {
-      toast({ title: "An error occurred during TTS", variant: "destructive" });
+      const error = e instanceof Error ? e.message : 'An unknown error occurred.';
+      toast({ title: "An error occurred during TTS", description: error, variant: "destructive" });
       setReadingSection(null);
     }
   }, [readingSection, toast]);
@@ -145,7 +146,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
         const result = await handlePlagiarismCheckAction(fullText);
         if (result.success && result.plagiarismReport) {
             setPlagiarismResult(result.plagiarismReport);
-            toast({ title: "Originality Check Complete", description: "Simulated plagiarism check has finished.", variant: "default" });
+            toast({ title: "Originality Check Complete", description: "The report has been analyzed for potential plagiarism.", variant: "default" });
         } else {
             toast({ title: "Originality Check Failed", description: result.message, variant: "destructive" });
         }
@@ -514,12 +515,12 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
                       </Button>
                   </CardTitle>
                   <CardDescription className="text-muted-foreground text-xs sm:text-sm pt-1">
-                    Simulates a plagiarism check against common sources to gauge content originality.
+                    Analyzes the report against a vast knowledge base to gauge content originality.
                   </CardDescription>
               </CardHeader>
               <CardContent>
                 {isCheckingPlagiarism ? (
-                    <div className="flex items-center text-sm text-muted-foreground"><Loader2 className="mr-2 h-4 w-4 animate-spin"/>Simulating check...</div>
+                    <div className="flex items-center text-sm text-muted-foreground"><Loader2 className="mr-2 h-4 w-4 animate-spin"/>Analyzing report...</div>
                 ) : plagiarismResult ? (
                   <div className="space-y-4">
                      <div>
@@ -531,7 +532,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
                      </div>
                      {plagiarismResult.matches.length > 0 && (
                         <div>
-                             <h4 className="font-medium text-sm mb-2 text-foreground">Potential Matches:</h4>
+                             <h4 className="font-medium text-sm mb-2 text-foreground">Potential Matches Found:</h4>
                              <div className="space-y-3">
                                 {plagiarismResult.matches.map((match, index) => (
                                     <div key={index} className="p-3 bg-background/50 border rounded-md text-xs">
@@ -546,7 +547,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
                      )}
                   </div>
                 ) : (
-                   <p className="text-sm text-muted-foreground italic">Click "Run Check" to start the simulation.</p>
+                   <p className="text-sm text-muted-foreground italic">Click "Run Check" to start the analysis.</p>
                 )}
               </CardContent>
           </Card>
