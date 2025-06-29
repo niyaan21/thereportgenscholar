@@ -86,6 +86,7 @@ const GenerateReportFromFileInputSchema = z.object({
   fileName: z.string().optional().describe("The name of the uploaded file, for context."),
   generateMindmap: z.boolean().optional().describe("Flag to indicate if mind map data should be generated."),
   generateCharts: z.boolean().optional().describe("Flag to indicate if charts should be generated."),
+  language: z.string().optional().describe('The language for the response, e.g., "en" or "es".'),
 });
 export type GenerateReportFromFileInput = z.infer<
   typeof GenerateReportFromFileInputSchema
@@ -124,6 +125,9 @@ const prompt = ai.definePrompt({
     ],
   },
   prompt: `You are an expert research assistant tasked with generating a comprehensive academic research report based on the content of an uploaded file and specific user guidance.
+{{#if language}}
+CRITICAL: Your entire response, including all fields in the JSON output, MUST be in the following language: {{{language}}}. All generated text, from the title to glossary terms, must be fully translated.
+{{/if}}
 
 File Context:
 {{#if fileName}}File Name: {{{fileName}}}{{/if}}

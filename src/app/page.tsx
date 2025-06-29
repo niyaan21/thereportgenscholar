@@ -84,7 +84,7 @@ const initialReportActionState: GenerateReportActionState = {
 
 
 export default function ScholarAIPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [appState, setAppState] = useState<AppState>('initial');
   const [researchQuestion, setResearchQuestion] = useState<string>('');
   const [queryFormInputValue, setQueryFormInputValue] = useState<string>('');
@@ -270,9 +270,10 @@ export default function ScholarAIPage() {
       if (generateCharts) {
         formData.append('generateCharts', 'on');
       }
+      formData.append('language', i18n.language);
       reportFormAction(formData);
     });
-  }, [researchQuestion, researchSummary, generateCharts, reportFormAction, toast, currentUser, t]);
+  }, [researchQuestion, researchSummary, generateCharts, reportFormAction, toast, currentUser, t, i18n.language]);
 
   const isLoading = isFormulatingQueries || isSynthesizingResearch || isReportGenerating;
   const isFormDisabled = (!currentUser && authChecked) || isLoading;

@@ -24,6 +24,7 @@ const TranscribeAndAnalyzeInputSchema = z.object({
       'Optional user guidance on what to focus on during analysis (e.g., "focus on action items for the marketing team").'
     ),
   fileName: z.string().optional().describe("The name of the uploaded file, for context."),
+  language: z.string().optional().describe('The language for the response, e.g., "en" or "es".'),
 });
 export type TranscribeAndAnalyzeInput = z.infer<
   typeof TranscribeAndAnalyzeInputSchema
@@ -73,6 +74,10 @@ const prompt = ai.definePrompt({
 
 1.  **Transcribe:** Accurately transcribe the entire audio conversation. Pay attention to different speakers if possible, but a clean, readable transcript is the priority.
 2.  **Analyze:** After transcribing, analyze the full text to extract key insights.
+
+{{#if language}}
+CRITICAL: Your analysis (summary, keyThemes, sentiment, actionItems) MUST be in the following language: {{{language}}}. The transcription itself should remain in the original language of the audio.
+{{/if}}
 
 Use the following user guidance to focus your analysis. If no guidance is provided, perform a general analysis.
 

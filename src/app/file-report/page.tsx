@@ -42,7 +42,7 @@ const initialMindmapState: ExtractMindmapConceptsActionState = {
 
 
 export default function AnalysisToolsPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
   
@@ -191,6 +191,7 @@ export default function AnalysisToolsPage() {
                         <CardDescription className="text-muted-foreground mt-1">{t('fileReport.uploadDescription')}</CardDescription>
                     </CardHeader>
                     <CardContent className="p-6 space-y-6">
+                        <input type="hidden" name="language" value={i18n.language} />
                         {/* File Input */}
                         <div className="space-y-2">
                             <Label htmlFor="file" className="text-base">{t('fileReport.docFileLabel')}</Label>
@@ -238,6 +239,7 @@ export default function AnalysisToolsPage() {
                             <CardDescription className="text-muted-foreground mt-1">{t('fileReport.mindmapInputDescription')}</CardDescription>
                         </CardHeader>
                         <CardContent className="p-6 space-y-5">
+                            <input type="hidden" name="language" value={i18n.language} />
                             <div className="space-y-2">
                                 <Label htmlFor="textToAnalyze" className="text-base">{t('fileReport.textToAnalyzeLabel')}</Label>
                                 <Textarea id="textToAnalyze" name="textToAnalyze" placeholder={t('fileReport.textToAnalyzePlaceholder')} rows={10} required minLength={50} maxLength={10000} disabled={isFormDisabled} value={textToAnalyze} onChange={(e) => setTextToAnalyze(e.target.value)} className="text-base leading-relaxed" />

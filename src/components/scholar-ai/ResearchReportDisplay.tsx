@@ -63,7 +63,7 @@ const Section: React.FC<{ title: string; icon?: React.ReactNode; children: React
 };
 
 const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report, originalQuestion }: ResearchReportDisplayProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const { toast } = useToast();
   const [openSections, setOpenSections] = useState<string[]>([]);
@@ -150,7 +150,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
     const fullText = Object.values(report).filter(val => typeof val === 'string').join('\n\n');
     
     try {
-        const result = await handlePlagiarismCheckAction(fullText);
+        const result = await handlePlagiarismCheckAction(fullText, i18n.language);
         if (result.success && result.plagiarismReport) {
             setPlagiarismResult(result.plagiarismReport);
             toast({ title: t('reportDisplay.checkComplete'), description: "The report has been analyzed for potential plagiarism.", variant: "default" });

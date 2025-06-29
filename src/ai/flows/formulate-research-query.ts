@@ -15,6 +15,7 @@ const FormulateResearchQueryInputSchema = z.object({
   researchQuestion: z
     .string()
     .describe('The complex research question to formulate search queries for.'),
+  language: z.string().optional().describe('The language for the response, e.g., "en" or "es".'),
 });
 export type FormulateResearchQueryInput = z.infer<
   typeof FormulateResearchQueryInputSchema
@@ -52,6 +53,9 @@ const prompt = ai.definePrompt({
   input: {schema: FormulateResearchQueryInputSchema},
   output: {schema: FormulateResearchQueryOutputSchema},
   prompt: `You are an expert research query formulator and research assistant. Your job is to take a complex research question and provide several outputs to help the user begin their research:
+{{#if language}}
+All output fields in the JSON schema must be in the following language: {{{language}}}.
+{{/if}}
 
 Research Question: {{{researchQuestion}}}
 

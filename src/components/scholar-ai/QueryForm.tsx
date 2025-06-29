@@ -43,12 +43,13 @@ function SubmitButtonQueryForm({ isDisabled }: { isDisabled?: boolean }) {
 }
 
 function QueryFormInner({ isBusy, isDisabled, value, onChange }: QueryFormProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { pending } = useFormStatus();
   const actualIsDisabled = isBusy || isDisabled;
 
   return (
     <>
+      <input type="hidden" name="language" value={i18n.language} />
       <div className="relative">
         <Textarea
           id="researchQuestion"

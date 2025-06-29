@@ -105,7 +105,7 @@ const TranscriptionResultDisplay = ({ result, onReset }: { result: NonNullable<T
 
 
 export default function NotesPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const { toast } = useToast();
@@ -173,7 +173,7 @@ export default function NotesPage() {
     const recognition = recognitionRef.current;
     recognition.continuous = true;
     recognition.interimResults = true;
-    recognition.lang = 'en-US';
+    recognition.lang = i18n.language; // Use current language for speech recognition
 
     recognition.onresult = (event) => {
       let localInterim = '';
@@ -199,7 +199,7 @@ export default function NotesPage() {
       toast({ title: t('notes.toastRecordingError'), description: errorMsg, variant: 'destructive' });
       setIsRecording(false);
     };
-  }, [apiSupported, finalTranscript, currentUser, toast, t]);
+  }, [apiSupported, finalTranscript, currentUser, toast, t, i18n.language]);
 
   const toggleRecording = () => {
     if (!currentUser || !apiSupported) {
@@ -218,6 +218,7 @@ export default function NotesPage() {
       if (!recognitionRef.current) setupRecognition();
       if (recognitionRef.current) {
         setFinalTranscript(currentNoteContent);
+        recognitionRef.current.lang = i18n.language; // ensure lang is current
         recognitionRef.current.start();
         setIsRecording(true);
         setPermissionError(null);
@@ -327,6 +328,7 @@ export default function NotesPage() {
                     <CardDescription>{t('notes.uploadDescription')}</CardDescription>
                     </CardHeader>
                     <CardContent className="p-6 space-y-6">
+                    <input type="hidden" name="language" value={i18n.language} />
                     <div>
                         <Label htmlFor="file" className="text-base">{t('notes.fileLabel')}</Label>
                         <Input id="file" name="file" type="file" ref={fileInputRef} required disabled={isProcessing} accept="audio/*,video/*" />

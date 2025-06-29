@@ -17,6 +17,7 @@ const GenerateResearchReportInputSchema = z.object({
     .describe('The central research question for the report.'),
   summary: z.string().optional().describe('An existing summary of the research, if available, to provide context and seed the report.'),
   generateCharts: z.boolean().optional().describe('Flag to indicate if charts should be generated.'),
+  language: z.string().optional().describe('The language for the response, e.g., "en" or "es".'),
 });
 export type GenerateResearchReportInput = z.infer<
   typeof GenerateResearchReportInputSchema
@@ -98,6 +99,10 @@ const prompt = ai.definePrompt({
     ],
   },
   prompt: `You are an expert research assistant tasked with generating a comprehensive and significantly lengthy academic research report.
+{{#if language}}
+CRITICAL: Your entire response, including all fields in the JSON output, MUST be in the following language: {{{language}}}. All generated text, from the title to glossary terms, must be fully translated.
+{{/if}}
+
 The central research question is: "{{researchQuestion}}"
 
 {{#if summary}}

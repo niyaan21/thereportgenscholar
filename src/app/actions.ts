@@ -6,7 +6,7 @@ import { formulateResearchQuery, type FormulateResearchQueryInput, type Formulat
 import { summarizeResearchPapers, type SummarizeResearchPapersInput, type SummarizeResearchPapersOutput } from '@/ai/flows/summarize-research-papers';
 import { generateResearchReport, type GenerateResearchReportInput, type GenerateResearchReportOutput } from '@/ai/flows/generate-research-report';
 import { generateReportFromFile, type GenerateReportFromFileInput, type GenerateReportFromFileOutput } from '@/ai/flows/generate-report-from-file';
-import { generateDailyPrompt, type GenerateDailyPromptOutput } from '@/ai/flows/generate-daily-prompt-flow';
+import { generateDailyPrompt, type GenerateDailyPromptInput, type GenerateDailyPromptOutput } from '@/ai/flows/generate-daily-prompt-flow';
 import { extractMindmapConcepts, type ExtractMindmapConceptsInput, type ExtractMindmapConceptsOutput } from '@/ai/flows/extract-mindmap-concepts';
 import { transcribeAndAnalyze, type TranscribeAndAnalyzeInput, type TranscribeAndAnalyzeOutput } from '@/ai/flows/transcribe-and-analyze-flow';
 import { textToSpeech } from '@/ai/flows/text-to-speech-flow';
@@ -15,6 +15,7 @@ import { z } from 'zod';
 
 const formulateQuerySchema = z.object({
   researchQuestion: z.string().min(10, "Research question must be at least 10 characters long.").max(1500, "Research question must be at most 1500 characters long."),
+  language: z.string().optional(),
 });
 
 export interface FormulateQueryActionState {
@@ -33,8 +34,9 @@ export async function handleFormulateQueryAction(
   formData: FormData
 ): Promise<FormulateQueryActionState> {
   const researchQuestion = formData.get('researchQuestion') as string;
+  const language = formData.get('language') as string;
 
-  const validation = formulateQuerySchema.safeParse({ researchQuestion });
+  const validation = formulateQuerySchema.safeParse({ researchQuestion, language });
   if (!validation.success) {
     return {
       success: false,
@@ -45,7 +47,7 @@ export async function handleFormulateQueryAction(
   }
 
   try {
-    const input: FormulateResearchQueryInput = { researchQuestion: validation.data.researchQuestion };
+    const input: FormulateResearchQueryInput = { researchQuestion: validation.data.researchQuestion, language: validation.data.language };
     const result = await formulateResearchQuery(input);
     return {
       success: true,
@@ -159,6 +161,7 @@ const generateReportSchema = z.object({
   researchQuestion: z.string().min(10, "Research question must be at least 10 characters long.").max(1500, "Research question must be at most 1500 characters long."),
   summary: z.string().optional(),
   generateCharts: z.boolean(),
+  language: z.string().optional(),
 });
 
 export interface GenerateReportActionState {
@@ -175,8 +178,9 @@ export async function handleGenerateReportAction(
   const researchQuestion = formData.get('researchQuestion') as string;
   const summary = formData.get('summary') as string | undefined;
   const generateCharts = formData.get('generateCharts') === 'on';
+  const language = formData.get('language') as string;
 
-  const validation = generateReportSchema.safeParse({ researchQuestion, summary, generateCharts });
+  const validation = generateReportSchema.safeParse({ researchQuestion, summary, generateCharts, language });
   if (!validation.success) {
     return {
       success: false,
@@ -191,6 +195,7 @@ export async function handleGenerateReportAction(
       researchQuestion: validation.data.researchQuestion,
       summary: validation.data.summary ? validation.data.summary.trim() : undefined,
       generateCharts: validation.data.generateCharts,
+      language: validation.data.language,
     };
     const result = await generateResearchReport(input);
     return {
@@ -224,6 +229,7 @@ const generateReportFromFileSchema = z.object({
     .refine((file) => ALLOWED_DOC_TYPES.includes(file.type), "Invalid file type. Allowed types: .txt, .md, .pdf, .doc, .docx"),
   generateMindmap: z.boolean(),
   generateCharts: z.boolean(),
+  language: z.string().optional(),
 });
 
 export interface GenerateReportFromFileActionState {
@@ -242,8 +248,9 @@ export async function handleGenerateReportFromFileAction(
   const file = formData.get('file') as File;
   const generateMindmap = formData.get('generateMindmap') === 'on';
   const generateCharts = formData.get('generateCharts') === 'on';
+  const language = formData.get('language') as string;
 
-  const validation = generateReportFromFileSchema.safeParse({ guidanceQuery, file, generateMindmap, generateCharts });
+  const validation = generateReportFromFileSchema.safeParse({ guidanceQuery, file, generateMindmap, generateCharts, language });
 
   if (!validation.success) {
     return {
@@ -255,7 +262,7 @@ export async function handleGenerateReportFromFileAction(
     };
   }
 
-  const { file: validatedFile, guidanceQuery: validatedQuery, generateMindmap: validatedMindmapFlag, generateCharts: validatedChartsFlag } = validation.data;
+  const { file: validatedFile, guidanceQuery: validatedQuery, generateMindmap: validatedMindmapFlag, generateCharts: validatedChartsFlag, language: validatedLanguage } = validation.data;
 
   try {
     const arrayBuffer = await validatedFile.arrayBuffer();
@@ -268,6 +275,7 @@ export async function handleGenerateReportFromFileAction(
       fileName: validatedFile.name,
       generateMindmap: validatedMindmapFlag,
       generateCharts: validatedChartsFlag,
+      language: validatedLanguage,
     };
 
     const result = await generateReportFromFile(input);
@@ -298,9 +306,9 @@ export interface GenerateDailyPromptActionState {
   error?: string | null;
 }
 
-export async function handleGenerateDailyPromptAction(): Promise<GenerateDailyPromptActionState> {
+export async function handleGenerateDailyPromptAction(language?: string): Promise<GenerateDailyPromptActionState> {
   try {
-    const result = await generateDailyPrompt();
+    const result = await generateDailyPrompt({ language });
     return {
       success: true,
       message: "Daily prompt generated successfully.",
@@ -321,6 +329,7 @@ export async function handleGenerateDailyPromptAction(): Promise<GenerateDailyPr
 // Action for Mindmap Concept Extraction
 const extractMindmapConceptsSchema = z.object({
   textToAnalyze: z.string().min(50, "Text must be at least 50 characters.").max(10000, "Text must be at most 10,000 characters."),
+  language: z.string().optional(),
 });
 
 export interface ExtractMindmapConceptsActionState {
@@ -335,8 +344,9 @@ export async function handleExtractMindmapConceptsAction(
   formData: FormData
 ): Promise<ExtractMindmapConceptsActionState> {
   const textToAnalyze = formData.get('textToAnalyze') as string;
+  const language = formData.get('language') as string;
 
-  const validation = extractMindmapConceptsSchema.safeParse({ textToAnalyze });
+  const validation = extractMindmapConceptsSchema.safeParse({ textToAnalyze, language });
   if (!validation.success) {
     return {
       success: false,
@@ -347,7 +357,7 @@ export async function handleExtractMindmapConceptsAction(
   }
 
   try {
-    const input: ExtractMindmapConceptsInput = { textToAnalyze: validation.data.textToAnalyze };
+    const input: ExtractMindmapConceptsInput = { textToAnalyze: validation.data.textToAnalyze, language: validation.data.language };
     const result = await extractMindmapConcepts(input);
     return {
       success: true,
@@ -379,6 +389,7 @@ const transcribeAndAnalyzeSchema = z.object({
     .refine((file) => file.size > 0, "File cannot be empty.")
     .refine((file) => file.size <= MAX_AUDIO_FILE_SIZE_BYTES, `File size must be less than ${MAX_AUDIO_FILE_SIZE_MB}MB.`)
     .refine((file) => ALLOWED_AUDIO_TYPES.includes(file.type), "Invalid file type. Allowed: .mp3, .wav, .mp4, .mov"),
+  language: z.string().optional(),
 });
 
 export interface TranscribeAndAnalyzeActionState {
@@ -394,8 +405,9 @@ export async function handleTranscribeAndAnalyzeAction(
 ): Promise<TranscribeAndAnalyzeActionState> {
   const guidance = formData.get('analysisGuidance') as string;
   const file = formData.get('file') as File;
+  const language = formData.get('language') as string;
 
-  const validation = transcribeAndAnalyzeSchema.safeParse({ analysisGuidance: guidance, file });
+  const validation = transcribeAndAnalyzeSchema.safeParse({ analysisGuidance: guidance, file, language });
 
   if (!validation.success) {
     return {
@@ -406,7 +418,7 @@ export async function handleTranscribeAndAnalyzeAction(
     };
   }
 
-  const { file: validatedFile, analysisGuidance: validatedGuidance } = validation.data;
+  const { file: validatedFile, analysisGuidance: validatedGuidance, language: validatedLanguage } = validation.data;
 
   try {
     const arrayBuffer = await validatedFile.arrayBuffer();
@@ -417,6 +429,7 @@ export async function handleTranscribeAndAnalyzeAction(
       fileDataUri,
       analysisGuidance: validatedGuidance,
       fileName: validatedFile.name,
+      language: validatedLanguage,
     };
 
     const result = await transcribeAndAnalyze(input);
@@ -492,7 +505,8 @@ export interface PlagiarismCheckActionState {
 }
 
 export async function handlePlagiarismCheckAction(
-  text: string
+  text: string,
+  language?: string
 ): Promise<PlagiarismCheckActionState> {
   const validation = z.string().min(100).safeParse(text);
   if (!validation.success) {
@@ -504,7 +518,7 @@ export async function handlePlagiarismCheckAction(
   }
 
   try {
-    const result = await plagiarismCheck({ text });
+    const result = await plagiarismCheck({ text, language });
     return {
       success: true,
       message: "Plagiarism check simulation complete.",

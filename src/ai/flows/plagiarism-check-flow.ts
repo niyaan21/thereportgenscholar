@@ -13,6 +13,7 @@ import { z } from 'genkit';
 
 const PlagiarismCheckInputSchema = z.object({
   text: z.string().min(100, "Text must be at least 100 characters long.").max(50000, "Text is too long for plagiarism check."),
+  language: z.string().optional().describe('The language for the response, e.g., "en" or "es".'),
 });
 export type PlagiarismCheckInput = z.infer<typeof PlagiarismCheckInputSchema>;
 
@@ -41,6 +42,9 @@ const prompt = ai.definePrompt({
   input: { schema: PlagiarismCheckInputSchema },
   output: { schema: PlagiarismCheckOutputSchema },
   prompt: `You are an advanced AI Research Integrity Analyst. Your task is to analyze the following text and generate an originality report. Your goal is to use your extensive knowledge base, which includes vast amounts of academic papers, books, and web content, to identify sentences that are highly similar to known, real-world sources.
+{{#if language}}
+CRITICAL: Your analysis and justification in the output must be in the following language: {{{language}}}. Do not translate the source sentence or the citation itself.
+{{/if}}
 
 Follow these instructions precisely:
 1.  **Calculate a Similarity Score**: Based on your analysis, provide a plausible overall similarity score percentage, reflecting the proportion of text that has potential matches. This should be a realistic estimate (e.g., between 5% and 30%).

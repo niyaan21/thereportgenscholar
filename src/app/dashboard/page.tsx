@@ -76,7 +76,7 @@ QuickActionCard.displayName = "QuickActionCard";
 type ActivityFilterType = 'all' | 'query-formulation' | 'report-generation' | 'file-report-generation';
 
 export default function DashboardPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [allActivities, setAllActivities] = useState<ResearchActivityItem[]>([]);
@@ -96,7 +96,7 @@ export default function DashboardPage() {
     setDailyPromptLoading(true);
     setDailyPromptError(null);
     try {
-      const result = await handleGenerateDailyPromptAction();
+      const result = await handleGenerateDailyPromptAction(i18n.language);
       if (result.success && result.dailyPrompt) {
         setDailyPrompt(result.dailyPrompt);
       } else {
@@ -110,7 +110,7 @@ export default function DashboardPage() {
     } finally {
       setDailyPromptLoading(false);
     }
-  }, [currentUser, toast, t]);
+  }, [currentUser, toast, t, i18n.language]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {

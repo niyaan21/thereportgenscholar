@@ -17,6 +17,7 @@ const ExtractMindmapConceptsInputSchema = z.object({
     .min(50, "Text must be at least 50 characters long.")
     .max(10000, "Text must be at most 10,000 characters long.")
     .describe('The text content from which to extract mindmap concepts.'),
+  language: z.string().optional().describe('The language for the response, e.g., "en" or "es".'),
 });
 export type ExtractMindmapConceptsInput = z.infer<
   typeof ExtractMindmapConceptsInputSchema
@@ -49,6 +50,10 @@ const prompt = ai.definePrompt({
   input: {schema: ExtractMindmapConceptsInputSchema},
   output: {schema: ExtractMindmapConceptsOutputSchema},
   prompt: `You are an expert text analyst specializing in structuring information for mind maps.
+{{#if language}}
+Your entire response, including all fields in the JSON output, must be in the following language: {{{language}}}.
+{{/if}}
+
 Given the following text, your task is to:
 1. Identify the single most central theme or main idea of the text.
 2. Extract 3 to 10 key concepts, main ideas, or important entities from the text.
