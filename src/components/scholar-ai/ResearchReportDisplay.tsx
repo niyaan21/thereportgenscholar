@@ -482,17 +482,17 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
             </CardDescription>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 mt-4 sm:mt-5 pt-3 sm:pt-4 border-t border-primary-foreground/20">
-             <Button variant="outline" size="sm" onClick={handleExpandAll} disabled={isGeneratingPdf} className="bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-md sm:rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm group">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap items-center gap-2 mt-4 pt-4 border-t border-primary-foreground/20">
+             <Button variant="outline" size="sm" onClick={handleExpandAll} disabled={isGeneratingPdf} className="w-full sm:w-auto bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-md sm:rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm group">
                 <Maximize size={16} className="mr-1.5 sm:mr-2" /> Expand All
              </Button>
-             <Button variant="outline" size="sm" onClick={handleCollapseAll} disabled={isGeneratingPdf} className="bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-md sm:rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm group">
+             <Button variant="outline" size="sm" onClick={handleCollapseAll} disabled={isGeneratingPdf} className="w-full sm:w-auto bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-md sm:rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm group">
                 <Minimize size={16} className="mr-1.5 sm:mr-2" /> Collapse All
              </Button>
-             <Button variant="outline" size="sm" onClick={handleDownloadReportJson} disabled={isGeneratingPdf} className="bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-md sm:rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm group">
+             <Button variant="outline" size="sm" onClick={handleDownloadReportJson} disabled={isGeneratingPdf} className="w-full sm:w-auto bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-md sm:rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm group">
                 <FileJson size={16} className="mr-1.5 sm:mr-2 group-hover:animate-pulse" /> Download JSON
              </Button>
-             <Button variant="outline" size="sm" onClick={handleDownloadReportPdf} disabled={isGeneratingPdf} className="bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-md sm:rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm group">
+             <Button variant="outline" size="sm" onClick={handleDownloadReportPdf} disabled={isGeneratingPdf} className="w-full sm:w-auto bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-md sm:rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm group">
                 {isGeneratingPdf ? <Loader2 size={16} className="mr-1.5 sm:mr-2 animate-spin" /> : <FileType size={16} className="mr-1.5 sm:mr-2 group-hover:animate-pulse" />} 
                 {isGeneratingPdf ? "Generating..." : "Download PDF"}
              </Button>
