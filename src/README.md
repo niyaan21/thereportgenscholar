@@ -34,8 +34,8 @@ Foss AI is a powerful Next.js web application designed to revolutionize your res
 
 Foss AI is continuously evolving. Here are some of the exciting capabilities on our roadmap:
 
-*   **Multi-language Support:** Capabilities to conduct research, process inputs, and generate reports in a variety of languages. (Placeholder UI exists).
-*   **Note-taking Apps Integration:** Direct synchronization of research notes, summaries, and reports with popular platforms like Notion and Obsidian. (Placeholder UI exists).
+*   **Note-taking Apps Integration:** Direct synchronization of research notes, summaries, and reports with popular platforms like Notion and Obsidian.
+*   **Multi-language Support:** Capabilities to conduct research, process inputs, and generate reports in a variety of languages.
 *   **Custom Report Templates:** Ability for users to create, save, and share report templates tailored to specific academic fields, journal requirements, or organizational standards.
 *   **Research Timeline Visualization:** Interactive tools to create and visualize research project timelines, milestones, and progress. (Placeholder UI exists).
 *   **Research Network Visualization:** Tools to map and explore connections between researchers, published papers, institutions, and key topics within a field.
