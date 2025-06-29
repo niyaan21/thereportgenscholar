@@ -15,7 +15,7 @@ Foss AI is a powerful Next.js web application designed to revolutionize your res
 
 *   **AI Query Formulation:** Transforms complex research questions into optimized search vectors, alternative phrasings, key concepts, and potential sub-topics.
 *   **Intelligent Knowledge Synthesis:** Distills information based on formulated queries to provide concise summaries of key insights and themes. The AI-generated summary is editable by the user before full report generation.
-*   **Comprehensive Report Generation:** Automatically generates structured, multi-section academic-style reports with sections like executive summary, literature review, methodology, results (with chart suggestions), discussion, and references.
+*   **Comprehensive Report Generation:** Automatically generates structured, multi-section academic-style reports with sections like executive summary, literature review, methodology, results (with chart suggestions), discussion, and real academic references.
 *   **File-Powered Guided Reporting:** Upload documents (TXT, MD, PDF, DOCX) and provide specific guidance to generate tailored reports based on the file's content.
 *   **Voice-to-Text Research Notes:** Capture ideas, notes, and observations on-the-go using audio input. Transcribed notes can be edited and saved locally in the browser.
 *   **Interview Transcription & Analysis:** Upload audio/video files for automated transcription and AI-powered thematic analysis, sentiment detection, and key insight extraction.
@@ -256,6 +256,7 @@ The `/account-settings` page allows users to:
 *   Update their password or request a password reset.
 *   Delete their account.
 *   Customize appearance (Theme: Light, Dark, System - saved to `localStorage`).
+*   Set language preferences for the UI (placeholder for future localization, saved to `localStorage`).
 *   Set notification preferences (Email Notifications, Newsletter - saved to `localStorage`).
 *   Configure interface settings (Items Per Page, Experimental Features - saved to `localStorage`).
 *   View, export, and import their research activity history (managed via `localStorage`).
