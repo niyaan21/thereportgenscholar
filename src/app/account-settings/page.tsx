@@ -30,6 +30,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
 import { getResearchHistory, setResearchHistory, type ResearchActivityItem } from '@/lib/historyService';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 
 const SettingsSection: React.FC<{ title: string; description?: string; icon?: React.ElementType; children: React.ReactNode; className?: string }> = ({ title, description, icon: Icon, children, className }) => (
@@ -60,6 +61,7 @@ export default function AccountSettingsPage() {
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
 
   const [theme, setThemeState] = useState<'light' | 'dark' | 'system'>('system');
+  const [language, setLanguage] = useState('en');
   const [activeTab, setActiveTab] = useState("general");
   
   const [researchHistoryItems, setResearchHistoryItems] = useState<ResearchActivityItem[]>([]);
@@ -93,6 +95,10 @@ export default function AccountSettingsPage() {
             const prefersDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
             setThemeState(prefersDark ? 'dark' : 'system');
         }
+        
+        // Load language preference
+        const storedLanguage = localStorage.getItem('language');
+        if (storedLanguage) setLanguage(storedLanguage);
         
         // Load notification preferences
         const storedEmailNotifications = localStorage.getItem('emailNotifications');
@@ -149,6 +155,12 @@ export default function AccountSettingsPage() {
       }
     }
     toast({ title: "Theme Updated", description: `Switched to ${newTheme} theme.`, variant: 'default' });
+  };
+
+  const handleLanguageChange = (newLanguage: string) => {
+    setLanguage(newLanguage);
+    localStorage.setItem('language', newLanguage);
+    toast({ title: "Language Preference Saved", description: `Language set to ${newLanguage}. Full support is planned for a future update.`, variant: 'default' });
   };
 
   const handleSendVerificationEmail = async () => {
@@ -542,13 +554,24 @@ export default function AccountSettingsPage() {
                 </RadioGroup>
               </SettingsSection>
               
-               <SettingsSection title="Language & Region" icon={Globe} description="Set your language for the UI and AI responses.">
+              <SettingsSection title="Language & Region" icon={Globe} description="Set your language for the UI and AI responses.">
                 <div className="space-y-3">
                     <div>
-                        <Label htmlFor="language">Language (Coming Soon)</Label>
-                        <Input id="language" value="English (United States)" disabled />
+                        <Label htmlFor="language">Interface Language</Label>
+                        <Select onValueChange={handleLanguageChange} value={language}>
+                            <SelectTrigger id="language" className="w-full">
+                                <SelectValue placeholder="Select a language" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="en">English</SelectItem>
+                                <SelectItem value="es">Español (Spanish)</SelectItem>
+                                <SelectItem value="fr">Français (French)</SelectItem>
+                                <SelectItem value="de">Deutsch (German)</SelectItem>
+                                <SelectItem value="ja">日本語 (Japanese)</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
-                    <p className="text-xs text-muted-foreground">More languages for both the interface and AI model interactions are planned for future updates.</p>
+                    <p className="text-xs text-muted-foreground">This is a placeholder UI. Changing the language will not affect the application yet, but the preference will be saved.</p>
                 </div>
               </SettingsSection>
 
