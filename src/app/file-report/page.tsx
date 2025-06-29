@@ -17,7 +17,7 @@ import MindmapDisplay from '@/components/scholar-ai/MindmapDisplay';
 import { handleGenerateReportFromFileAction, type GenerateReportFromFileActionState, handleExtractMindmapConceptsAction, type ExtractMindmapConceptsActionState } from '@/app/actions';
 import type { GenerateResearchReportOutput } from '@/ai/flows/generate-research-report';
 import type { ExtractMindmapConceptsOutput } from '@/ai/flows/extract-mindmap-concepts';
-import { UploadCloud, Wand2, Loader2, RotateCcw, AlertCircle, Lock, Info, BrainCircuit, Lightbulb } from 'lucide-react';
+import { UploadCloud, Wand2, Loader2, RotateCcw, AlertCircle, Lock, Info, BrainCircuit, Lightbulb, BarChartBig } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged, type User } from 'firebase/auth';
@@ -203,9 +203,13 @@ export default function AnalysisToolsPage() {
                             {reportState.errors?.guidanceQuery && <p className="text-xs text-destructive flex items-center mt-1"><AlertCircle className="mr-1 h-3 w-3" /> {reportState.errors.guidanceQuery.join(', ')}</p>}
                         </div>
                         <Separator />
-                        {/* Mindmap Switch */}
+                        {/* Additional Outputs */}
                         <div className="space-y-3">
                             <Label className="text-base">Additional Outputs</Label>
+                             <div className="flex items-center space-x-3 p-3 rounded-lg bg-secondary/30 dark:bg-secondary/10 border border-border/50">
+                                <Switch id="generateCharts" name="generateCharts" defaultChecked disabled={isFormDisabled}/>
+                                <Label htmlFor="generateCharts" className="flex flex-col space-y-0.5"><span className="font-medium text-primary/90">Generate Chart Suggestions</span><span className="text-xs text-muted-foreground">Allow the AI to suggest charts for visualizing data.</span></Label>
+                            </div>
                             <div className="flex items-center space-x-3 p-3 rounded-lg bg-secondary/30 dark:bg-secondary/10 border border-border/50">
                                 <Switch id="generateMindmap" name="generateMindmap" disabled={isFormDisabled}/>
                                 <Label htmlFor="generateMindmap" className="flex flex-col space-y-0.5"><span className="font-medium text-primary/90">Generate Mind Map Concepts</span><span className="text-xs text-muted-foreground">Extract a main idea and key concepts from the file.</span></Label>
