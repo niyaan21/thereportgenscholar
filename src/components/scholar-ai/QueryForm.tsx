@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Loader2, Send, Lightbulb, Brain, Wand2, Lock } from 'lucide-react'; 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 export interface QueryFormProps {
   formAction: (payload: FormData) => void; 
@@ -20,6 +21,7 @@ export interface QueryFormProps {
 }
 
 function SubmitButtonQueryForm({ isDisabled }: { isDisabled?: boolean }) {
+  const { t } = useTranslation();
   const { pending } = useFormStatus();
   return (
     <Button
@@ -35,12 +37,13 @@ function SubmitButtonQueryForm({ isDisabled }: { isDisabled?: boolean }) {
       ) : (
         <Send className="mr-2 h-4 w-4 sm:mr-2.5 sm:h-5 sm:w-5 group-hover:animate-pulse transition-transform duration-200" />
       )}
-      {isDisabled ? "Login to Explore" : "Explore Insights"}
+      {isDisabled ? t('queryForm.buttonLabelAuth') : t('queryForm.buttonLabel')}
     </Button>
   );
 }
 
 function QueryFormInner({ isBusy, isDisabled, value, onChange }: QueryFormProps) {
+  const { t } = useTranslation();
   const { pending } = useFormStatus();
   const actualIsDisabled = isBusy || isDisabled;
 
@@ -51,7 +54,7 @@ function QueryFormInner({ isBusy, isDisabled, value, onChange }: QueryFormProps)
           id="researchQuestion"
           name="researchQuestion"
           rows={6}
-          placeholder={actualIsDisabled && !isBusy ? "Please log in or sign up to enter your research question." : "e.g., Explore the multifaceted impacts of generative AI on the future of creative professions, considering ethical dilemmas, economic shifts, and the evolution of human-AI collaboration..."}
+          placeholder={actualIsDisabled && !isBusy ? t('queryForm.placeholderAuth') : t('queryForm.placeholder')}
           className={cn(
             "w-full border-input focus:border-accent focus:ring-2 focus:ring-accent/60 rounded-lg sm:rounded-xl shadow-inner text-sm sm:text-base bg-background/80 placeholder:text-muted-foreground/70 p-3 sm:p-4 transition-all duration-200 leading-relaxed",
             "hover:border-primary/60 focus:shadow-accent/25 focus:shadow-lg",
@@ -76,6 +79,7 @@ function QueryFormInner({ isBusy, isDisabled, value, onChange }: QueryFormProps)
 
 
 const QueryForm = React.memo(function QueryForm({ formAction, isBusy, isDisabled, value, onChange }: QueryFormProps) {
+  const { t } = useTranslation();
   const actualIsDisabled = isBusy || isDisabled;
 
   return (
@@ -92,10 +96,10 @@ const QueryForm = React.memo(function QueryForm({ formAction, isBusy, isDisabled
             </div>
             <div>
               <CardTitle className="text-xl sm:text-2xl md:text-3xl font-extrabold text-primary tracking-tight">
-                Launch Your Exploration
+                {t('queryForm.title')}
               </CardTitle>
               <CardDescription className="text-muted-foreground text-sm sm:text-base mt-1 sm:mt-1.5 max-w-lg">
-                {actualIsDisabled && !isBusy ? "Log in to articulate your research challenge." : "Articulate your research challenge. ScholarAI will map the knowledge frontier."}
+                {actualIsDisabled && !isBusy ? t('queryForm.descriptionAuth') : t('queryForm.description')}
               </CardDescription>
             </div>
           </div>

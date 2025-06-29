@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Loader2, CheckCircle, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface GeneratingStateDisplayProps {
   title: string;
@@ -14,6 +15,7 @@ interface GeneratingStateDisplayProps {
 }
 
 const GeneratingStateDisplay: React.FC<GeneratingStateDisplayProps> = React.memo(function GeneratingStateDisplay({ title, description, steps }) {
+  const { t } = useTranslation();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
   useEffect(() => {
@@ -89,7 +91,7 @@ const GeneratingStateDisplay: React.FC<GeneratingStateDisplayProps> = React.memo
           </div>
         </CardContent>
         <CardFooter className="p-4 sm:p-5 md:p-6 bg-secondary/20 dark:bg-secondary/10 border-t">
-            <p className="text-xs text-muted-foreground text-center w-full">Please wait, this process can take some time. Do not navigate away from the page.</p>
+            <p className="text-xs text-muted-foreground text-center w-full">{t('generating.waitMessage')}</p>
         </CardFooter>
       </Card>
     </motion.div>

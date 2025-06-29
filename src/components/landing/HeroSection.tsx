@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { ArrowRight, UploadCloud, Info, Sparkles, Brain, FileText, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface HeroSectionProps {
   queryFormSlot: React.ReactNode;
@@ -16,6 +17,7 @@ interface HeroSectionProps {
 }
 
 const HeroSection = React.memo(function HeroSection({ queryFormSlot, isAuthenticated, authLoading }: HeroSectionProps) {
+  const { t } = useTranslation();
   const FADE_UP_ANIMATION_VARIANTS = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
@@ -41,13 +43,13 @@ const HeroSection = React.memo(function HeroSection({ queryFormSlot, isAuthentic
           className="max-w-3xl mx-auto"
         >
           <div className="inline-block rounded-lg bg-primary/10 px-3 py-1 text-sm text-primary mb-4 sm:mb-6 font-medium shadow-sm border border-primary/20">
-            <Sparkles className="inline-block h-4 w-4 mr-1.5 -mt-0.5" /> Advanced AI Research Platform
+            <Sparkles className="inline-block h-4 w-4 mr-1.5 -mt-0.5" /> {t('hero.badge')}
           </div>
           <h1 className="hero-title text-4xl font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl bg-clip-text text-transparent bg-gradient-to-br from-primary via-primary/80 to-accent">
-            Uncover Deeper Insights with Foss AI
+            {t('hero.title')}
           </h1>
           <p className="mt-6 max-w-xl mx-auto text-lg text-muted-foreground sm:text-xl md:text-2xl">
-            Leverage cutting-edge AI to formulate research queries, synthesize knowledge, visualize concepts, and generate comprehensive reports effortlessly.
+            {t('hero.subtitle')}
           </p>
         </motion.div>
 
@@ -78,7 +80,7 @@ const HeroSection = React.memo(function HeroSection({ queryFormSlot, isAuthentic
                 )}
             >
                 <NextLink href="/file-report">
-                    <UploadCloud className="mr-2 h-5 w-5" /> Or, Analyze Your Own File
+                    <UploadCloud className="mr-2 h-5 w-5" /> {t('hero.analyzeFile')}
                 </NextLink>
             </Button>
         </motion.div>
@@ -92,7 +94,7 @@ const HeroSection = React.memo(function HeroSection({ queryFormSlot, isAuthentic
                 className="mt-6 text-xs text-muted-foreground"
             >
                 <Info className="inline h-3 w-3 mr-1 -mt-0.5"/>
-                Sign up or log in to access the full suite of Foss AI research tools.
+                {t('hero.authPrompt')}
             </motion.p>
         )}
       </div>

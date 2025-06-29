@@ -1,3 +1,4 @@
+
 // src/components/scholar-ai/FormulatedQueriesDisplay.tsx
 'use client';
 
@@ -9,6 +10,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 export interface FormulatedQueriesDisplayProps {
   queries: string[];
@@ -20,6 +22,7 @@ export interface FormulatedQueriesDisplayProps {
 }
 
 function SubmitButtonFormulatedQueries({ isBusy }: { isBusy: boolean }) {
+  const { t } = useTranslation();
   const { pending } = useFormStatus();
   const isDisabled = pending || isBusy; 
   return (
@@ -36,7 +39,7 @@ function SubmitButtonFormulatedQueries({ isBusy }: { isBusy: boolean }) {
         ) : (
           <Zap className="mr-2 h-4 w-4 sm:mr-2.5 sm:h-5 sm:w-5 group-hover:animate-pulse transition-transform duration-200" /> 
         )}
-      {isBusy && !pending ? "Login to Synthesize" : "Synthesize & Illuminate"}
+      {isBusy && !pending ? t('formulatedQueries.buttonLabelAuth') : t('formulatedQueries.buttonLabel')}
       <ArrowRight className="ml-2 h-4 w-4 sm:ml-2.5 sm:h-5 sm:w-5 opacity-80 group-hover:opacity-100 group-hover:translate-x-1 transition-transform duration-200" />
     </Button>
   );
@@ -53,10 +56,11 @@ function FormulatedQueriesDisplayInner({
     keyConcepts?: string[] | null,
     potentialSubTopics?: string[] | null,
 }) {
+  const { t } = useTranslation();
   const queryIcons = [FileSearch2, DatabaseZap, Telescope, Brain, Sparkles, Layers, Activity];
   
   const renderListItems = (items: string[] | null | undefined, Icon: React.ElementType, itemClassName?: string) => {
-    if (!items || items.length === 0) return <p className="text-sm text-muted-foreground italic px-1">None suggested for this query.</p>;
+    if (!items || items.length === 0) return <p className="text-sm text-muted-foreground italic px-1">{t('formulatedQueries.noneSuggested')}</p>;
     return (
       <ul className="space-y-2">
         {items.map((item, index) => (
@@ -76,7 +80,7 @@ function FormulatedQueriesDisplayInner({
   };
   
   const renderKeyConcepts = (concepts: string[] | null | undefined) => {
-    if (!concepts || concepts.length === 0) return <p className="text-sm text-muted-foreground italic px-1">None identified for this query.</p>;
+    if (!concepts || concepts.length === 0) return <p className="text-sm text-muted-foreground italic px-1">{t('formulatedQueries.noneSuggested')}</p>;
     return (
         <div className="flex flex-wrap gap-2 pt-1">
             {concepts.map((concept, index) => (
@@ -100,7 +104,7 @@ function FormulatedQueriesDisplayInner({
         <AccordionItem value="search-queries" className="bg-card border-none rounded-lg shadow-md overflow-hidden">
           <AccordionTrigger className="px-4 py-3 text-md font-semibold hover:no-underline text-primary bg-primary/5 hover:bg-primary/10 transition-colors">
             <div className="flex items-center">
-              <Search className="h-5 w-5 mr-2.5 text-primary/80" /> AI-Forged Search Vectors
+              <Search className="h-5 w-5 mr-2.5 text-primary/80" /> {t('formulatedQueries.vectorsTitle')}
             </div>
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4 pt-2">
@@ -123,7 +127,7 @@ function FormulatedQueriesDisplayInner({
                 })}
               </ul>
             ) : (
-              <p className="text-center text-muted-foreground py-4 sm:py-6 text-sm sm:text-base">No search vectors were generated for the provided question.</p>
+              <p className="text-center text-muted-foreground py-4 sm:py-6 text-sm sm:text-base">{t('formulatedQueries.noVectors')}</p>
             )}
           </AccordionContent>
         </AccordionItem>
@@ -132,7 +136,7 @@ function FormulatedQueriesDisplayInner({
            <AccordionItem value="alternative-phrasings" className="bg-card border-none rounded-lg shadow-md overflow-hidden">
               <AccordionTrigger className="px-4 py-3 text-md font-semibold hover:no-underline text-primary bg-primary/5 hover:bg-primary/10 transition-colors">
                 <div className="flex items-center">
-                  <MessagesSquare className="h-5 w-5 mr-2.5 text-primary/80" /> Alternative Phrasings
+                  <MessagesSquare className="h-5 w-5 mr-2.5 text-primary/80" /> {t('formulatedQueries.phrasingsTitle')}
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 pt-2">
@@ -145,7 +149,7 @@ function FormulatedQueriesDisplayInner({
             <AccordionItem value="key-concepts" className="bg-card border-none rounded-lg shadow-md overflow-hidden">
               <AccordionTrigger className="px-4 py-3 text-md font-semibold hover:no-underline text-primary bg-primary/5 hover:bg-primary/10 transition-colors">
                 <div className="flex items-center">
-                  <Tag className="h-5 w-5 mr-2.5 text-primary/80" /> Key Concepts
+                  <Tag className="h-5 w-5 mr-2.5 text-primary/80" /> {t('formulatedQueries.conceptsTitle')}
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 pt-2">
@@ -158,7 +162,7 @@ function FormulatedQueriesDisplayInner({
             <AccordionItem value="sub-topics" className="bg-card border-none rounded-lg shadow-md overflow-hidden">
               <AccordionTrigger className="px-4 py-3 text-md font-semibold hover:no-underline text-primary bg-primary/5 hover:bg-primary/10 transition-colors">
                 <div className="flex items-center">
-                  <ListTree className="h-5 w-5 mr-2.5 text-primary/80" /> Potential Sub-Topics
+                  <ListTree className="h-5 w-5 mr-2.5 text-primary/80" /> {t('formulatedQueries.subTopicsTitle')}
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 pt-2">
@@ -180,6 +184,7 @@ const FormulatedQueriesDisplay = React.memo(function FormulatedQueriesDisplay({
     formAction, 
     isBusy 
 }: FormulatedQueriesDisplayProps) {
+  const { t } = useTranslation();
   const isAuthLocked = isBusy && queries.length > 0; // Determine if busy due to auth lock specifically
 
   return (
@@ -196,10 +201,10 @@ const FormulatedQueriesDisplay = React.memo(function FormulatedQueriesDisplay({
             </div>
             <div>
               <CardTitle className="text-lg sm:text-xl md:text-2xl font-extrabold text-primary tracking-tight">
-                Expanded Research Guidance
+                {t('formulatedQueries.title')}
               </CardTitle>
               <CardDescription className="text-muted-foreground text-sm sm:text-base mt-1 sm:mt-1.5 max-w-lg">
-                {isAuthLocked ? "Log in to synthesize insights." : "Review AI-crafted queries and suggestions. Synthesize to distill key insights."}
+                {isAuthLocked ? t('formulatedQueries.descriptionAuth') : t('formulatedQueries.description')}
               </CardDescription>
             </div>
           </div>

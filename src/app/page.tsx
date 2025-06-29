@@ -53,6 +53,7 @@ import NextImage from 'next/image';
 import { cn } from '@/lib/utils';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged, type User } from 'firebase/auth';
+import { useTranslation } from 'react-i18next';
 
 type AppState = 'initial' | 'queries_formulated' | 'summary_generated' | 'report_generated';
 
@@ -84,6 +85,7 @@ const initialReportActionState: GenerateReportActionState = {
 
 
 export default function ScholarAIPage() {
+  const { t } = useTranslation();
   const [appState, setAppState] = useState<AppState>('initial');
   const [researchQuestion, setResearchQuestion] = useState<string>('');
   const [queryFormInputValue, setQueryFormInputValue] = useState<string>('');
@@ -246,14 +248,14 @@ export default function ScholarAIPage() {
 
   const handleGenerateFullReport = useCallback(() => {
      if (!currentUser) {
-      toast({ title: "Authentication Required", description: "Please log in or sign up to generate reports.", variant: "destructive", duration: 5000 });
+      toast({ title: t('actions.authRequiredToastTitle'), description: t('actions.authRequiredToastDescription'), variant: "destructive", duration: 5000 });
       return;
     }
     const currentResearchQuestion = researchQuestion.trim();
      if (!currentResearchQuestion || currentResearchQuestion.length < 10) {
       toast({
-        title: "🚫 Cannot Generate Report",
-        description: "The research question is too short or missing. Please ensure a valid research question (min. 10 characters) was used to start this session.",
+        title: t('actions.questionTooShortToastTitle'),
+        description: t('actions.questionTooShortToastDescription'),
         variant: "destructive",
         duration: 6000,
       });
@@ -271,7 +273,7 @@ export default function ScholarAIPage() {
       }
       reportFormAction(formData);
     });
-  }, [researchQuestion, researchSummary, generateCharts, reportFormAction, toast, currentUser]);
+  }, [researchQuestion, researchSummary, generateCharts, reportFormAction, toast, currentUser, t]);
 
   const isLoading = isFormulatingQueries || isSynthesizingResearch || isReportGenerating;
   const isFormDisabled = (!currentUser && authChecked) || isLoading;
@@ -290,12 +292,12 @@ export default function ScholarAIPage() {
     if (isFormulatingQueries) {
       return (
         <GeneratingStateDisplay
-          title="Forging Your Research Path..."
-          description="Our AI is analyzing your question to create a tailored research strategy."
+          title={t('generating.titleForge')}
+          description={t('generating.descriptionForge')}
           steps={[
-            { text: 'Analyzing core concepts...', duration: 2000 },
-            { text: 'Identifying related topics...', duration: 2500 },
-            { text: 'Formulating optimal search vectors...', duration: 3000 },
+            { text: t('generating.stepAnalyze'), duration: 2000 },
+            { text: t('generating.stepIdentify'), duration: 2500 },
+            { text: t('generating.stepFormulate'), duration: 3000 },
           ]}
         />
       );
@@ -304,13 +306,13 @@ export default function ScholarAIPage() {
     if (isSynthesizingResearch) {
       return (
         <GeneratingStateDisplay
-          title="Illuminating Key Insights..."
-          description="The AI is synthesizing information from its knowledge base to build a concise overview."
+          title={t('generating.titleIlluminate')}
+          description={t('generating.descriptionIlluminate')}
           steps={[
-            { text: 'Processing search vectors...', duration: 2000 },
-            { text: 'Gathering conceptual information...', duration: 3000 },
-            { text: 'Synthesizing key themes...', duration: 3500 },
-            { text: 'Drafting initial summary...', duration: 2000 },
+            { text: t('generating.stepProcess'), duration: 2000 },
+            { text: t('generating.stepGather'), duration: 3000 },
+            { text: t('generating.stepSynthesize'), duration: 3500 },
+            { text: t('generating.stepDraft'), duration: 2000 },
           ]}
         />
       );
@@ -319,15 +321,15 @@ export default function ScholarAIPage() {
     if (isReportGenerating) {
         return (
           <GeneratingStateDisplay
-            title="Crafting Your Comprehensive Report..."
-            description="This is the most intensive step. The AI is now writing your multi-section report."
+            title={t('generating.titleCraft')}
+            description={t('generating.descriptionCraft')}
             steps={[
-              { text: 'Structuring report outline...', duration: 3000 },
-              { text: 'Writing introduction & literature review...', duration: 7000 },
-              { text: 'Developing key themes & methodology...', duration: 7000 },
-              { text: 'Analyzing results & suggesting charts...', duration: 6000 },
-              { text: 'Drafting discussion & conclusion...', duration: 7000 },
-              { text: 'Assembling final document...', duration: 3000 },
+              { text: t('generating.stepStructure'), duration: 3000 },
+              { text: t('generating.stepWriteIntro'), duration: 7000 },
+              { text: t('generating.stepDevelopThemes'), duration: 7000 },
+              { text: t('generating.stepAnalyzeResults'), duration: 6000 },
+              { text: t('generating.stepDraftDiscussion'), duration: 7000 },
+              { text: t('generating.stepAssemble'), duration: 3000 },
             ]}
           />
         );
@@ -363,7 +365,7 @@ export default function ScholarAIPage() {
                   </div>
                   <div>
                     <CardTitle className="text-lg sm:text-xl md:text-2xl font-semibold text-primary tracking-tight">
-                      Your Research Focus
+                      {t('summaryDisplay.guidingQuestion')}
                     </CardTitle>
                     <CardDescription className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-xl">The central question guiding this research: <strong className="text-foreground/90">"{researchQuestion}"</strong></CardDescription>
                   </div>
@@ -386,7 +388,7 @@ export default function ScholarAIPage() {
                     size="lg"
                     className="w-full sm:w-auto border-input hover:bg-muted/20 hover:text-muted-foreground px-6 sm:px-8 rounded-xl"
                     icon={ArrowLeft}
-                    label="Edit Question"
+                    label={t('actions.goBackEditQuestion')}
                     aria-label="Go back to edit research question"
                     disabled={isLoading}
                   />
@@ -412,7 +414,7 @@ export default function ScholarAIPage() {
                   size="lg"
                   className="w-full sm:w-auto border-input hover:bg-muted/20 hover:text-muted-foreground px-6 sm:px-8 rounded-xl"
                   icon={ArrowLeft}
-                  label="Refine Queries"
+                  label={t('actions.goBackRefineQueries')}
                   aria-label="Go back to formulated queries"
                   disabled={isLoading}
                 />
@@ -423,7 +425,7 @@ export default function ScholarAIPage() {
                   className="w-full sm:w-auto bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/80 hover:to-primary px-6 sm:px-8 rounded-xl"
                   pending={isReportGenerating}
                   icon={BookOpen}
-                  label="Generate Full Report"
+                  label={t('actions.generateReport')}
                   aria-label="Generate Full Research Report"
                 />
             </CardFooter>
@@ -445,7 +447,7 @@ export default function ScholarAIPage() {
                   size="lg"
                   className="w-full sm:w-auto border-input hover:bg-muted/20 hover:text-muted-foreground px-6 sm:px-8 rounded-xl"
                   icon={ArrowLeft}
-                  label="View Summary"
+                  label={t('actions.goBackViewSummary')}
                   aria-label="Go back to research summary"
                   disabled={isLoading}
                 />
@@ -455,7 +457,7 @@ export default function ScholarAIPage() {
                 size="lg"
                 className="w-full sm:w-auto bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/80 hover:to-primary px-6 sm:px-8 rounded-xl"
                 icon={RotateCcw}
-                label="Start New Research Session"
+                label={t('actions.startNew')}
                 aria-label="Start a new research session"
               />
             </CardFooter>

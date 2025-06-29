@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/chart';
 import { cn } from '@/lib/utils';
 import type { GenerateResearchReportOutput } from '@/ai/flows/generate-research-report'; // To get ChartSuggestion type
+import { useTranslation } from 'react-i18next';
 
 // Infer ChartSuggestion type from a specific part of GenerateResearchReportOutput
 type ChartSuggestion = Exclude<Exclude<GenerateResearchReportOutput['resultsAndAnalysis'], undefined>[number]['chartSuggestion'], undefined>;
@@ -41,21 +42,19 @@ interface PlaceholderChartProps {
   pdfChartId?: string;
 }
 
-const DEFAULT_CHART_TITLE = "Illustrative Data Visualization";
-const DEFAULT_CHART_DESCRIPTION = "This chart visualizes AI-generated sample data related to the report section.";
-
 export default function PlaceholderChart({
   chartSuggestion,
   pdfChartId,
 }: PlaceholderChartProps) {
+  const { t } = useTranslation();
 
   if (!chartSuggestion || chartSuggestion.type === 'none') {
     return (
       <Card id={pdfChartId} className="border-dashed border-border/40 bg-secondary/20 mt-3 shadow-sm flex items-center justify-center h-[260px] rounded-xl">
         <CardContent className="p-4 text-center">
           <ImageIconLucide className="h-10 w-10 text-muted-foreground mx-auto mb-2.5" />
-          <p className="text-sm font-medium text-muted-foreground">No Visual Chart Suggested</p>
-          <p className="text-xs text-muted-foreground/80 mt-1">The content in this section is primarily narrative or qualitative, and a specific chart visualization was not proposed by the AI.</p>
+          <p className="text-sm font-medium text-muted-foreground">{t('placeholderChart.noChartTitle')}</p>
+          <p className="text-xs text-muted-foreground/80 mt-1">{t('placeholderChart.noChartDescription')}</p>
         </CardContent>
       </Card>
     );
@@ -70,8 +69,8 @@ export default function PlaceholderChart({
     categoryDataKey: categoryDataKeyConfig,
   } = chartSuggestion;
 
-  const displayTitle = title || DEFAULT_CHART_TITLE;
-  const displayDescription = description || DEFAULT_CHART_DESCRIPTION;
+  const displayTitle = title || t('placeholderChart.defaultTitle');
+  const displayDescription = description || t('placeholderChart.defaultDescription');
 
   let chartData: Record<string, string>[] | undefined | null = null;
   let seriesDataKeysConfig: { key: string; label: string }[] | undefined | null = null;
@@ -85,10 +84,10 @@ export default function PlaceholderChart({
             if (Array.isArray(parsed) && parsed.every(item => item && typeof item.key === 'string' && typeof item.label === 'string')) {
                 seriesDataKeysConfig = parsed;
             } else {
-                dataError = "AI-generated seriesDataKeys is not a valid JSON string of key/label objects.";
+                dataError = t('placeholderChart.seriesError');
             }
         } catch (e) {
-            dataError = "Failed to parse AI-generated seriesDataKeys JSON string.";
+            dataError = t('placeholderChart.parseError');
         }
     }
 
@@ -108,13 +107,13 @@ export default function PlaceholderChart({
           dataError = "AI-generated sample data string is not a valid JSON array of objects.";
         }
       } catch (e) {
-        dataError = "Failed to parse AI-generated sample data JSON string.";
+        dataError = t('placeholderChart.parseError');
         console.error("Chart data parsing error:", e, "Raw data string:", rawChartDataString);
       }
     }
 
     if (!dataError && (!chartData || chartData.length === 0)) {
-      dataError = "AI-generated sample data is missing or empty after parsing.";
+      dataError = t('placeholderChart.emptyError');
     }
   }
 
@@ -123,10 +122,10 @@ export default function PlaceholderChart({
   const hasValidCategoryKey = (chartType === 'scatter' && chartData && seriesDataKeysConfig && seriesDataKeysConfig[0]?.key) || (categoryDataKeyConfig && categoryDataKeyConfig.trim() !== '');
 
   if (chartType !== 'none' && !dataError) {
-    if (!hasValidSeriesKeys) dataError = "AI-provided series data key configuration is missing or empty.";
-    else if (!hasValidCategoryKey && (chartType === 'bar' || chartType === 'line' || chartType === 'pie')) dataError = "AI-provided category data key configuration is missing.";
+    if (!hasValidSeriesKeys) dataError = t('placeholderChart.seriesError');
+    else if (!hasValidCategoryKey && (chartType === 'bar' || chartType === 'line' || chartType === 'pie')) dataError = t('placeholderChart.keyError');
     else if (chartType === 'scatter' && (!categoryDataKeyConfig || seriesDataKeysConfig!.length < 1)) {
-        dataError = "Scatter charts require at least one series key for Y-axis values and a category key for X-axis values from the AI's sample data.";
+        dataError = t('placeholderChart.scatterError');
     }
   }
 
@@ -138,11 +137,11 @@ export default function PlaceholderChart({
             <div className="mx-auto bg-destructive/20 p-2 rounded-full w-fit">
                 <AlertCircle className="h-7 w-7 text-destructive" />
             </div>
-            <CardTitle className="text-base font-semibold text-destructive/90 mt-2">{displayTitle}</CardTitle>
+            <CardTitle className="text-base font-semibold text-destructive/90 mt-2">{t('placeholderChart.errorTitle')}</CardTitle>
         </CardHeader>
         <CardContent className="p-4 pt-0 text-center">
           <p className="text-sm text-destructive/80">{dataError}</p>
-          <p className="text-xs text-destructive/70 mt-1.5">The AI did not provide sufficient or correctly formatted data/configuration for this visualization.</p>
+          <p className="text-xs text-destructive/70 mt-1.5">{t('placeholderChart.errorDescription')}</p>
         </CardContent>
       </Card>
     );
@@ -280,7 +279,7 @@ export default function PlaceholderChart({
       );
       break;
     default:
-      ChartComponent = <p className="text-sm text-muted-foreground p-4 text-center">Unsupported chart type: {chartType}</p>;
+      ChartComponent = <p className="text-sm text-muted-foreground p-4 text-center">{t('placeholderChart.unsupportedError', { chartType })}</p>;
   }
 
   let iconForTitle;
