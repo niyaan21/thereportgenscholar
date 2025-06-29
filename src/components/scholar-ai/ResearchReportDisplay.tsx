@@ -4,8 +4,9 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'; 
 import type { GenerateResearchReportOutput } from '@/ai/flows/generate-research-report';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { FileText, BookOpen, MessageSquareQuote, ThumbsUp, Settings, LightbulbIcon, ShieldAlert, Library, UsersRound, ClipboardList, Milestone, Scale, GitBranch, DownloadCloud, BookText as AppendixIcon, BookMarked, Activity, FileType, FileJson, Loader2, Maximize, Minimize, Volume2, XCircle, ShieldCheck } from 'lucide-react';
+import { FileText, BookOpen, MessageSquareQuote, ThumbsUp, Settings, LightbulbIcon, ShieldAlert, Library, UsersRound, ClipboardList, Milestone, Scale, GitBranch, DownloadCloud, BookText as AppendixIcon, BookMarked, Activity, FileType, FileJson, Loader2, Maximize, Minimize, Volume2, XCircle, ShieldCheck, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import jsPDF from 'jspdf';
@@ -30,18 +31,22 @@ export interface ResearchReportDisplayProps {
 const Section: React.FC<{ title: string; icon?: React.ReactNode; children: React.ReactNode; className?: string, value: string, onReadAloud: () => void, isReading: boolean, canRead: boolean }> = ({ title, icon, children, className, value, onReadAloud, isReading, canRead }) => (
   <div>
     <AccordionItem value={value} className={cn('border-b-0 mb-3 sm:mb-3.5 rounded-lg sm:rounded-xl overflow-hidden shadow-lg bg-card hover:shadow-primary/15 transition-all duration-300', className)}>
-      <AccordionTrigger className="py-3 px-4 sm:py-4 sm:px-6 hover:no-underline hover:bg-secondary/70 dark:hover:bg-secondary/35 transition-colors duration-200 rounded-t-lg sm:rounded-t-xl data-[state=open]:rounded-b-none data-[state=open]:border-b data-[state=open]:border-border/80 data-[state=open]:bg-accent/10 dark:data-[state=open]:bg-accent/20 group">
-        <div className="flex-1 flex items-center text-left">
-           {icon && <span className="mr-2.5 sm:mr-3.5 text-accent group-data-[state=open]:text-accent-foreground transition-colors duration-200">{icon}</span>}
-          <h3 className="text-md sm:text-lg md:text-xl font-semibold text-primary group-hover:text-accent transition-colors duration-200">
-            {title}
-          </h3>
+      <AccordionPrimitive.Header className="flex w-full items-center group data-[state=open]:rounded-b-none data-[state=open]:border-b data-[state=open]:border-border/80 data-[state=open]:bg-accent/10 dark:data-[state=open]:bg-accent/20 hover:bg-secondary/70 dark:hover:bg-secondary/35 transition-colors duration-200">
+        <AccordionTrigger className="flex-1 text-left px-4 py-3 sm:py-4 sm:px-6 hover:no-underline bg-transparent">
+          <div className="flex items-center">
+            {icon && <span className="mr-2.5 sm:mr-3.5 text-accent group-data-[state=open]:text-accent-foreground transition-colors duration-200">{icon}</span>}
+            <h3 className="text-md sm:text-lg md:text-xl font-semibold text-primary group-hover:text-accent transition-colors duration-200">
+              {title}
+            </h3>
+          </div>
+        </AccordionTrigger>
+        <div className="pr-4 flex-shrink-0">
+          <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onReadAloud(); }} disabled={!canRead} className="h-8 w-8 rounded-full hover:bg-accent/20 focus:bg-accent/20 text-muted-foreground hover:text-accent-foreground ml-2">
+              {isReading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Volume2 className="h-5 w-5" />}
+              <span className="sr-only">Read aloud</span>
+          </Button>
         </div>
-         <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onReadAloud(); }} disabled={!canRead} className="h-8 w-8 rounded-full hover:bg-accent/20 focus:bg-accent/20 text-muted-foreground hover:text-accent-foreground ml-2">
-            {isReading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Volume2 className="h-5 w-5" />}
-            <span className="sr-only">Read aloud</span>
-        </Button>
-      </AccordionTrigger>
+      </AccordionPrimitive.Header>
       <AccordionContent className="bg-card rounded-b-lg sm:rounded-b-xl">
         <div id={`section-content-${value}`} className="text-foreground/90 text-sm sm:text-base leading-relaxed prose prose-sm sm:prose-base dark:prose-invert max-w-none marker:text-accent px-4 py-4 sm:px-6 sm:py-5 pt-3 sm:pt-4">
           {children}

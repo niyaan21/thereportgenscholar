@@ -25,19 +25,17 @@ const AccordionTrigger = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>
 >(({ className, children, ...props }, ref) => (
-  <AccordionPrimitive.Header className="flex">
-    <AccordionPrimitive.Trigger
-      ref={ref}
-      className={cn(
-        "flex flex-1 items-center justify-between py-4 font-medium transition-all hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/70 focus-visible:ring-offset-1 focus-visible:ring-offset-background data-[state=open]:text-primary data-[state=open]:bg-accent/10 dark:data-[state=open]:bg-accent/20 [&[data-state=open]>svg]:rotate-180 [&[data-state=open]>svg]:text-accent-foreground",
-        className
-      )}
-      {...props}
-    >
-      {children}
-      <ChevronDown className="h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-300 ease-out group-data-[state=open]:text-accent-foreground" />
-    </AccordionPrimitive.Trigger>
-  </AccordionPrimitive.Header>
+  <AccordionPrimitive.Trigger
+    ref={ref}
+    className={cn(
+      "flex flex-1 items-center font-medium transition-all hover:underline data-[state=open]:text-primary [&[data-state=open]>svg]:rotate-180 [&[data-state=open]>svg]:text-accent-foreground",
+      className
+    )}
+    {...props}
+  >
+    {children}
+    <ChevronDown className="h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-300 ease-out group-data-[state=open]:text-accent-foreground" />
+  </AccordionPrimitive.Trigger>
 ))
 AccordionTrigger.displayName = AccordionPrimitive.Trigger.displayName
 
