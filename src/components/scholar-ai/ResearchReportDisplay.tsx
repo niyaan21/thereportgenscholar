@@ -425,7 +425,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
     if (report.ethicalConsiderations && report.ethicalConsiderations.trim() !== "") await addPdfSection("Ethical Considerations & Impact", report.ethicalConsiderations);
 
     if (report.references && report.references.length > 0) {
-        await addPdfSection("References (AI Synthesized)", report.references, async (ref: string, index: number, docRef, currentY, addTextFn) => {
+        await addPdfSection("References", report.references, async (ref: string, index: number, docRef, currentY, addTextFn) => {
             yPosition = currentY;
             addTextFn(`${index + 1}. ${ref}`, 9, {}, 15);
             yPosition += 14 / 2;
@@ -642,7 +642,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
             )}
 
             {report.references && report.references.length > 0 && (
-              <Section title="References (AI Synthesized)" icon={sectionIcons.references} value="references" onReadAloud={() => {}} isReading={false} canRead={false}>
+              <Section title="References" icon={sectionIcons.references} value="references" onReadAloud={() => {}} isReading={false} canRead={false}>
                 <ul className="list-decimal list-inside space-y-2 sm:space-y-2.5 text-xs sm:text-sm">
                   {report.references.map((ref, index) => (
                     <li key={index} className="leading-normal text-foreground/80">{ref}</li>

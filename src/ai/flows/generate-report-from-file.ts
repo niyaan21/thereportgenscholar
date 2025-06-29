@@ -57,7 +57,7 @@ const ReportOutputSchema = z.object({
   limitations: z.string().optional().describe('A detailed discussion of potential limitations of the research, analysis, or typical approaches to this topic (approx. 200-300 words).'),
   futureWork: z.string().optional().describe('Specific and actionable suggestions for future research directions stemming from the report (approx. 200-300 words).'),
   ethicalConsiderations: z.string().optional().describe('Discussion of any relevant ethical considerations related to the research topic, data handling, or methodology (approx. 150-250 words).'),
-  references: z.array(z.string()).optional().describe('A list of 3-10 placeholder references in a generic academic format, relevant to the file content and guidance query.'),
+  references: z.array(z.string()).optional().describe('A list of 3-10 real, relevant academic references in a standard format (e.g., APA style) that are relevant to the file content and guidance query. Use your knowledge base to find actual publications.'),
   appendices: z.array(z.object({
     title: z.string().describe('Title of the appendix section (e.g., "Appendix A: Detailed Data from File").'),
     content: z.string().describe('Content of the appendix, e.g., placeholder for detailed data tables, or extracted text sections.')
@@ -146,10 +146,10 @@ Key report requirements:
 6.  **Methodology (if applicable)**: (approx. 300-500 words) If the file describes a methodology, summarize it. Otherwise, discuss general methodologies relevant to analyzing such content or topic.
 7.  **Results and Analysis from File**: Present 2-4 sections. Each 'sectionTitle' and 'content' (approx. 200-300 words per section) analyzing data/information from the file.
     {{#if generateCharts}}
-    Include 'chartSuggestion' where appropriate.
+    CRITICAL: Include 'chartSuggestion' where appropriate.
     *   For 'chartSuggestion': If data in the file lends itself to visualization (or if hypothetical data related to the topic could be visualized):
         *   Specify its 'type' (bar, line, pie, scatter, or none).
-        *   If type is NOT 'none', you MUST provide 'dataDescription', 'categoryDataKey', 'seriesDataKeys', and 'data'. If you determine a chart is appropriate, you MUST generate valid sample data for it; failure to do so will result in an error.
+        *   MANDATORY: If type is NOT 'none', you MUST provide 'dataDescription', 'categoryDataKey', 'seriesDataKeys', and a NON-EMPTY 'data' field. If you determine a chart is appropriate, you MUST generate valid sample data for it; failure to do so will result in an error. If you cannot generate valid data, you MUST set 'type' to 'none'.
         *   'title' for the chart is optional.
         *   'xAxisLabel' and 'yAxisLabel' are optional.
         *   'dataDescription' (what it shows, e.g., "Trends of X over Y time, segmented by Group Z").
@@ -166,7 +166,7 @@ Key report requirements:
 10. **Limitations**: (approx. 150-250 words) Discuss limitations of the information in the file or the analysis.
 11. **Future Work**: (approx. 150-250 words) Suggest future work based on the file's content.
 12. **Ethical Considerations (if applicable)**: (approx. 100-200 words) Discuss ethics if relevant.
-13. **References**: (3-10 placeholders) List references if mentioned in the file, or generic relevant ones.
+13. **References**: Provide 3-10 real, relevant academic references in a standard format (e.g., APA style). Use your knowledge base to find actual publications related to the file content and guidance query. Do not invent sources.
 14. **Appendices (Optional)**: (1-2) e.g., for extracted data snippets.
 15. **Glossary (Optional)**: (3-7 terms) Define key terms from the file.
 

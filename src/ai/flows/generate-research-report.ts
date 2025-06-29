@@ -53,7 +53,7 @@ const ResearchReportOutputSchema = z.object({
   limitations: z.string().optional().describe('A detailed discussion of potential limitations of the research, analysis, or typical approaches to this topic (approx. 200-300 words).'),
   futureWork: z.string().optional().describe('Specific and actionable suggestions for future research directions stemming from the report (approx. 200-300 words).'),
   ethicalConsiderations: z.string().optional().describe('Discussion of any relevant ethical considerations related to the research topic, data handling, or methodology (approx. 150-250 words).'),
-  references: z.array(z.string()).optional().describe('A list of 8-15 placeholder references in a generic academic format, like "AI Synthesized Reference X: [Relevant Topic/Concept from research question]".'),
+  references: z.array(z.string()).optional().describe('A list of 8-15 real, relevant academic references in a standard format (e.g., APA style). Use your knowledge base to find actual publications. Do not invent sources.'),
   appendices: z.array(z.object({
     title: z.string().describe('Title of the appendix section (e.g., "Appendix A: Survey Instrument Example").'),
     content: z.string().describe('Content of the appendix, e.g., placeholder for detailed data tables, survey instruments, or complex figures.')
@@ -116,10 +116,10 @@ Key requirements for the report:
 6.  **Detailed Methodology**: (approx. 500-700 words) Describe in great detail the typical or proposed methodologies for investigating such a research question. This should include research design choices (e.g., qualitative, quantitative, mixed-methods), specific data collection approaches (even if hypothetical, explain them thoroughly), sampling strategies, instrumentation, and advanced analytical techniques. Discuss the rationale for these choices and potential challenges.
 7.  **Results and Analysis**: Provide 3-5 distinct sections. Each should have a 'sectionTitle', very detailed 'content' (approx. 300-400 words per section discussing patterns, trends, statistical significance if applicable, and nuanced interpretations).
     {{#if generateCharts}}
-    Each section should also have an optional 'chartSuggestion'.
+    CRITICAL: Each section should also have an optional 'chartSuggestion'.
     *   For 'chartSuggestion': If a chart (bar, line, pie, scatter) would be beneficial for illustrating complex data or findings:
         *   Specify its 'type' (bar, line, pie, scatter, or none).
-        *   **MANDATORY FOR CHARTS**: If type is NOT 'none', you MUST provide 'dataDescription', 'categoryDataKey', 'seriesDataKeys', AND a non-empty 'data' field. If you determine a chart is appropriate, you MUST generate valid sample data for it; failure to do so will result in an error.
+        *   MANDATORY: If type is NOT 'none', you MUST provide 'dataDescription', 'categoryDataKey', 'seriesDataKeys', AND a non-empty 'data' field. If you determine a chart is appropriate, you MUST generate valid sample data for it; failure to do so will result in an error. If you cannot generate valid data, you MUST set 'type' to 'none'.
         *   'title' for the chart is optional.
         *   'xAxisLabel' and 'yAxisLabel' are optional.
         *   'dataDescription' (what it shows, e.g., "Trends of X over Y time, segmented by Group Z").
@@ -137,7 +137,7 @@ Key requirements for the report:
 10. **Limitations**: (approx. 200-300 words) Detail potential limitations of the research, analysis, or typical approaches to this topic, including scope, methodology, and data.
 11. **Future Work**: (approx. 200-300 words) Offer specific, insightful, and actionable suggestions for future research directions stemming from the report. These should be well-justified.
 12. **Ethical Considerations**: (approx. 150-250 words) Discuss any relevant ethical considerations related to the research topic, data handling, methodology, or potential impact.
-13. **References**: Provide 8-15 placeholder academic references in a consistent format (e.g., APA, MLA - choose one or use a generic style like "Author, A. A. (Year). Title of work. Publisher." or "AI Synthesized Reference X: [Detailed Topic/Concept]"). Ensure they are relevant to the research question.
+13. **References**: Provide 8-15 real, relevant academic references in a standard format (e.g., APA style). Use your knowledge base to find actual publications. Do not invent sources.
 14. **Appendices (Optional)**: Suggest 1-3 appendices with a 'title' and placeholder 'content' for supplementary material like detailed data tables, survey instruments, complex figures, or extended theoretical discussions.
 15. **Glossary (Optional)**: Define 7-10 key technical 'term's used in the report with their clear and concise 'definition'.
 
