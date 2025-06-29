@@ -6,7 +6,7 @@ import type { GenerateResearchReportOutput } from '@/ai/flows/generate-research-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { FileText, BookOpen, MessageSquareQuote, ThumbsUp, Settings, LightbulbIcon, ShieldAlert, Library, UsersRound, ClipboardList, Milestone, Scale, GitBranch, DownloadCloud, BookText as AppendixIcon, BookMarked, Activity, FileType, FileJson, Loader2, Maximize, Minimize, Volume2, XCircle, ShieldCheck, ChevronDown } from 'lucide-react';
+import { FileText, BookOpen, MessageSquareQuote, ThumbsUp, Settings, LightbulbIcon, ShieldAlert, Library, UsersRound, ClipboardList, Milestone, Scale, GitBranch, DownloadCloud, BookText as AppendixIcon, BookMarked, Activity, FileType, FileJson, Loader2, Maximize, Minimize, Volume2, XCircle, ShieldCheck, ShieldExclamation, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import jsPDF from 'jspdf';
@@ -14,7 +14,7 @@ import html2canvas from 'html2canvas';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import dynamic from 'next/dynamic';
-import { handleTextToSpeechAction, type TextToSpeechActionState } from '@/app/actions';
+import { handleTextToSpeechAction, type TextToSpeechActionState, handlePlagiarismCheckAction, type PlagiarismCheckActionState } from '@/app/actions';
 import { Progress } from '@/components/ui/progress';
 
 const PlaceholderChart = dynamic(() => import('./PlaceholderChart'), {
@@ -66,6 +66,9 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
   const [readingSection, setReadingSection] = useState<string | null>(null);
   const [audioDataUri, setAudioDataUri] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+
+  const [plagiarismResult, setPlagiarismResult] = useState<PlagiarismCheckActionState['plagiarismReport']>(null);
+  const [isCheckingPlagiarism, setIsCheckingPlagiarism] = useState(false);
 
   useEffect(() => {
     const sections = [
@@ -132,6 +135,26 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
       });
     }
   }, [audioDataUri, toast]);
+
+  const handleRunPlagiarismCheck = async () => {
+    setIsCheckingPlagiarism(true);
+    setPlagiarismResult(null);
+    const fullText = Object.values(report).filter(val => typeof val === 'string').join('\n\n');
+    
+    try {
+        const result = await handlePlagiarismCheckAction(fullText);
+        if (result.success && result.plagiarismReport) {
+            setPlagiarismResult(result.plagiarismReport);
+            toast({ title: "Originality Check Complete", description: "Simulated plagiarism check has finished.", variant: "default" });
+        } else {
+            toast({ title: "Originality Check Failed", description: result.message, variant: "destructive" });
+        }
+    } catch (e) {
+        toast({ title: "An error occurred during originality check", variant: "destructive" });
+    } finally {
+        setIsCheckingPlagiarism(false);
+    }
+  };
 
 
   const renderParagraphs = (text: string | undefined | null): JSX.Element[] | JSX.Element => {
@@ -458,42 +481,73 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
               In-depth exploration for: <em className='font-semibold'>"{originalQuestion}"</em>
             </CardDescription>
           </div>
-           <div className="flex-shrink-0 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 mt-3 sm:mt-0 self-stretch sm:self-center w-full sm:w-auto">
-             <Button variant="outline" size="sm" onClick={handleExpandAll} disabled={isGeneratingPdf} className="bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-md sm:rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm group w-full sm:w-auto">
+        </div>
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 mt-4 sm:mt-5 pt-3 sm:pt-4 border-t border-primary-foreground/20">
+             <Button variant="outline" size="sm" onClick={handleExpandAll} disabled={isGeneratingPdf} className="bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-md sm:rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm group">
                 <Maximize size={16} className="mr-1.5 sm:mr-2" /> Expand All
              </Button>
-             <Button variant="outline" size="sm" onClick={handleCollapseAll} disabled={isGeneratingPdf} className="bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-md sm:rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm group w-full sm:w-auto">
+             <Button variant="outline" size="sm" onClick={handleCollapseAll} disabled={isGeneratingPdf} className="bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-md sm:rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm group">
                 <Minimize size={16} className="mr-1.5 sm:mr-2" /> Collapse All
              </Button>
-             <Button variant="outline" size="sm" onClick={handleDownloadReportJson} disabled={isGeneratingPdf} className="bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-md sm:rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm group w-full sm:w-auto">
+             <Button variant="outline" size="sm" onClick={handleDownloadReportJson} disabled={isGeneratingPdf} className="bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-md sm:rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm group">
                 <FileJson size={16} className="mr-1.5 sm:mr-2 group-hover:animate-pulse" /> Download JSON
              </Button>
-             <Button variant="outline" size="sm" onClick={handleDownloadReportPdf} disabled={isGeneratingPdf} className="bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-md sm:rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm group w-full sm:w-auto">
+             <Button variant="outline" size="sm" onClick={handleDownloadReportPdf} disabled={isGeneratingPdf} className="bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-md sm:rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm group">
                 {isGeneratingPdf ? <Loader2 size={16} className="mr-1.5 sm:mr-2 animate-spin" /> : <FileType size={16} className="mr-1.5 sm:mr-2 group-hover:animate-pulse" />} 
                 {isGeneratingPdf ? "Generating..." : "Download PDF"}
              </Button>
-           </div>
         </div>
       </CardHeader>
 
       <div className="flex-grow min-h-0 bg-background/50">
         <CardContent className="p-4 sm:p-5 md:p-6 lg:p-7">
-          <Card className="mb-4 sm:mb-6 bg-secondary/30 dark:bg-secondary/10 border-border/50 shadow-md">
-              <CardHeader>
-                  <CardTitle className="text-lg flex items-center text-primary/90">
-                      <ShieldCheck className="h-5 w-5 mr-3 text-accent"/>
-                      Originality Check (Planned Feature)
+           <Card className="mb-4 sm:mb-6 bg-secondary/30 dark:bg-secondary/10 border-border/50 shadow-md">
+              <CardHeader className="pb-4">
+                  <CardTitle className="text-lg flex items-center justify-between text-primary/90">
+                      <div className="flex items-center">
+                          <ShieldCheck className="h-5 w-5 mr-3 text-accent"/>
+                          Originality Check
+                      </div>
+                      <Button size="sm" onClick={handleRunPlagiarismCheck} disabled={isCheckingPlagiarism}>
+                        {isCheckingPlagiarism ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <ShieldExclamation className="mr-2 h-4 w-4"/>}
+                        Run Check
+                      </Button>
                   </CardTitle>
-                  <CardDescription className="text-muted-foreground text-xs sm:text-sm">
-                    Foss AI aims to help you produce original work. A plagiarism detection feature is planned to scan content and provide similarity scores.
+                  <CardDescription className="text-muted-foreground text-xs sm:text-sm pt-1">
+                    Simulates a plagiarism check against common sources to gauge content originality.
                   </CardDescription>
               </CardHeader>
-              <CardContent className="text-sm">
-                  <div className="flex items-center gap-4">
-                      <Progress value={15} aria-label="15% similarity check" className="w-1/2" />
-                      <span className="font-mono text-primary/80 text-xs">Similarity: ~15% (placeholder)</span>
+              <CardContent>
+                {isCheckingPlagiarism ? (
+                    <div className="flex items-center text-sm text-muted-foreground"><Loader2 className="mr-2 h-4 w-4 animate-spin"/>Simulating check...</div>
+                ) : plagiarismResult ? (
+                  <div className="space-y-4">
+                     <div>
+                        <div className="flex justify-between items-center mb-1">
+                            <span className="text-sm font-medium text-foreground">Overall Similarity Score</span>
+                            <span className="font-mono text-sm text-primary/80">{plagiarismResult.similarityScore.toFixed(2)}%</span>
+                        </div>
+                        <Progress value={plagiarismResult.similarityScore} aria-label={`${plagiarismResult.similarityScore}% similarity`} />
+                     </div>
+                     {plagiarismResult.matches.length > 0 && (
+                        <div>
+                             <h4 className="font-medium text-sm mb-2 text-foreground">Potential Matches:</h4>
+                             <div className="space-y-3">
+                                {plagiarismResult.matches.map((match, index) => (
+                                    <div key={index} className="p-3 bg-background/50 border rounded-md text-xs">
+                                        <p className="italic text-muted-foreground">"{match.sentence}"</p>
+                                        <p className="mt-1.5 text-right font-medium text-primary/90">
+                                            <span className="font-mono bg-primary/10 px-1.5 py-0.5 rounded">{match.similarity.toFixed(0)}%</span> match with: <span className="italic">{match.source}</span>
+                                        </p>
+                                    </div>
+                                ))}
+                             </div>
+                        </div>
+                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2.5">This feature is not yet active. The UI is a conceptual placeholder.</p>
+                ) : (
+                   <p className="text-sm text-muted-foreground italic">Click "Run Check" to start the simulation.</p>
+                )}
               </CardContent>
           </Card>
 
@@ -547,7 +601,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
                     <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none marker:text-accent">
                       {renderParagraphs(result.content)}
                     </div>
-                    {result.chartSuggestion && result.chartSuggestion.type !== 'none' && (
+                    {result.chartSuggestion && (
                       <div className="mt-4 sm:mt-5 pt-4 sm:pt-5 border-t border-dashed border-border/50">
                         <PlaceholderChart
                           chartSuggestion={result.chartSuggestion}

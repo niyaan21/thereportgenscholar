@@ -16,6 +16,7 @@ const GenerateResearchReportInputSchema = z.object({
     .string()
     .describe('The central research question for the report.'),
   summary: z.string().optional().describe('An existing summary of the research, if available, to provide context and seed the report.'),
+  generateCharts: z.boolean().optional().describe('Flag to indicate if charts should be generated.'),
 });
 export type GenerateResearchReportInput = z.infer<
   typeof GenerateResearchReportInputSchema
@@ -113,19 +114,24 @@ Key requirements for the report:
 4.  **Literature Review**: (approx. 600-800 words) Conduct an in-depth and critical review of existing literature and research relevant to the main research question. Identify key theories, seminal works, prior findings, methodological approaches, and crucial gaps the current research aims to address. Synthesize the literature to build a strong theoretical foundation.
 5.  **Key Themes**: Identify and extensively discuss 4-6 major themes or areas of investigation. Each theme's discussion should be approx. 250-350 words, providing substantial analysis and synthesis of information.
 6.  **Detailed Methodology**: (approx. 500-700 words) Describe in great detail the typical or proposed methodologies for investigating such a research question. This should include research design choices (e.g., qualitative, quantitative, mixed-methods), specific data collection approaches (even if hypothetical, explain them thoroughly), sampling strategies, instrumentation, and advanced analytical techniques. Discuss the rationale for these choices and potential challenges.
-7.  **Results and Analysis**: Provide 3-5 distinct sections. Each should have a 'sectionTitle', very detailed 'content' (approx. 300-400 words per section discussing patterns, trends, statistical significance if applicable, and nuanced interpretations), and an optional 'chartSuggestion'.
+7.  **Results and Analysis**: Provide 3-5 distinct sections. Each should have a 'sectionTitle', very detailed 'content' (approx. 300-400 words per section discussing patterns, trends, statistical significance if applicable, and nuanced interpretations).
+    {{#if generateCharts}}
+    Each section should also have an optional 'chartSuggestion'.
     *   For 'chartSuggestion': If a chart (bar, line, pie, scatter) would be beneficial for illustrating complex data or findings:
         *   Specify its 'type' (bar, line, pie, scatter, or none).
-        *   If type is NOT 'none', you MUST provide 'dataDescription', 'categoryDataKey', 'seriesDataKeys', and 'data'.
+        *   **MANDATORY FOR CHARTS**: If type is NOT 'none', you MUST provide 'dataDescription', 'categoryDataKey', 'seriesDataKeys', AND a non-empty 'data' field.
         *   'title' for the chart is optional.
         *   'xAxisLabel' and 'yAxisLabel' are optional.
         *   'dataDescription' (what it shows, e.g., "Trends of X over Y time, segmented by Group Z").
         *   'categoryDataKey' (the field name for categories/x-axis in your sample data, e.g., "year" or "product_category").
         *   'seriesDataKeys' must be a JSON STRING representing an array of objects, where each object has a "key" and a "label". Example: '[{"key": "revenue", "label": "Total Revenue"}]'.
-        *   'data' must be a JSON STRING representing an array of 2-7 plausible data objects. It is CRUCIAL that you generate plausible, contextually relevant sample data that logically fits the research question and this specific results section. Do not use generic placeholders like 'Value A' or 'Category 1'. Invent realistic numbers and labels. Keys in these data objects MUST exactly match the 'categoryDataKey' and the 'key's defined in 'seriesDataKeys'. All values within these data objects (e.g., for 'sales_total') must be provided as STRINGS (e.g., "1200", "1500.75").
+        *   **CRITICAL**: 'data' must be a NON-EMPTY JSON STRING representing an array of 2-7 plausible data objects. It is CRUCIAL that you generate plausible, contextually relevant sample data that logically fits the research question and this specific results section. Do not use generic placeholders like 'Value A' or 'Category 1'. Invent realistic numbers and labels. Keys in these data objects MUST exactly match the 'categoryDataKey' and the 'key's defined in 'seriesDataKeys'. All values within these data objects (e.g., for 'sales_total') must be provided as STRINGS (e.g., "1200", "1500.75").
             Example (bar/line): If categoryDataKey is "month" and seriesDataKeys is '[{"key": "revenue", "label": "Revenue"}]', the JSON string for 'data' could be: '[{"month": "Jan", "revenue": "1200"}, {"month": "Feb", "revenue": "1500"}, {"month": "Mar", "revenue": "1300"}]'.
             Example (pie): If categoryDataKey is "segment" and seriesDataKeys is '[{"key": "percentage", "label": "Market Share"}]', the JSON string for 'data' could be: '[{"segment": "Alpha", "percentage": "40"}, {"segment": "Beta", "percentage": "30"}, {"segment": "Gamma", "percentage": "30"}]'.
-        *   If no chart is suitable for a section, set chartSuggestion.type to 'none' and other chart-related fields can be omitted. Ensure chart suggestions are meaningful and add value.
+        *   If no chart is suitable for a section, you MUST set chartSuggestion.type to 'none' and other chart-related fields can be omitted.
+    {{else}}
+    Do NOT generate any chart suggestions. For all 'chartSuggestion' fields, you MUST set the 'type' to 'none'.
+    {{/if}}
 8.  **Discussion**: (approx. 600-800 words) Interpret the overall (hypothetical or synthesized) findings in great depth. Discuss their implications, how they relate back to the research question and literature review, and how they contribute to the field. Connect different results, address inconsistencies, and explore alternative interpretations.
 9.  **Conclusion**: (approx. 350-450 words) Provide a robust conclusion summarizing the main findings, their significance, and restating the overall contribution of the research. Reiterate the answers to the research objectives.
 10. **Limitations**: (approx. 200-300 words) Detail potential limitations of the research, analysis, or typical approaches to this topic, including scope, methodology, and data.

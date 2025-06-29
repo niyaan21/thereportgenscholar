@@ -95,6 +95,7 @@ export default function ScholarAIPage() {
   
   const [researchSummary, setResearchSummary] = useState<string>(''); // This will now be editable
   const [summarizedPaperTitles, setSummarizedPaperTitles] = useState<string[]>([]);
+  const [generateCharts, setGenerateCharts] = useState(true);
 
   const [_isTransitionPending, startTransition] = useTransition();
 
@@ -220,6 +221,7 @@ export default function ScholarAIPage() {
       setPotentialSubTopics([]);
       setResearchSummary('');
       setSummarizedPaperTitles([]);
+      setGenerateCharts(true);
       // Reset action states if possible, or rely on new form submissions to overwrite
     });
   }, []);
@@ -264,9 +266,12 @@ export default function ScholarAIPage() {
       if (researchSummary && researchSummary.trim().length > 0) {
         formData.append('summary', researchSummary.trim());
       }
+      if (generateCharts) {
+        formData.append('generateCharts', 'on');
+      }
       reportFormAction(formData);
     });
-  }, [researchQuestion, researchSummary, reportFormAction, toast, currentUser]);
+  }, [researchQuestion, researchSummary, generateCharts, reportFormAction, toast, currentUser]);
 
   const isLoading = isFormulatingQueries || isSynthesizingResearch || isReportGenerating;
   const isFormDisabled = (!currentUser && authChecked) || isLoading;
@@ -397,6 +402,8 @@ export default function ScholarAIPage() {
               onSummaryChange={setResearchSummary} // Pass setter to allow editing
               originalQuestion={researchQuestion}
               summarizedPaperTitles={summarizedPaperTitles}
+              generateCharts={generateCharts}
+              onGenerateChartsChange={setGenerateCharts}
             />
             <CardFooter className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4 p-0 pt-6 md:pt-8 border-t border-border/40 mt-6 md:mt-8">
                 <ActionButton

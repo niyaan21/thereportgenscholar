@@ -85,6 +85,7 @@ const GenerateReportFromFileInputSchema = z.object({
     ),
   fileName: z.string().optional().describe("The name of the uploaded file, for context."),
   generateMindmap: z.boolean().optional().describe("Flag to indicate if mind map data should be generated."),
+  generateCharts: z.boolean().optional().describe("Flag to indicate if charts should be generated."),
 });
 export type GenerateReportFromFileInput = z.infer<
   typeof GenerateReportFromFileInputSchema
@@ -143,7 +144,9 @@ Key report requirements:
 4.  **Literature Review (Contextual Background)**: (approx. 400-600 words) If the file provides context or cites sources, synthesize this. If not, provide general background relevant to the file's topic and guidance.
 5.  **Key Themes from File**: Identify and discuss 2-5 major themes extracted from the file relevant to the guidance. Each theme discussion (approx. 200-300 words).
 6.  **Methodology (if applicable)**: (approx. 300-500 words) If the file describes a methodology, summarize it. Otherwise, discuss general methodologies relevant to analyzing such content or topic.
-7.  **Results and Analysis from File**: Present 2-4 sections. Each 'sectionTitle' and 'content' (approx. 200-300 words per section) analyzing data/information from the file. Include 'chartSuggestion' where appropriate.
+7.  **Results and Analysis from File**: Present 2-4 sections. Each 'sectionTitle' and 'content' (approx. 200-300 words per section) analyzing data/information from the file.
+    {{#if generateCharts}}
+    Include 'chartSuggestion' where appropriate.
     *   For 'chartSuggestion': If data in the file lends itself to visualization (or if hypothetical data related to the topic could be visualized):
         *   Specify its 'type' (bar, line, pie, scatter, or none).
         *   If type is NOT 'none', you MUST provide 'dataDescription', 'categoryDataKey', 'seriesDataKeys', and 'data'.
@@ -152,9 +155,12 @@ Key report requirements:
         *   'dataDescription' (what it shows, e.g., "Trends of X over Y time, segmented by Group Z").
         *   'categoryDataKey' (the field name for categories/x-axis in your sample data, e.g., "item_name").
         *   'seriesDataKeys' must be a JSON STRING representing an array of objects, where each object has a "key" and a "label". Example: '[{"key": "revenue", "label": "Total Revenue"}]'.
-        *   'data' must be a JSON STRING representing an array of 2-7 plausible data objects. It is CRUCIAL that this sample data is derived from patterns or information in the file content if available. If the file lacks specific numerical data, you MUST generate plausible, non-generic sample data that logically fits the file's topic and the user's guidance query. Invent realistic numbers and labels. Avoid placeholders. Keys in 'data' objects MUST match 'categoryDataKey' and the 'key' in the 'seriesDataKeys' objects. IMPORTANT FOR SCHEMA: All values within these data objects (e.g., for 'score') must be provided as STRINGS (e.g., "85", "92.5").
+        *   **MANDATORY FOR CHARTS**: 'data' must be a NON-EMPTY JSON STRING representing an array of 2-7 plausible data objects. It is CRUCIAL that this sample data is derived from patterns or information in the file content if available. If the file lacks specific numerical data, you MUST generate plausible, non-generic sample data that logically fits the file's topic and the user's guidance query. Invent realistic numbers and labels. Avoid placeholders. Keys in 'data' objects MUST match 'categoryDataKey' and the 'key' in the 'seriesDataKeys' objects. IMPORTANT FOR SCHEMA: All values within these data objects (e.g., for 'score') must be provided as STRINGS (e.g., "85", "92.5").
             Example: If categoryDataKey is "topic" and seriesDataKeys is '[{"key": "relevance", "label": "Relevance Score"}]', the JSON string for 'data' could be: '[{"topic": "AI Ethics", "relevance": "85"}, {"topic": "Data Privacy", "relevance": "92"}]'.
         *   If no chart is suitable, set chartSuggestion.type to 'none' and other chart-related fields can be omitted. Assume some data extraction or plausible sample data generation is possible if the file context suggests it.
+    {{else}}
+    Do NOT generate any chart suggestions. For all 'chartSuggestion' fields, set the 'type' to 'none'.
+    {{/if}}
 8.  **Discussion**: (approx. 400-600 words) Interpret findings from the file in light of the guidance query.
 9.  **Conclusion**: (approx. 250-350 words) Summarize the main takeaways from the file as per the guidance.
 10. **Limitations**: (approx. 150-250 words) Discuss limitations of the information in the file or the analysis.

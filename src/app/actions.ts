@@ -10,6 +10,7 @@ import { generateDailyPrompt, type GenerateDailyPromptOutput } from '@/ai/flows/
 import { extractMindmapConcepts, type ExtractMindmapConceptsInput, type ExtractMindmapConceptsOutput } from '@/ai/flows/extract-mindmap-concepts';
 import { transcribeAndAnalyze, type TranscribeAndAnalyzeInput, type TranscribeAndAnalyzeOutput } from '@/ai/flows/transcribe-and-analyze-flow';
 import { textToSpeech } from '@/ai/flows/text-to-speech-flow';
+import { plagiarismCheck, type PlagiarismCheckInput, type PlagiarismCheckOutput } from '@/ai/flows/plagiarism-check-flow';
 import { z } from 'zod';
 
 const formulateQuerySchema = z.object({
@@ -157,6 +158,7 @@ export async function handleSynthesizeResearchAction(
 const generateReportSchema = z.object({
   researchQuestion: z.string().min(10, "Research question must be at least 10 characters long.").max(1500, "Research question must be at most 1500 characters long."),
   summary: z.string().optional(),
+  generateCharts: z.boolean(),
 });
 
 export interface GenerateReportActionState {
@@ -172,8 +174,9 @@ export async function handleGenerateReportAction(
 ): Promise<GenerateReportActionState> {
   const researchQuestion = formData.get('researchQuestion') as string;
   const summary = formData.get('summary') as string | undefined;
+  const generateCharts = formData.get('generateCharts') === 'on';
 
-  const validation = generateReportSchema.safeParse({ researchQuestion, summary });
+  const validation = generateReportSchema.safeParse({ researchQuestion, summary, generateCharts });
   if (!validation.success) {
     return {
       success: false,
@@ -186,7 +189,8 @@ export async function handleGenerateReportAction(
   try {
     const input: GenerateResearchReportInput = {
       researchQuestion: validation.data.researchQuestion,
-      summary: validation.data.summary ? validation.data.summary.trim() : undefined
+      summary: validation.data.summary ? validation.data.summary.trim() : undefined,
+      generateCharts: validation.data.generateCharts,
     };
     const result = await generateResearchReport(input);
     return {
@@ -219,6 +223,7 @@ const generateReportFromFileSchema = z.object({
     .refine((file) => file.size <= MAX_FILE_SIZE_BYTES, `File size must be less than ${MAX_FILE_SIZE_MB}MB.`)
     .refine((file) => ALLOWED_DOC_TYPES.includes(file.type), "Invalid file type. Allowed types: .txt, .md, .pdf, .doc, .docx"),
   generateMindmap: z.boolean(),
+  generateCharts: z.boolean(),
 });
 
 export interface GenerateReportFromFileActionState {
@@ -226,7 +231,7 @@ export interface GenerateReportFromFileActionState {
   message: string;
   researchReport: GenerateReportFromFileOutput | null;
   originalGuidance?: string;
-  errors: { guidanceQuery?: string[]; file?: string[]; generateMindmap?: string[] } | null;
+  errors: { guidanceQuery?: string[]; file?: string[]; generateMindmap?: string[]; generateCharts?: string[] } | null;
 }
 
 export async function handleGenerateReportFromFileAction(
@@ -236,8 +241,9 @@ export async function handleGenerateReportFromFileAction(
   const guidanceQuery = formData.get('guidanceQuery') as string;
   const file = formData.get('file') as File;
   const generateMindmap = formData.get('generateMindmap') === 'on';
+  const generateCharts = formData.get('generateCharts') === 'on';
 
-  const validation = generateReportFromFileSchema.safeParse({ guidanceQuery, file, generateMindmap });
+  const validation = generateReportFromFileSchema.safeParse({ guidanceQuery, file, generateMindmap, generateCharts });
 
   if (!validation.success) {
     return {
@@ -249,7 +255,7 @@ export async function handleGenerateReportFromFileAction(
     };
   }
 
-  const { file: validatedFile, guidanceQuery: validatedQuery, generateMindmap: validatedMindmapFlag } = validation.data;
+  const { file: validatedFile, guidanceQuery: validatedQuery, generateMindmap: validatedMindmapFlag, generateCharts: validatedChartsFlag } = validation.data;
 
   try {
     const arrayBuffer = await validatedFile.arrayBuffer();
@@ -261,6 +267,7 @@ export async function handleGenerateReportFromFileAction(
       guidanceQuery: validatedQuery,
       fileName: validatedFile.name,
       generateMindmap: validatedMindmapFlag,
+      generateCharts: validatedChartsFlag,
     };
 
     const result = await generateReportFromFile(input);
@@ -474,4 +481,42 @@ export async function handleTextToSpeechAction(
             error: errorMessage,
         };
     }
+}
+
+
+export interface PlagiarismCheckActionState {
+  success: boolean;
+  message: string;
+  plagiarismReport: PlagiarismCheckOutput | null;
+  error?: string | null;
+}
+
+export async function handlePlagiarismCheckAction(
+  text: string
+): Promise<PlagiarismCheckActionState> {
+  const validation = z.string().min(100).safeParse(text);
+  if (!validation.success) {
+    return {
+      success: false,
+      message: "Text is too short for a meaningful plagiarism check.",
+      plagiarismReport: null,
+    };
+  }
+
+  try {
+    const result = await plagiarismCheck({ text });
+    return {
+      success: true,
+      message: "Plagiarism check simulation complete.",
+      plagiarismReport: result,
+    };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
+    return {
+      success: false,
+      message: `Failed to run plagiarism check: ${errorMessage}`,
+      plagiarismReport: null,
+      error: errorMessage,
+    };
+  }
 }

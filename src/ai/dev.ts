@@ -10,3 +10,4 @@ import '@/ai/flows/generate-daily-prompt-flow.ts';
 import '@/ai/flows/extract-mindmap-concepts.ts';
 import '@/ai/flows/transcribe-and-analyze-flow.ts';
 import '@/ai/flows/text-to-speech-flow.ts';
+import '@/ai/flows/plagiarism-check-flow.ts';

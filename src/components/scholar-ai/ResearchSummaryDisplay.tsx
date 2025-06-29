@@ -4,17 +4,21 @@
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { BookOpenCheck, FileText, Lightbulb, Quote, Brain, CheckCircle, BarChart3, Edit } from 'lucide-react';
+import { BookOpenCheck, FileText, Lightbulb, Quote, Brain, CheckCircle, BarChart3, Edit, BarChartBig } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea'; // Import Textarea
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 export interface ResearchSummaryDisplayProps {
   summary: string;
   onSummaryChange: (newSummary: string) => void; // Callback to update summary in parent
   originalQuestion: string;
   summarizedPaperTitles: string[];
+  generateCharts: boolean;
+  onGenerateChartsChange: (checked: boolean) => void;
 }
 
 const ResearchSummaryDisplay = React.memo(function ResearchSummaryDisplay({ 
@@ -22,6 +26,8 @@ const ResearchSummaryDisplay = React.memo(function ResearchSummaryDisplay({
   onSummaryChange,
   originalQuestion, 
   summarizedPaperTitles,
+  generateCharts,
+  onGenerateChartsChange,
 }: ResearchSummaryDisplayProps) {
 
   return (
@@ -93,6 +99,29 @@ const ResearchSummaryDisplay = React.memo(function ResearchSummaryDisplay({
                   </ul>
               </ScrollArea>
             </div>
+
+            <Separator className="my-6 sm:my-7 bg-border/60"/>
+
+            <div className="space-y-3">
+              <h3 className="text-lg sm:text-xl font-semibold flex items-center text-primary">
+                <BarChartBig className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 text-accent" />
+                Report Options
+              </h3>
+              <div className="flex items-center space-x-3 rounded-lg border border-border/70 bg-secondary/40 dark:bg-secondary/15 p-3 sm:p-4">
+                <Switch
+                  id="generate-charts"
+                  checked={generateCharts}
+                  onCheckedChange={onGenerateChartsChange}
+                />
+                <Label htmlFor="generate-charts" className="flex flex-col space-y-0.5">
+                  <span className="font-medium text-primary/90">Generate Chart Suggestions</span>
+                  <span className="text-xs text-muted-foreground">
+                    Allow the AI to suggest and create charts for visualizing data in the report.
+                  </span>
+                </Label>
+              </div>
+            </div>
+
           </CardContent>
           <CardFooter className="p-4 sm:p-5 md:p-6 border-t border-border/40 bg-secondary/25 dark:bg-secondary/10">
               <p className="text-sm sm:text-base text-muted-foreground text-center w-full">
