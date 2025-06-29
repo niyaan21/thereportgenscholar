@@ -22,7 +22,6 @@ Foss AI is a powerful Next.js web application designed to revolutionize your res
 *   **Mind Map Concept Extraction:** Analyzes text input to identify a main idea and key concepts with related terms, providing a structured starting point for mind mapping.
 *   **Text-to-Speech for Reports:** Listen to generated report sections with AI-powered audio playback for enhanced accessibility and proofreading.
 *   **AI-Powered Originality Analysis:** Leverages AI to compare generated text against its vast knowledge base of academic literature and web sources, identifying potential similarities and citing likely original sources to help ensure academic integrity.
-*   **Note-taking Apps Integration:** Connect to Notion and Obsidian in your account settings and simulate syncing reports to your favorite apps. (Placeholder integration).
 *   **Secure User Authentication:** Robust Firebase authentication (Email/Password, Sign in with Google).
 *   **Intuitive User Interface:** Clean, modern, and responsive UI built with Next.js, ShadCN UI, and Tailwind CSS.
 *   **Downloadable Outputs:** Export reports in structured JSON and formatted PDF.
@@ -35,7 +34,7 @@ Foss AI is a powerful Next.js web application designed to revolutionize your res
 
 Foss AI is continuously evolving. Here are some of the exciting capabilities on our roadmap:
 
-*   **Multi-language Support:** Capabilities to conduct research, process inputs, and generate reports in a variety of languages. (Placeholder UI exists).
+*   **Multi-language Support:** Capabilities to conduct research, process inputs, and generate reports in a variety of languages.
 *   **Custom Report Templates:** Ability for users to create, save, and share report templates tailored to specific academic fields, journal requirements, or organizational standards.
 *   **Research Timeline Visualization:** Interactive tools to create and visualize research project timelines, milestones, and progress. (Placeholder UI exists).
 *   **Research Network Visualization:** Tools to map and explore connections between researchers, published papers, institutions, and key topics within a field.

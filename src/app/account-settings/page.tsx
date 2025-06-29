@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Mail, Lock, UserCircle, Trash2, Palette, Bell, Settings2 as GeneralSettingsIcon, ShieldAlert, ExternalLink, Edit3, AlertCircle, CheckCircle2, Sun, Moon, History, UserRoundCog, FileText, BookOpen, ClockIcon, Search, FileSignature, Upload, Download, FileJson, Edit, Save, Settings as InterfaceSettingsIcon, Languages, Globe, Share2 } from 'lucide-react';
+import { Loader2, Mail, Lock, UserCircle, Trash2, Palette, Bell, Settings2 as GeneralSettingsIcon, ShieldAlert, ExternalLink, Edit3, AlertCircle, CheckCircle2, Sun, Moon, History, UserRoundCog, FileText, BookOpen, ClockIcon, Search, FileSignature, Upload, Download, FileJson, Edit, Save, Settings as InterfaceSettingsIcon, Languages, Globe } from 'lucide-react';
 import NextLink from 'next/link';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -78,11 +78,6 @@ export default function AccountSettingsPage() {
   const [experimentalFeatures, setExperimentalFeatures] = useState(false);
   const [isSavingInterface, setIsSavingInterface] = useState(false);
   
-  const [notionConnected, setNotionConnected] = useState(false);
-  const [obsidianConnected, setObsidianConnected] = useState(false);
-  const [isConnecting, setIsConnecting] = useState<'notion' | 'obsidian' | null>(null);
-
-
   const router = useRouter();
   const { toast } = useToast();
 
@@ -116,13 +111,6 @@ export default function AccountSettingsPage() {
         if (storedItemsPerPage) setItemsPerPage(storedItemsPerPage);
         const storedExperimentalFeatures = localStorage.getItem('experimentalFeatures');
         if (storedExperimentalFeatures) setExperimentalFeatures(JSON.parse(storedExperimentalFeatures));
-
-        // Load integration preferences
-        const storedNotion = localStorage.getItem('notionConnected');
-        if (storedNotion) setNotionConnected(JSON.parse(storedNotion));
-        const storedObsidian = localStorage.getItem('obsidianConnected');
-        if (storedObsidian) setObsidianConnected(JSON.parse(storedObsidian));
-
 
         if (typeof window !== 'undefined') {
           if (window.location.hash === "#history" && activeTab !== "history") {
@@ -369,32 +357,6 @@ export default function AccountSettingsPage() {
     setPendingImportData(null);
   };
 
-  const handleIntegrationConnect = async (target: 'notion' | 'obsidian') => {
-    setIsConnecting(target);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    if (target === 'notion') {
-        setNotionConnected(true);
-        localStorage.setItem('notionConnected', 'true');
-    } else {
-        setObsidianConnected(true);
-        localStorage.setItem('obsidianConnected', 'true');
-    }
-    toast({ title: `Connected to ${target.charAt(0).toUpperCase() + target.slice(1)}!`, description: `You can now sync reports. (This is a simulation)`, variant: "default" });
-    setIsConnecting(null);
-  };
-
-  const handleIntegrationDisconnect = (target: 'notion' | 'obsidian') => {
-    if (target === 'notion') {
-        setNotionConnected(false);
-        localStorage.removeItem('notionConnected');
-    } else {
-        setObsidianConnected(false);
-        localStorage.removeItem('obsidianConnected');
-    }
-    toast({ title: `Disconnected from ${target.charAt(0).toUpperCase() + target.slice(1)}`, variant: "default" });
-  };
-
-
   const handleViewHistoryDetails = (item: ResearchActivityItem) => {
     let detailText = `Type: ${item.type}\nQuestion/Guidance: ${item.question}`;
     if (item.reportTitle) {
@@ -495,49 +457,6 @@ export default function AccountSettingsPage() {
                 </Button>
               </SettingsSection>
               
-              <SettingsSection title="Integrations" icon={Share2} description="Connect Foss AI with your other tools. Status is saved locally.">
-                <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 dark:bg-secondary/10 border border-border/50">
-                        <div className="flex items-center gap-3">
-                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#000000] dark:text-[#FFFFFF]"><title>Notion</title><path d="M22.28 2.022H1.72C.77 2.022 0 2.793 0 3.742v16.516c0 .949.77 1.72 1.72 1.72h20.56c.95 0 1.72-.77 1.72-1.72V3.742c0-.95-.77-1.72-1.72-1.72zM7.74 18.237V8.92l7.46 9.317h-1.57L7.74 11.237v7.001H4.99V5.763h2.75zm12.54 0h-2.75V5.763h2.75zm-4.32-1.475L8.5 5.763h1.6l7.459 11.002v-7.003h2.75v12.475h-2.75z"/></svg>
-                            <Label htmlFor="notion-connect" className="font-medium text-primary/90">Notion</Label>
-                        </div>
-                        {notionConnected ? (
-                            <AlertDialog>
-                                <AlertDialogTrigger asChild><Button id="notion-connect" variant="destructive" size="sm" disabled={isConnecting !== null}>Disconnect</Button></AlertDialogTrigger>
-                                <AlertDialogContent>
-                                    <AlertDialogHeader><AlertDialogTitle>Disconnect from Notion?</AlertDialogTitle><AlertDialogDescription>Are you sure you want to disconnect? You will need to reconnect to sync reports.</AlertDialogDescription></AlertDialogHeader>
-                                    <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleIntegrationDisconnect('notion')}>Disconnect</AlertDialogAction></AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
-                        ) : (
-                            <Button id="notion-connect" variant="outline" size="sm" onClick={() => handleIntegrationConnect('notion')} disabled={isConnecting !== null}>
-                                {isConnecting === 'notion' ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/> Connecting...</> : 'Connect'}
-                            </Button>
-                        )}
-                    </div>
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 dark:bg-secondary/10 border border-border/50">
-                        <div className="flex items-center gap-3">
-                            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#9B61F8]"><title>Obsidian</title><path d="M12.43.255A1.023 1.023 0 0 0 12 0a1.023 1.023 0 0 0-.43.255L4.54 5.375a1.023 1.023 0 0 0-.43.834v11.582c0 .34.168.658.43.841l7.03 5.11a1.023 1.023 0 0 0 .86 0l7.03-5.11a1.023 1.023 0 0 0 .43-.84V6.21a1.023 1.023 0 0 0-.43-.834zM12 1.055 18.2 5.61v.24l-4.508 3.01a.34.34 0 0 1-.384 0L8.8 5.85zm-7.08 4.793L12 1.082l7.08 4.763-3.417 2.28a1.023 1.023 0 0 0-.43.834v8.132l-3.24 2.162z"/></svg>
-                            <Label htmlFor="obsidian-connect" className="font-medium text-primary/90">Obsidian</Label>
-                        </div>
-                        {obsidianConnected ? (
-                           <AlertDialog>
-                                <AlertDialogTrigger asChild><Button id="obsidian-connect" variant="destructive" size="sm" disabled={isConnecting !== null}>Disconnect</Button></AlertDialogTrigger>
-                                <AlertDialogContent>
-                                    <AlertDialogHeader><AlertDialogTitle>Disconnect from Obsidian?</AlertDialogTitle><AlertDialogDescription>Are you sure you want to disconnect?</AlertDialogDescription></AlertDialogHeader>
-                                    <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleIntegrationDisconnect('obsidian')}>Disconnect</AlertDialogAction></AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
-                        ) : (
-                             <Button id="obsidian-connect" variant="outline" size="sm" onClick={() => handleIntegrationConnect('obsidian')} disabled={isConnecting !== null}>
-                                {isConnecting === 'obsidian' ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/> Connecting...</> : 'Connect'}
-                            </Button>
-                        )}
-                    </div>
-                </div>
-              </SettingsSection>
-
               <SettingsSection title="Account Deletion" icon={Trash2} description="Permanently delete your Foss AI account and all associated data. This action is irreversible.">
                  <p className="text-sm text-destructive/90 bg-destructive/10 p-3 rounded-md border border-destructive/30">
                     <ShieldAlert className="inline h-4 w-4 mr-1.5 mb-0.5"/>Warning: This action cannot be undone. All your research history and settings will be lost.
