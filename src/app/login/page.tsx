@@ -1,7 +1,8 @@
+
 // src/app/login/page.tsx
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,13 +15,10 @@ import { auth, googleProvider } from '@/lib/firebase';
 import { signInWithEmailAndPassword, signInWithPopup, sendPasswordResetEmail } from 'firebase/auth';
 import { z } from 'zod';
 import { Separator } from '@/components/ui/separator';
-
-const loginFormSchema = z.object({
-  email: z.string().email({ message: "Invalid email address." }),
-  password: z.string().min(1, { message: "Password cannot be empty." }),
-});
+import { useTranslation } from 'react-i18next';
 
 export default function LoginPage() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -34,6 +32,11 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     setErrors(null);
+    
+    const loginFormSchema = z.object({
+      email: z.string().email({ message: "Invalid email address." }),
+      password: z.string().min(1, { message: "Password cannot be empty." }),
+    });
 
     const validation = loginFormSchema.safeParse({ email, password });
     if (!validation.success) {
@@ -137,10 +140,7 @@ export default function LoginPage() {
         duration: 7000
       });
     } catch (error: any) {
-      // For security, don't reveal if an email is registered or not.
-      // So we show a generic success message regardless of success or failure on the backend.
-      // This is a common practice to prevent user enumeration attacks.
-       toast({
+      toast({
         title: 'Password Reset Email Sent',
         description: 'If an account exists for that email, a password reset link has been sent.',
         variant: 'default',
@@ -166,8 +166,8 @@ export default function LoginPage() {
       </NextLink>
       <Card className="w-full max-w-md shadow-2xl">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold">Welcome Back!</CardTitle>
-          <CardDescription>Log in to continue your research with Foss AI.</CardDescription>
+          <CardTitle className="text-2xl font-bold">{t('welcomeBack')}</CardTitle>
+          <CardDescription>{t('loginDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
            <Button 
@@ -184,19 +184,19 @@ export default function LoginPage() {
                 <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.85 3.18-1.73 4.1-1.05 1.05-2.36 1.67-4.66 1.67-3.86 0-6.99-3.16-6.99-7.12s3.13-7.12 6.99-7.12c1.96 0 3.41.79 4.3 1.7l2.43-2.42C18.09.47 15.49 0 12.48 0c-6.63 0-12 5.37-12 12s5.37 12 12 12c6.28 0 11.43-4.39 11.43-11.72 0-.81-.07-1.61-.21-2.36h-11.22z"/>
               </svg>
             )}
-            Sign in with Google
+            {t('signInWithGoogle')}
           </Button>
 
           <div className="flex items-center space-x-2">
             <Separator className="flex-1" />
-            <span className="text-xs text-muted-foreground">OR</span>
+            <span className="text-xs text-muted-foreground">{t('or')}</span>
             <Separator className="flex-1" />
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="email" className="flex items-center">
-                <Mail className="mr-2 h-4 w-4 text-muted-foreground" /> Email
+                <Mail className="mr-2 h-4 w-4 text-muted-foreground" /> {t('emailLabel')}
               </Label>
               <Input 
                 id="email" 
@@ -217,7 +217,7 @@ export default function LoginPage() {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <Label htmlFor="password" className="flex items-center">
-                  <Lock className="mr-2 h-4 w-4 text-muted-foreground" /> Password
+                  <Lock className="mr-2 h-4 w-4 text-muted-foreground" /> {t('passwordLabel')}
                 </Label>
                 <Button
                     type="button"
@@ -226,7 +226,7 @@ export default function LoginPage() {
                     onClick={handleForgotPassword}
                     disabled={isLoading || isGoogleLoading}
                 >
-                    Forgot Password?
+                    {t('forgotPassword')}
                 </Button>
               </div>
               <Input 
@@ -253,15 +253,15 @@ export default function LoginPage() {
             <CardFooter className="p-0 pt-4">
               <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading}>
                 {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LogIn className="mr-2 h-4 w-4" />}
-                Log In with Email
+                {t('loginWithEmail')}
               </Button>
             </CardFooter>
           </form>
         </CardContent>
         <div className="p-6 pt-0 text-center text-sm text-muted-foreground">
-          Don't have an account?{' '}
+          {t('noAccount')}{' '}
           <NextLink href="/signup" className="font-medium text-primary hover:underline underline-offset-2">
-            Sign Up
+            {t('signUp')}
           </NextLink>
         </div>
       </Card>

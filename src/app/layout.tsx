@@ -9,6 +9,7 @@ import ParticleBackground from '@/components/layout/ParticleBackground';
 import { ThemeProvider } from 'next-themes';
 import Footer from '@/components/layout/Footer';
 import GlobalKeyboardShortcuts from '@/components/layout/GlobalKeyboardShortcuts';
+import { I18nProviderClient } from '@/components/layout/I18nProviderClient';
 
 export const metadata: Metadata = {
   title: {
@@ -62,18 +63,20 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable} scroll-smooth`} suppressHydrationWarning>
       <body className="font-sans antialiased">
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <ParticleBackground />
-          <GlobalKeyboardShortcuts />
-          <div className="relative z-10 flex flex-col min-h-screen">
-            <Navbar />
-            <main className="flex-grow">
-              {children}
-            </main>
-            <Toaster />
-            <Footer />
-          </div>
-        </ThemeProvider>
+        <I18nProviderClient>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <ParticleBackground />
+            <GlobalKeyboardShortcuts />
+            <div className="relative z-10 flex flex-col min-h-screen">
+              <Navbar />
+              <main className="flex-grow">
+                {children}
+              </main>
+              <Toaster />
+              <Footer />
+            </div>
+          </ThemeProvider>
+        </I18nProviderClient>
       </body>
     </html>
   );

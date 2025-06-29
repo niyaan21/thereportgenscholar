@@ -31,6 +31,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
 import { getResearchHistory, setResearchHistory, type ResearchActivityItem } from '@/lib/historyService';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useTranslation } from 'react-i18next';
 
 
 const SettingsSection: React.FC<{ title: string; description?: string; icon?: React.ElementType; children: React.ReactNode; className?: string }> = ({ title, description, icon: Icon, children, className }) => (
@@ -50,6 +51,7 @@ const SettingsSection: React.FC<{ title: string; description?: string; icon?: Re
 
 
 export default function AccountSettingsPage() {
+  const { t, i18n } = useTranslation();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [newPassword, setNewPassword] = useState('');
@@ -61,7 +63,6 @@ export default function AccountSettingsPage() {
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
 
   const [theme, setThemeState] = useState<'light' | 'dark' | 'system'>('system');
-  const [language, setLanguage] = useState('en');
   const [activeTab, setActiveTab] = useState("general");
   
   const [researchHistoryItems, setResearchHistoryItems] = useState<ResearchActivityItem[]>([]);
@@ -88,7 +89,6 @@ export default function AccountSettingsPage() {
         setDisplayName(user.displayName || '');
         setProfilePicUrl(user.photoURL || '');
 
-        // Load theme
         const localTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'system' | null;
         if (localTheme) setThemeState(localTheme);
         else {
@@ -96,17 +96,11 @@ export default function AccountSettingsPage() {
             setThemeState(prefersDark ? 'dark' : 'system');
         }
         
-        // Load language preference
-        const storedLanguage = localStorage.getItem('language');
-        if (storedLanguage) setLanguage(storedLanguage);
-        
-        // Load notification preferences
         const storedEmailNotifications = localStorage.getItem('emailNotifications');
         if (storedEmailNotifications) setEmailNotifications(JSON.parse(storedEmailNotifications));
         const storedNewsletter = localStorage.getItem('newsletterSubscription');
         if (storedNewsletter) setNewsletterSubscription(JSON.parse(storedNewsletter));
 
-        // Load interface preferences
         const storedItemsPerPage = localStorage.getItem('itemsPerPage');
         if (storedItemsPerPage) setItemsPerPage(storedItemsPerPage);
         const storedExperimentalFeatures = localStorage.getItem('experimentalFeatures');
@@ -158,9 +152,12 @@ export default function AccountSettingsPage() {
   };
 
   const handleLanguageChange = (newLanguage: string) => {
-    setLanguage(newLanguage);
-    localStorage.setItem('language', newLanguage);
-    toast({ title: "Language Preference Saved", description: `Language set to ${newLanguage}. Full support is planned for a future update.`, variant: 'default' });
+    i18n.changeLanguage(newLanguage);
+    toast({
+      title: t('languageChangeToastTitle'),
+      description: t('languageChangeToastDescription', { language: t(`lang_${newLanguage}` as any) }),
+      variant: 'default',
+    });
   };
 
   const handleSendVerificationEmail = async () => {
@@ -265,7 +262,6 @@ export default function AccountSettingsPage() {
   const handleSaveNotificationPreferences = async (e: FormEvent) => {
     e.preventDefault();
     setIsSavingNotifications(true);
-    // Simulate async operation
     await new Promise(resolve => setTimeout(resolve, 700));
     try {
         localStorage.setItem('emailNotifications', JSON.stringify(emailNotifications));
@@ -390,19 +386,19 @@ export default function AccountSettingsPage() {
   return (
     <div className="container mx-auto min-h-[calc(100vh-8rem)] py-10 sm:py-12 px-4 sm:px-6 lg:px-8">
       <header className="mb-8 sm:mb-10 text-center">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-primary tracking-tight">Account Settings</h1>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-primary tracking-tight">{t('accountSettingsTitle')}</h1>
         <p className="mt-2 sm:mt-3 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-          Manage your Foss AI profile, preferences, and security settings.
+          {t('accountSettingsDescription')}
         </p>
       </header>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2 sm:grid-cols-2 md:max-w-md mx-auto h-auto">
           <TabsTrigger value="general" className="py-2.5 text-sm sm:text-base flex items-center gap-2">
-            <UserRoundCog className="h-5 w-5" /> General
+            <UserRoundCog className="h-5 w-5" /> {t('generalTab')}
           </TabsTrigger>
           <TabsTrigger value="history" className="py-2.5 text-sm sm:text-base flex items-center gap-2">
-            <History className="h-5 w-5" /> Research History
+            <History className="h-5 w-5" /> {t('researchHistoryTab')}
           </TabsTrigger>
         </TabsList>
 
@@ -540,24 +536,23 @@ export default function AccountSettingsPage() {
                 </RadioGroup>
               </SettingsSection>
               
-              <SettingsSection title="Language & Region" icon={Globe} description="Set your language for the UI and AI responses.">
+              <SettingsSection title={t('languageRegionSectionTitle')} icon={Globe} description={t('languageRegionDescription')}>
                 <div className="space-y-3">
                     <div>
-                        <Label htmlFor="language">Interface Language</Label>
-                        <Select onValueChange={handleLanguageChange} value={language}>
+                        <Label htmlFor="language">{t('interfaceLanguageLabel')}</Label>
+                        <Select onValueChange={handleLanguageChange} value={i18n.language}>
                             <SelectTrigger id="language" className="w-full">
                                 <SelectValue placeholder="Select a language" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="en">English</SelectItem>
-                                <SelectItem value="es">Español (Spanish)</SelectItem>
-                                <SelectItem value="fr">Français (French)</SelectItem>
-                                <SelectItem value="de">Deutsch (German)</SelectItem>
-                                <SelectItem value="ja">日本語 (Japanese)</SelectItem>
+                                <SelectItem value="en">{t('lang_en')}</SelectItem>
+                                <SelectItem value="es">{t('lang_es')}</SelectItem>
+                                <SelectItem value="fr">{t('lang_fr')}</SelectItem>
+                                <SelectItem value="de">{t('lang_de')}</SelectItem>
+                                <SelectItem value="ja">{t('lang_ja')}</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
-                    <p className="text-xs text-muted-foreground">This is a placeholder UI. Changing the language will not affect the application yet, but the preference will be saved.</p>
                 </div>
               </SettingsSection>
 

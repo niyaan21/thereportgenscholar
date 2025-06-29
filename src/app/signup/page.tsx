@@ -15,13 +15,10 @@ import { auth, googleProvider } from '@/lib/firebase';
 import { createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 import { z } from 'zod';
 import { Separator } from '@/components/ui/separator';
-
-const signUpFormSchema = z.object({
-  email: z.string().email({ message: "Invalid email address." }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters long." }),
-});
+import { useTranslation } from 'react-i18next';
 
 export default function SignUpPage() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -35,6 +32,11 @@ export default function SignUpPage() {
     e.preventDefault();
     setIsLoading(true);
     setErrors(null);
+    
+    const signUpFormSchema = z.object({
+      email: z.string().email({ message: "Invalid email address." }),
+      password: z.string().min(6, { message: "Password must be at least 6 characters long." }),
+    });
 
     const validation = signUpFormSchema.safeParse({ email, password });
     if (!validation.success) {
@@ -123,8 +125,8 @@ export default function SignUpPage() {
       </NextLink>
       <Card className="w-full max-w-md shadow-2xl">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold">Create an Account</CardTitle>
-          <CardDescription>Enter your email and password to join Foss AI.</CardDescription>
+          <CardTitle className="text-2xl font-bold">{t('createAccount')}</CardTitle>
+          <CardDescription>{t('signupDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <Button 
@@ -141,19 +143,19 @@ export default function SignUpPage() {
                 <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.85 3.18-1.73 4.1-1.05 1.05-2.36 1.67-4.66 1.67-3.86 0-6.99-3.16-6.99-7.12s3.13-7.12 6.99-7.12c1.96 0 3.41.79 4.3 1.7l2.43-2.42C18.09.47 15.49 0 12.48 0c-6.63 0-12 5.37-12 12s5.37 12 12 12c6.28 0 11.43-4.39 11.43-11.72 0-.81-.07-1.61-.21-2.36h-11.22z"/>
               </svg>
             )}
-            Sign up with Google
+            {t('signupWithGoogle')}
           </Button>
 
           <div className="flex items-center space-x-2">
             <Separator className="flex-1" />
-            <span className="text-xs text-muted-foreground">OR</span>
+            <span className="text-xs text-muted-foreground">{t('or')}</span>
             <Separator className="flex-1" />
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="email" className="flex items-center">
-                <Mail className="mr-2 h-4 w-4 text-muted-foreground" /> Email
+                <Mail className="mr-2 h-4 w-4 text-muted-foreground" /> {t('emailLabel')}
               </Label>
               <Input 
                 id="email" 
@@ -173,13 +175,13 @@ export default function SignUpPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="password" className="flex items-center">
-                <Lock className="mr-2 h-4 w-4 text-muted-foreground" /> Password
+                <Lock className="mr-2 h-4 w-4 text-muted-foreground" /> {t('passwordLabel')}
               </Label>
               <Input 
                 id="password" 
                 name="password" 
                 type="password" 
-                placeholder="•••••••• (min. 6 characters)" 
+                placeholder={t('passwordMinChars')}
                 required 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -199,15 +201,15 @@ export default function SignUpPage() {
             <CardFooter className="p-0 pt-4">
               <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading}>
                 {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserPlus className="mr-2 h-4 w-4" />}
-                Create Account with Email
+                {t('createAccountWithEmail')}
               </Button>
             </CardFooter>
           </form>
         </CardContent>
         <div className="p-6 pt-0 text-center text-sm text-muted-foreground">
-          Already have an account?{' '}
+          {t('haveAccount')}{' '}
           <NextLink href="/login" className="font-medium text-primary hover:underline underline-offset-2">
-            Log In
+            {t('login')}
           </NextLink>
         </div>
       </Card>
