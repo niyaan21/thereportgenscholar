@@ -34,7 +34,6 @@ Foss AI is a powerful Next.js web application designed to revolutionize your res
 
 Foss AI is continuously evolving. Here are some of the exciting capabilities on our roadmap:
 
-*   **Full-Fledged Plagiarism Detection:** Integrated similarity checking against real web sources to ensure originality and proper attribution.
 *   **Multi-language Support:** Capabilities to conduct research, process inputs, and generate reports in a variety of languages. (Placeholder UI exists).
 *   **Note-taking Apps Integration:** Direct synchronization of research notes, summaries, and reports with popular platforms like Notion and Obsidian. (Placeholder UI exists).
 *   **Custom Report Templates:** Ability for users to create, save, and share report templates tailored to specific academic fields, journal requirements, or organizational standards.
