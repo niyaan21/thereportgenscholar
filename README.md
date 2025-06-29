@@ -29,12 +29,12 @@ Foss AI is a powerful Next.js web application designed to revolutionize your res
 *   **Account Settings:** Manage profile, preferences (theme, language, notifications, interface - saved to `localStorage`), and research/voice note history (with export/import for research history).
 *   **Dynamic Particle Background:** Visually engaging background that adapts to light/dark themes (disabled on mobile for performance).
 *   **Basic Keyboard Shortcuts:** Quick navigation and actions for power users.
+*   **Multi-language Support:** The interface for key pages (Login, Signup, Account Settings) is translated using i18next, with a framework in place for full application-wide internationalization.
 
 ## 🚀 Planned Future Features
 
 Foss AI is continuously evolving. Here are some of the exciting capabilities on our roadmap:
 
-*   **Multi-language Support:** Capabilities to conduct research, process inputs, and generate reports in a variety of languages.
 *   **Custom Report Templates:** Ability for users to create, save, and share report templates tailored to specific academic fields, journal requirements, or organizational standards.
 *   **Research Timeline Visualization:** Interactive tools to create and visualize research project timelines, milestones, and progress. (Placeholder UI exists).
 *   **Research Network Visualization:** Tools to map and explore connections between researchers, published papers, institutions, and key topics within a field.
