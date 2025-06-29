@@ -258,7 +258,7 @@ The `/account-settings` page allows users to:
 *   Customize appearance (Theme: Light, Dark, System - saved to `localStorage`).
 *   Set language preferences for the UI (placeholder for future localization, saved to `localStorage`).
 *   Set notification preferences (Email Notifications, Newsletter - saved to `localStorage`).
-*   Configure interface settings (Items Per Page, Experimental Features - saved to `localStorage`).
+*   Configure interface settings (Items PerPage, Experimental Features - saved to `localStorage`).
 *   View, export, and import their research activity history (managed via `localStorage`).
 *   Manage voice notes (view, edit, delete - stored in `localStorage`).
 
