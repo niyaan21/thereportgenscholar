@@ -2,11 +2,12 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react'; 
+import NextLink from 'next/link';
 import type { GenerateResearchReportOutput } from '@/ai/flows/generate-research-report';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { FileText, BookOpen, MessageSquareQuote, ThumbsUp, Settings, LightbulbIcon, ShieldAlert, Library, UsersRound, ClipboardList, Milestone, Scale, GitBranch, DownloadCloud, BookText as AppendixIcon, BookMarked, Activity, FileType, FileJson, Loader2, Maximize, Minimize, Volume2, XCircle, ShieldCheck, ShieldExclamation, ChevronDown } from 'lucide-react';
+import { FileText, BookOpen, MessageSquareQuote, ThumbsUp, Settings, LightbulbIcon, ShieldAlert, Library, UsersRound, ClipboardList, Milestone, Scale, GitBranch, DownloadCloud, BookText as AppendixIcon, BookMarked, Activity, FileType, FileJson, Loader2, Maximize, Minimize, Volume2, XCircle, ShieldCheck, ShieldExclamation, ChevronDown, Share2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import jsPDF from 'jspdf';
@@ -16,6 +17,16 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import dynamic from 'next/dynamic';
 import { handleTextToSpeechAction, type TextToSpeechActionState, handlePlagiarismCheckAction, type PlagiarismCheckActionState } from '@/app/actions';
 import { Progress } from '@/components/ui/progress';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Badge } from '@/components/ui/badge';
 
 const PlaceholderChart = dynamic(() => import('./PlaceholderChart'), {
   ssr: false,
@@ -70,6 +81,11 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
   const [plagiarismResult, setPlagiarismResult] = useState<PlagiarismCheckActionState['plagiarismReport']>(null);
   const [isCheckingPlagiarism, setIsCheckingPlagiarism] = useState(false);
 
+  const [isSharing, setIsSharing] = useState(false);
+  const [shareTarget, setShareTarget] = useState<'notion' | 'obsidian' | null>(null);
+  const [notionConnected, setNotionConnected] = useState(false);
+  const [obsidianConnected, setObsidianConnected] = useState(false);
+
   useEffect(() => {
     const sections = [
       'executive-summary',
@@ -92,10 +108,30 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
 
     const defaultOpen = ['executive-summary', 'introduction', 'results-and-analysis', 'conclusion'].filter(key => sections.includes(key));
     setOpenSections(defaultOpen);
+    
+    // Check connection status from localStorage
+    const storedNotion = localStorage.getItem('notionConnected');
+    if (storedNotion) setNotionConnected(JSON.parse(storedNotion));
+    const storedObsidian = localStorage.getItem('obsidianConnected');
+    if (storedObsidian) setObsidianConnected(JSON.parse(storedObsidian));
+
   }, [report]);
 
   const handleExpandAll = () => setOpenSections(allSectionKeys);
   const handleCollapseAll = () => setOpenSections([]);
+
+  const handleShare = async (target: 'notion' | 'obsidian') => {
+    setIsSharing(true);
+    setShareTarget(target);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    toast({
+        title: `Synced with ${target.charAt(0).toUpperCase() + target.slice(1)}! (Simulation)`,
+        description: "Your report has been 'sent' to your note-taking app.",
+        variant: "default",
+    });
+    setIsSharing(false);
+    document.getElementById('close-share-dialog')?.click();
+  };
 
   const handleReadAloud = useCallback(async (sectionKey: string, content: string | undefined | null) => {
     if (readingSection) {
@@ -488,6 +524,57 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
              <Button variant="outline" size="sm" onClick={handleCollapseAll} disabled={isGeneratingPdf} className="w-full sm:w-auto bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-md sm:rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm group">
                 <Minimize size={16} className="mr-1.5 sm:mr-2" /> Collapse All
              </Button>
+            <Dialog>
+                <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" disabled={isGeneratingPdf} className="w-full sm:w-auto bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-md sm:rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm group">
+                        <Share2 size={16} className="mr-1.5 sm:mr-2 group-hover:animate-pulse" /> Share Report
+                    </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Sync with Note-taking Apps</DialogTitle>
+                        <DialogDescription>
+                            Send a copy of this report to your connected services. This is a simulation and no data will be sent.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex flex-col space-y-3 pt-4">
+                        <Button
+                            variant="outline"
+                            className="w-full justify-start"
+                            onClick={() => handleShare('notion')}
+                            disabled={isSharing || !notionConnected}
+                        >
+                            {isSharing && shareTarget === 'notion' ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                                <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2"><title>Notion</title><path d="M22.28 2.022H1.72C.77 2.022 0 2.793 0 3.742v16.516c0 .949.77 1.72 1.72 1.72h20.56c.95 0 1.72-.77 1.72-1.72V3.742c0-.95-.77-1.72-1.72-1.72zM7.74 18.237V8.92l7.46 9.317h-1.57L7.74 11.237v7.001H4.99V5.763h2.75zm12.54 0h-2.75V5.763h2.75zm-4.32-1.475L8.5 5.763h1.6l7.459 11.002v-7.003h2.75v12.475h-2.75z"/></svg>
+                            )}
+                            {isSharing && shareTarget === 'notion' ? 'Syncing to Notion...' : 'Sync to Notion'}
+                            {!notionConnected && <Badge variant="destructive" className="ml-auto">Not Connected</Badge>}
+                        </Button>
+                        <Button
+                            variant="outline"
+                            className="w-full justify-start"
+                            onClick={() => handleShare('obsidian')}
+                            disabled={isSharing || !obsidianConnected}
+                        >
+                            {isSharing && shareTarget === 'obsidian' ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                                <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2"><title>Obsidian</title><path d="M12.43.255A1.023 1.023 0 0 0 12 0a1.023 1.023 0 0 0-.43.255L4.54 5.375a1.023 1.023 0 0 0-.43.834v11.582c0 .34.168.658.43.841l7.03 5.11a1.023 1.023 0 0 0 .86 0l7.03-5.11a1.023 1.023 0 0 0 .43-.84V6.21a1.023 1.023 0 0 0-.43-.834zM12 1.055 18.2 5.61v.24l-4.508 3.01a.34.34 0 0 1-.384 0L8.8 5.85zm-7.08 4.793L12 1.082l7.08 4.763-3.417 2.28a1.023 1.023 0 0 0-.43.834v8.132l-3.24 2.162z"/></svg>
+                            )}
+                            {isSharing && shareTarget === 'obsidian' ? 'Syncing to Obsidian...' : 'Sync to Obsidian'}
+                            {!obsidianConnected && <Badge variant="destructive" className="ml-auto">Not Connected</Badge>}
+                        </Button>
+                        {(!notionConnected || !obsidianConnected) && (
+                            <p className="text-xs text-center text-muted-foreground pt-2">
+                                Connect your apps in <NextLink href="/account-settings" className="text-accent hover:underline">Account Settings</NextLink> to enable sync.
+                            </p>
+                        )}
+                    </div>
+                    <DialogClose id="close-share-dialog" className="hidden"/>
+                </DialogContent>
+            </Dialog>
              <Button variant="outline" size="sm" onClick={handleDownloadReportJson} disabled={isGeneratingPdf} className="w-full sm:w-auto bg-primary-foreground/15 hover:bg-primary-foreground/25 border-primary-foreground/40 text-primary-foreground rounded-md sm:rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm group">
                 <FileJson size={16} className="mr-1.5 sm:mr-2 group-hover:animate-pulse" /> Download JSON
              </Button>
