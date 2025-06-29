@@ -21,7 +21,7 @@ Foss AI is a powerful Next.js web application designed to revolutionize your res
 *   **Interview Transcription & Analysis:** Upload audio/video files for automated transcription and AI-powered thematic analysis, sentiment detection, and key insight extraction.
 *   **Mind Map Concept Extraction:** Analyzes text input to identify a main idea and key concepts with related terms, providing a structured starting point for mind mapping.
 *   **Text-to-Speech for Reports:** Listen to generated report sections with AI-powered audio playback for enhanced accessibility and proofreading.
-*   **Simulated Originality Check:** Run a simulated plagiarism check on generated reports to gauge content originality and identify sentences with plausible, invented academic sources.
+*   **AI-Powered Originality Analysis:** Leverages AI to compare generated text against its vast knowledge base of academic literature and web sources, identifying potential similarities and citing likely original sources to help ensure academic integrity.
 *   **Secure User Authentication:** Robust Firebase authentication (Email/Password, Sign in with Google).
 *   **Intuitive User Interface:** Clean, modern, and responsive UI built with Next.js, ShadCN UI, and Tailwind CSS.
 *   **Downloadable Outputs:** Export reports in structured JSON and formatted PDF.
@@ -234,7 +234,7 @@ Foss AI uses **Genkit for Firebase** to integrate with Google's Gemini AI models
 *   `extract-mindmap-concepts.ts`: Extracts key concepts and a main idea from text for mind mapping.
 *   `transcribe-and-analyze-flow.ts`: Transcribes audio/video files and performs thematic analysis.
 *   `text-to-speech-flow.ts`: Converts text from report sections into playable audio.
-*   `plagiarism-check-flow.ts`: Simulates a plagiarism check on a body of text.
+*   `plagiarism-check-flow.ts`: Performs an AI-powered originality analysis on text, identifying similar sentences and citing likely real-world sources.
 
 These flows are called by Next.js Server Actions defined in `src/app/actions.ts`.
 

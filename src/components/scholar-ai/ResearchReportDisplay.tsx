@@ -424,14 +424,12 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
     if (report.futureWork && report.futureWork.trim() !== "") await addPdfSection("Future Research Avenues", report.futureWork);
     if (report.ethicalConsiderations && report.ethicalConsiderations.trim() !== "") await addPdfSection("Ethical Considerations & Impact", report.ethicalConsiderations);
 
-    if (report.references && report.references.length > 0) {
-        await addPdfSection("References", report.references, async (ref: string, index: number, docRef, currentY, addTextFn) => {
-            yPosition = currentY;
-            addTextFn(`${index + 1}. ${ref}`, 9, {}, 15);
-            yPosition += 14 / 2;
-            return yPosition;
-        });
-    }
+    await addPdfSection("References", report.references, async (ref: string, index: number, docRef, currentY, addTextFn) => {
+        yPosition = currentY;
+        addTextFn(`${index + 1}. ${ref}`, 9, {}, 15);
+        yPosition += 14 / 2;
+        return yPosition;
+    });
 
     if (report.appendices && report.appendices.length > 0) {
         await addPdfSection("Supplementary Appendices", report.appendices, async (appendix: any, index: number, docRef, currentY, addTextFn) => {
@@ -507,7 +505,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
                   <CardTitle className="text-lg flex items-center justify-between text-primary/90">
                       <div className="flex items-center">
                           <ShieldCheck className="h-5 w-5 mr-3 text-accent"/>
-                          Originality Check
+                          AI-Powered Originality Analysis
                       </div>
                       <Button size="sm" onClick={handleRunPlagiarismCheck} disabled={isCheckingPlagiarism}>
                         {isCheckingPlagiarism ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <ShieldExclamation className="mr-2 h-4 w-4"/>}
@@ -515,7 +513,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
                       </Button>
                   </CardTitle>
                   <CardDescription className="text-muted-foreground text-xs sm:text-sm pt-1">
-                    Analyzes the report against a vast knowledge base to gauge content originality.
+                    Leverages AI to compare the report against a vast knowledge base of academic and web sources to identify potential similarities and suggest likely sources.
                   </CardDescription>
               </CardHeader>
               <CardContent>
@@ -537,6 +535,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
                                 {plagiarismResult.matches.map((match, index) => (
                                     <div key={index} className="p-3 bg-background/50 border rounded-md text-xs">
                                         <p className="italic text-muted-foreground">"{match.sentence}"</p>
+                                        {match.justification && <p className="mt-2 text-foreground/80"><span className="font-semibold">Justification:</span> {match.justification}</p>}
                                         <p className="mt-1.5 text-right font-medium text-primary/90">
                                             <span className="font-mono bg-primary/10 px-1.5 py-0.5 rounded">{match.similarity.toFixed(0)}%</span> match with: <span className="italic">{match.source}</span>
                                         </p>
