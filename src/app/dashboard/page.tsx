@@ -1,4 +1,3 @@
-
 // src/app/dashboard/page.tsx
 'use client';
 
@@ -21,6 +20,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useTranslation } from 'react-i18next';
 
 const ActivityDistributionChart = dynamic(() => import('@/components/scholar-ai/ActivityDistributionChart'), {
     ssr: false,
@@ -46,6 +46,7 @@ DashboardStatCard.displayName = "DashboardStatCard";
 
 
 const QuickActionCard = React.memo(function QuickActionCard({ title, href, icon: Icon, description }: { title: string; href: string; icon: React.ElementType; description: string }) {
+ const { t } = useTranslation();
  return (
  <NextLink href={href}>
     <Card className="hover:shadow-lg hover:border-accent transition-all duration-200 cursor-pointer h-full flex flex-col">
@@ -62,7 +63,7 @@ const QuickActionCard = React.memo(function QuickActionCard({ title, href, icon:
       </CardContent>
        <CardFooter className="pt-0">
          <Button variant="link" className="p-0 text-sm text-accent">
-            Go to {title} <ExternalLink className="ml-1.5 h-3.5 w-3.5"/>
+            {t('dashboard.actionGoTo', { title })} <ExternalLink className="ml-1.5 h-3.5 w-3.5"/>
           </Button>
        </CardFooter>
     </Card>
@@ -75,6 +76,7 @@ QuickActionCard.displayName = "QuickActionCard";
 type ActivityFilterType = 'all' | 'query-formulation' | 'report-generation' | 'file-report-generation';
 
 export default function DashboardPage() {
+  const { t } = useTranslation();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [allActivities, setAllActivities] = useState<ResearchActivityItem[]>([]);
@@ -99,16 +101,16 @@ export default function DashboardPage() {
         setDailyPrompt(result.dailyPrompt);
       } else {
         setDailyPromptError(result.message || "Failed to fetch daily prompt.");
-        toast({ title: "Error Fetching Prompt", description: result.message, variant: "destructive" });
+        toast({ title: t('dashboard.promptError'), description: result.message, variant: "destructive" });
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
       setDailyPromptError(errorMessage);
-      toast({ title: "Error Fetching Prompt", description: errorMessage, variant: "destructive" });
+      toast({ title: t('dashboard.promptError'), description: errorMessage, variant: "destructive" });
     } finally {
       setDailyPromptLoading(false);
     }
-  }, [currentUser, toast]);
+  }, [currentUser, toast, t]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -136,16 +138,16 @@ export default function DashboardPage() {
     if (!text) return;
     navigator.clipboard.writeText(text).then(() => {
         toast({
-            title: "Prompt Copied!",
-            description: "The research spark has been copied to your clipboard.",
+            title: t('dashboard.promptCopySuccess'),
+            description: t('dashboard.promptCopyDescription'),
         });
         setIsCopied(true);
         setTimeout(() => setIsCopied(false), 2000);
     }).catch(err => {
         console.error('Failed to copy text: ', err);
         toast({
-            title: "Copy Failed",
-            description: "Could not copy the prompt to your clipboard.",
+            title: t('dashboard.promptCopyFail'),
+            description: t('dashboard.promptCopyFailDesc'),
             variant: "destructive"
         });
     });
@@ -161,17 +163,17 @@ export default function DashboardPage() {
     }, {} as { queries?: number; aiReports?: number; fileReports?: number });
 
     return [
-      { name: 'Queries', value: counts.queries || 0, fill: 'hsl(var(--chart-1))' },
-      { name: 'AI Reports', value: counts.aiReports || 0, fill: 'hsl(var(--chart-2))' },
-      { name: 'File Reports', value: counts.fileReports || 0, fill: 'hsl(var(--chart-3))' },
+      { name: t('dashboard.chartQueries'), value: counts.queries || 0, fill: 'hsl(var(--chart-1))' },
+      { name: t('dashboard.chartAiReports'), value: counts.aiReports || 0, fill: 'hsl(var(--chart-2))' },
+      { name: t('dashboard.chartFileReports'), value: counts.fileReports || 0, fill: 'hsl(var(--chart-3))' },
     ].filter(item => item.value > 0);
-  }, [allActivities]);
+  }, [allActivities, t]);
 
   const chartConfig = useMemo(() => ({
-    queries: { label: "Queries", color: "hsl(var(--chart-1))" },
-    aiReports: { label: "AI Reports", color: "hsl(var(--chart-2))" },
-    fileReports: { label: "File Reports", color: "hsl(var(--chart-3))" },
-  } as ChartConfig), []);
+    [t('dashboard.chartQueries')]: { label: t('dashboard.chartQueries'), color: "hsl(var(--chart-1))" },
+    [t('dashboard.chartAiReports')]: { label: t('dashboard.chartAiReports'), color: "hsl(var(--chart-2))" },
+    [t('dashboard.chartFileReports')]: { label: t('dashboard.chartFileReports'), color: "hsl(var(--chart-3))" },
+  } as ChartConfig), [t]);
 
 
   const filteredActivities = activityFilter === 'all' 
@@ -189,53 +191,54 @@ export default function DashboardPage() {
   }
   
   const filterButtons: { label: string; type: ActivityFilterType; icon: React.ElementType }[] = [
-    { label: 'All Activities', type: 'all', icon: History },
-    { label: 'Queries', type: 'query-formulation', icon: Search },
-    { label: 'AI Reports', type: 'report-generation', icon: BookOpen },
-    { label: 'File Reports', type: 'file-report-generation', icon: FileSignature },
+    { label: t('dashboard.filterAll'), type: 'all', icon: History },
+    { label: t('dashboard.filterQueries'), type: 'query-formulation', icon: Search },
+    { label: t('dashboard.filterAiReports'), type: 'report-generation', icon: BookOpen },
+    { label: t('dashboard.filterFileReports'), type: 'file-report-generation', icon: FileSignature },
   ];
 
   return (
     <div className="container mx-auto min-h-[calc(100vh-8rem)] py-10 sm:py-12 px-4 sm:px-6 lg:px-8">
       <header className="mb-8 sm:mb-10">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-primary tracking-tight">
-          Welcome back, <span className="text-accent">{currentUser.displayName || currentUser.email?.split('@')[0] || 'Researcher'}!</span>
+          {t('dashboard.welcome')}{' '}
+          <span className="text-accent">{currentUser.displayName || currentUser.email?.split('@')[0] || 'Researcher'}!</span>
         </h1>
         <p className="mt-2 sm:mt-3 text-lg sm:text-xl text-muted-foreground max-w-2xl">
-          Here's your Foss AI dashboard. Manage your research and access tools.
+          {t('dashboard.description')}
         </p>
       </header>
 
        <Alert variant="default" className="mb-6 sm:mb-8 bg-primary/5 border-primary/20 text-primary dark:bg-primary/10 dark:border-primary/30 dark:text-primary-foreground/90 shadow-md">
         <Info className="h-5 w-5 text-primary" />
-        <AlertTitle className="font-semibold text-primary">Local Activity Tracking</AlertTitle>
+        <AlertTitle className="font-semibold text-primary">{t('dashboard.localActivityTitle')}</AlertTitle>
         <AlertDescription className="text-primary/80 dark:text-primary-foreground/80 mt-1 text-sm">
-          Your dashboard stats and research history are based on activity stored locally in this browser.
+          {t('dashboard.localActivityDescription')}
         </AlertDescription>
       </Alert>
 
       <section className="mb-8 sm:mb-10">
         <h2 className="text-2xl sm:text-3xl font-semibold text-primary mb-4 sm:mb-6 flex items-center">
           <BarChart2 className="mr-3 h-7 w-7 text-accent" />
-          Your Activity At a Glance
+          {t('dashboard.activityTitle')}
         </h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <DashboardStatCard title="Research Sessions Initiated" value={stats.sessions.toString()} icon={Search} description="Unique research questions explored." className="bg-card/80 backdrop-blur-sm"/>
-          <DashboardStatCard title="Reports Generated" value={stats.reports.toString()} icon={BookOpen} description="Comprehensive reports created." className="bg-card/80 backdrop-blur-sm"/>
-          <DashboardStatCard title="Total Activities Logged" value={stats.activities.toString()} icon={Activity} description="Total interactions recorded." className="bg-card/80 backdrop-blur-sm"/>
+          <DashboardStatCard title={t('dashboard.statSessions')} value={stats.sessions.toString()} icon={Search} description={t('dashboard.statSessionsDesc')} className="bg-card/80 backdrop-blur-sm"/>
+          <DashboardStatCard title={t('dashboard.statReports')} value={stats.reports.toString()} icon={BookOpen} description={t('dashboard.statReportsDesc')} className="bg-card/80 backdrop-blur-sm"/>
+          <DashboardStatCard title={t('dashboard.statActivities')} value={stats.activities.toString()} icon={Activity} description={t('dashboard.statActivitiesDesc')} className="bg-card/80 backdrop-blur-sm"/>
         </div>
-         <p className="text-xs text-muted-foreground mt-3 text-center sm:text-left">Data reflects activity stored locally in this browser.</p>
+         <p className="text-xs text-muted-foreground mt-3 text-center sm:text-left">{t('dashboard.statDataNotice')}</p>
       </section>
 
       <section className="mb-8 sm:mb-10">
         <h2 className="text-2xl sm:text-3xl font-semibold text-primary mb-4 sm:mb-6 flex items-center">
           <Lightbulb className="mr-3 h-7 w-7 text-accent" />
-          Research Spark
+          {t('dashboard.sparkTitle')}
         </h2>
         <Card className="shadow-lg bg-card/80 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className="text-xl font-medium text-primary/90">Prompt of the Day</CardTitle>
-            <CardDescription className="text-sm">Get inspired with a novel research question.</CardDescription>
+            <CardTitle className="text-xl font-medium text-primary/90">{t('dashboard.promptTitle')}</CardTitle>
+            <CardDescription className="text-sm">{t('dashboard.promptDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="min-h-[100px]">
             {dailyPromptLoading && (
@@ -246,7 +249,7 @@ export default function DashboardPage() {
             {dailyPromptError && !dailyPromptLoading && (
               <Alert variant="destructive" className="bg-destructive/10">
                 <AlertCircleIcon className="h-5 w-5" />
-                <AlertTitle>Error Loading Prompt</AlertTitle>
+                <AlertTitle>{t('dashboard.promptError')}</AlertTitle>
                 <AlertDescription>{dailyPromptError}</AlertDescription>
               </Alert>
             )}
@@ -265,12 +268,12 @@ export default function DashboardPage() {
                     disabled={isCopied}
                 >
                     {isCopied ? <Check className="mr-2 h-4 w-4 text-green-500" /> : <Copy className="mr-2 h-4 w-4" />}
-                    {isCopied ? "Copied!" : "Copy Prompt"}
+                    {isCopied ? t('dashboard.copied') : t('dashboard.copyPrompt')}
                 </Button>
             )}
             <Button variant="outline" onClick={fetchDailyPrompt} disabled={dailyPromptLoading || !currentUser}>
               <RefreshCw className={cn("mr-2 h-4 w-4", dailyPromptLoading && "animate-spin")} />
-              {dailyPromptLoading ? 'Refreshing...' : 'New Spark'}
+              {dailyPromptLoading ? t('dashboard.refreshing') : t('dashboard.newSpark')}
             </Button>
           </CardFooter>
         </Card>
@@ -284,32 +287,32 @@ export default function DashboardPage() {
       <section className="mb-8 sm:mb-10">
         <h2 className="text-2xl sm:text-3xl font-semibold text-primary mb-4 sm:mb-6 flex items-center">
             <PlusCircle className="mr-3 h-7 w-7 text-accent" />
-            Quick Actions
+            {t('dashboard.quickActionsTitle')}
         </h2>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
             <QuickActionCard 
-                title="Start New Research" 
+                title={t('dashboard.actionStart')} 
                 href="/" 
                 icon={FileText}
-                description="Begin a new research exploration with your topic or question." 
+                description={t('dashboard.actionStartDesc')} 
             />
             <QuickActionCard 
-                title="Generate Report from File" 
+                title={t('dashboard.actionFileReport')}
                 href="/file-report" 
                 icon={UploadCloud}
-                description="Upload your document and provide guidance for a tailored report." 
+                description={t('dashboard.actionFileReportDesc')}
             />
             <QuickActionCard 
-                title="View Documentation" 
+                title={t('dashboard.actionDocs')}
                 href="/docs" 
                 icon={BookOpen}
-                description="Learn how to use Foss AI features effectively." 
+                description={t('dashboard.actionDocsDesc')}
             />
             <QuickActionCard 
-                title="Account Settings" 
+                title={t('dashboard.actionSettings')}
                 href="/account-settings" 
                 icon={Settings}
-                description="Manage your profile, preferences, and security." 
+                description={t('dashboard.actionSettingsDesc')}
             />
         </div>
       </section>
@@ -318,7 +321,7 @@ export default function DashboardPage() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6">
             <h2 className="text-2xl sm:text-3xl font-semibold text-primary flex items-center">
                 <History className="mr-3 h-7 w-7 text-accent" />
-                Recent Activity
+                {t('dashboard.recentActivityTitle')}
             </h2>
             <div className="flex items-center space-x-2 mt-3 sm:mt-0 overflow-x-auto pb-2 sm:pb-0">
                 {filterButtons.map(filter => (
@@ -342,8 +345,8 @@ export default function DashboardPage() {
             </CardTitle>
             <CardDescription className="text-sm">
               {activityFilter === 'all' 
-                ? `Showing latest ${displayedActivities.length} of ${allActivities.length} activities.`
-                : `Showing latest ${displayedActivities.length} of ${filteredActivities.length} matching activities.`
+                ? t('dashboard.showingLatestOf', { count: displayedActivities.length, total: allActivities.length })
+                : t('dashboard.showingLatestOfFiltered', { count: displayedActivities.length, total: filteredActivities.length })
               }
             </CardDescription>
           </CardHeader>
@@ -359,7 +362,7 @@ export default function DashboardPage() {
                   }
                   if (item.type === 'file-report-generation') {
                      itemIcon = <FileSignature className="inline h-4 w-4 mr-2 text-accent/80"/>;
-                     itemDescription = item.reportTitle || `Report from file: ${item.question}`;
+                     itemDescription = item.reportTitle || t('dashboard.reportFromFile', { question: item.question });
                   }
                   return (
                     <li key={item.id} className="p-3 bg-secondary/50 dark:bg-secondary/20 rounded-md hover:bg-secondary/70 dark:hover:bg-secondary/30 transition-colors border border-border/60">
@@ -379,8 +382,8 @@ export default function DashboardPage() {
             ) : (
               <p className="text-muted-foreground italic text-sm text-center py-4">
                 {activityFilter === 'all' 
-                    ? "No research activity logged yet in this browser. Start a new research session!" 
-                    : `No activities found for the "${filterButtons.find(f => f.type === activityFilter)?.label}" filter.`
+                    ? t('dashboard.emptyHistory')
+                    : t('dashboard.emptyFilter', { filter: filterButtons.find(f => f.type === activityFilter)?.label })
                 }
               </p>
             )}
@@ -388,12 +391,12 @@ export default function DashboardPage() {
           <CardFooter className="flex justify-between items-center">
             <Button variant="outline" asChild>
               <NextLink href="/account-settings#history">
-                View Full History <ExternalLink className="ml-2 h-4 w-4"/>
+                {t('dashboard.viewFullHistory')} <ExternalLink className="ml-2 h-4 w-4"/>
               </NextLink>
             </Button>
             {activityFilter !== 'all' && (
                 <Button variant="ghost" size="sm" onClick={() => setActivityFilter('all')}>
-                    Clear Filter
+                    {t('dashboard.clearFilter')}
                 </Button>
             )}
           </CardFooter>
@@ -402,7 +405,8 @@ export default function DashboardPage() {
 
       <CardFooter className="mt-10 sm:mt-12 text-center border-t pt-6 text-xs text-muted-foreground">
         <p className="mx-auto">
-          Need help? Visit our <NextLink href="/docs" className="text-accent hover:underline">Documentation</NextLink>.
+          {t('dashboard.helpNotice')}{' '}
+          <NextLink href="/docs" className="text-accent hover:underline">{t('dashboard.documentation')}</NextLink>.
         </p>
       </CardFooter>
     </div>
