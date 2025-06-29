@@ -235,7 +235,6 @@ Foss AI uses **Genkit for Firebase** to integrate with Google's Gemini AI models
 *   `transcribe-and-analyze-flow.ts`: Transcribes audio/video files and performs thematic analysis.
 *   `text-to-speech-flow.ts`: Converts text from report sections into playable audio.
 *   `plagiarism-check-flow.ts`: Simulates a plagiarism check on a body of text.
-*   `generate-research-image.ts`: Generates a conceptual image based on a research topic.
 
 These flows are called by Next.js Server Actions defined in `src/app/actions.ts`.
 
