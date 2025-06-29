@@ -7,7 +7,7 @@ import type { GenerateResearchReportOutput } from '@/ai/flows/generate-research-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { FileText, BookOpen, MessageSquareQuote, ThumbsUp, Settings, LightbulbIcon, ShieldAlert, Library, UsersRound, ClipboardList, Milestone, Scale, GitBranch, DownloadCloud, BookText as AppendixIcon, BookMarked, Activity, FileType, FileJson, Loader2, Maximize, Minimize, Volume2, XCircle, ShieldCheck, ShieldExclamation, ChevronDown } from 'lucide-react';
+import { FileText, BookOpen, MessageSquareQuote, ThumbsUp, Settings, LightbulbIcon, ShieldAlert, Library, UsersRound, ClipboardList, Milestone, Scale, GitBranch, DownloadCloud, BookText as AppendixIcon, BookMarked, Activity, FileType, FileJson, Loader2, Maximize, Minimize, Volume2, XCircle, ShieldCheck, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import jsPDF from 'jspdf';
@@ -532,7 +532,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
                           {t('reportDisplay.originalityTitle')}
                       </div>
                       <Button size="sm" onClick={handleRunPlagiarismCheck} disabled={isCheckingPlagiarism}>
-                        {isCheckingPlagiarism ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <ShieldExclamation className="mr-2 h-4 w-4"/>}
+                        {isCheckingPlagiarism ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <ShieldAlert className="mr-2 h-4 w-4"/>}
                         {t('reportDisplay.runCheck')}
                       </Button>
                   </CardTitle>
