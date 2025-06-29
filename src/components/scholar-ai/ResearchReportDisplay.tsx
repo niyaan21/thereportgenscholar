@@ -5,7 +5,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import type { GenerateResearchReportOutput } from '@/ai/flows/generate-research-report';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { FileText, BookOpen, MessageSquareQuote, ThumbsUp, Settings, LightbulbIcon, ShieldAlert, Library, UsersRound, ClipboardList, Milestone, Scale, GitBranch, DownloadCloud, BookText as AppendixIcon, BookMarked, Activity, FileType, FileJson, Loader2, Maximize, Minimize, Volume2, XCircle } from 'lucide-react';
+import { FileText, BookOpen, MessageSquareQuote, ThumbsUp, Settings, LightbulbIcon, ShieldAlert, Library, UsersRound, ClipboardList, Milestone, Scale, GitBranch, DownloadCloud, BookText as AppendixIcon, BookMarked, Activity, FileType, FileJson, Loader2, Maximize, Minimize, Volume2, XCircle, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import jsPDF from 'jspdf';
