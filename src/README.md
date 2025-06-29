@@ -20,7 +20,8 @@ Foss AI is a powerful Next.js web application designed to revolutionize your res
 *   **Voice-to-Text Research Notes:** Capture ideas, notes, and observations on-the-go using audio input. Transcribed notes can be edited and saved locally in the browser.
 *   **Interview Transcription & Analysis:** Upload audio/video files for automated transcription and AI-powered thematic analysis, sentiment detection, and key insight extraction.
 *   **Mind Map Concept Extraction:** Analyzes text input to identify a main idea and key concepts with related terms, providing a structured starting point for mind mapping.
-*   **Text-to-Speech for Reports:** Listen to generated report sections with AI-powered audio playback.
+*   **Text-to-Speech for Reports:** Listen to generated report sections with AI-powered audio playback for enhanced accessibility and proofreading.
+*   **Simulated Originality Check:** Run a simulated plagiarism check on generated reports to gauge content originality and identify sentences with plausible, invented academic sources.
 *   **Secure User Authentication:** Robust Firebase authentication (Email/Password, Sign in with Google).
 *   **Intuitive User Interface:** Clean, modern, and responsive UI built with Next.js, ShadCN UI, and Tailwind CSS.
 *   **Downloadable Outputs:** Export reports in structured JSON and formatted PDF.
@@ -33,7 +34,7 @@ Foss AI is a powerful Next.js web application designed to revolutionize your res
 
 Foss AI is continuously evolving. Here are some of the exciting capabilities on our roadmap:
 
-*   **Plagiarism Detection:** Integrated similarity checking for generated content to ensure originality and proper attribution. (Enhanced placeholder UI exists).
+*   **Full-Fledged Plagiarism Detection:** Integrated similarity checking against real web sources to ensure originality and proper attribution.
 *   **Multi-language Support:** Capabilities to conduct research, process inputs, and generate reports in a variety of languages. (Placeholder UI exists).
 *   **Note-taking Apps Integration:** Direct synchronization of research notes, summaries, and reports with popular platforms like Notion and Obsidian. (Placeholder UI exists).
 *   **Custom Report Templates:** Ability for users to create, save, and share report templates tailored to specific academic fields, journal requirements, or organizational standards.
@@ -41,6 +42,7 @@ Foss AI is continuously evolving. Here are some of the exciting capabilities on 
 *   **Research Network Visualization:** Tools to map and explore connections between researchers, published papers, institutions, and key topics within a field.
 *   **Ethics Compliance Checker:** AI-assisted review to help identify potential ethical considerations and ensure research aligns with relevant guidelines. (Placeholder UI exists).
 *   **Advanced Keyboard Shortcuts:** A comprehensive set of keyboard shortcuts for power users to navigate and operate Foss AI features with maximum efficiency.
+*   **Citation Management:** Advanced tools to manage citations and export bibliographies in various formats (e.g., .bib, RIS).
 
 ## ⌨️ Keyboard Shortcuts
 
@@ -104,7 +106,7 @@ Boost your productivity with these keyboard shortcuts:
     # Get your key from your Google Cloud project with the "Generative Language API" enabled.
     GOOGLE_API_KEY="your_google_ai_api_key_here"
     ```
-    **Note:** The `src/lib/firebase.ts` file currently has hardcoded Firebase config values. It's highly recommended to modify this file to use the `NEXT_PUBLIC_FIREBASE_...` environment variables for better security and easier configuration.
+    The application is configured to read these variables. Ensure they are correctly set for all features to work.
 
 ## 🛠️ Installation
 
@@ -232,7 +234,8 @@ Foss AI uses **Genkit for Firebase** to integrate with Google's Gemini AI models
 *   `extract-mindmap-concepts.ts`: Extracts key concepts and a main idea from text for mind mapping.
 *   `transcribe-and-analyze-flow.ts`: Transcribes audio/video files and performs thematic analysis.
 *   `text-to-speech-flow.ts`: Converts text from report sections into playable audio.
-*   (Planned) Flows for plagiarism detection, multi-language processing, etc.
+*   `plagiarism-check-flow.ts`: Simulates a plagiarism check on a body of text.
+*   `generate-research-image.ts`: Generates a conceptual image based on a research topic.
 
 These flows are called by Next.js Server Actions defined in `src/app/actions.ts`.
 
