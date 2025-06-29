@@ -1,4 +1,3 @@
-
 // src/components/landing/HowItWorksSection.tsx
 'use client';
 
@@ -7,35 +6,38 @@ import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Lightbulb, Search, Brain, FileTextIcon, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-const steps = [
-  {
-    icon: Lightbulb,
-    title: "1. Ask Your Question",
-    description: "Start by posing your complex research question or topic. Be as detailed or broad as you need.",
-    color: "bg-blue-500/15 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400",
-  },
-  {
-    icon: Search,
-    title: "2. AI Formulates Queries",
-    description: "Foss AI intelligently refines your input into optimized search vectors for its knowledge base.",
-    color: "bg-green-500/15 text-green-600 dark:bg-green-500/20 dark:text-green-400",
-  },
-  {
-    icon: Brain,
-    title: "3. Synthesize Insights",
-    description: "The AI synthesizes information from diverse conceptual sources, providing a coherent summary of key findings.",
-    color: "bg-purple-500/15 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400",
-  },
-  {
-    icon: FileTextIcon,
-    title: "4. Generate & Download",
-    description: "Receive a comprehensive, structured report or a conceptual image, ready for download and use.",
-    color: "bg-red-500/15 text-red-600 dark:bg-red-500/20 dark:text-red-400",
-  },
-];
+import { useTranslation } from 'react-i18next';
 
 const HowItWorksSection = React.memo(function HowItWorksSection() {
+  const { t } = useTranslation();
+
+  const steps = [
+    {
+      icon: Lightbulb,
+      title: t('howItWorks.step1'),
+      description: t('howItWorks.step1Desc'),
+      color: "bg-blue-500/15 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400",
+    },
+    {
+      icon: Search,
+      title: t('howItWorks.step2'),
+      description: t('howItWorks.step2Desc'),
+      color: "bg-green-500/15 text-green-600 dark:bg-green-500/20 dark:text-green-400",
+    },
+    {
+      icon: Brain,
+      title: t('howItWorks.step3'),
+      description: t('howItWorks.step3Desc'),
+      color: "bg-purple-500/15 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400",
+    },
+    {
+      icon: FileTextIcon,
+      title: t('howItWorks.step4'),
+      description: t('howItWorks.step4Desc'),
+      color: "bg-red-500/15 text-red-600 dark:bg-red-500/20 dark:text-red-400",
+    },
+  ];
+
   const FADE_IN_ANIMATION_VARIANTS = {
     hidden: { opacity: 0, y: 20 },
     visible: (i: number) => ({
@@ -65,13 +67,13 @@ const HowItWorksSection = React.memo(function HowItWorksSection() {
             variants={FADE_IN_ANIMATION_VARIANTS}
             className="text-3xl font-extrabold tracking-tight text-primary sm:text-4xl md:text-5xl"
           >
-            How Foss AI Works
+            {t('howItWorks.title')}
           </motion.h2>
           <motion.p
             variants={FADE_IN_ANIMATION_VARIANTS}
             className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground sm:text-xl"
           >
-            Streamline your research process in four simple, AI-powered steps.
+            {t('howItWorks.description')}
           </motion.p>
         </motion.div>
 

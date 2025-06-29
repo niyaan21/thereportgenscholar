@@ -1,5 +1,6 @@
-
 // src/app/pricing/page.tsx
+'use client';
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import NextLink from 'next/link';
@@ -7,24 +8,25 @@ import { Check, Star, Users, Zap, TrendingUp, ShieldCheck, Package, ArrowRight, 
 import type { Metadata } from 'next';
 import { cn } from '@/lib/utils';
 import React from 'react'; 
+import { useTranslation } from 'react-i18next';
 
-export const metadata: Metadata = {
-  title: 'Foss AI Pricing - Unlock Your Research Potential',
-  description: 'Explore flexible pricing plans for Foss AI. Choose the perfect plan for your research needs, from individual explorers to enterprise teams, and start leveraging AI today.',
-  openGraph: {
-    title: 'Foss AI Pricing - Plans for Every Researcher',
-    description: 'Find the Foss AI plan that fits your research workflow. AI-powered query formulation, synthesis, and report generation at your fingertips.',
-    images: [
-      {
-        url: 'https://placehold.co/1200x630.png?text=Foss+AI+Pricing',
-        width: 1200,
-        height: 630,
-        alt: 'Foss AI Pricing Plans',
-        'data-ai-hint': 'pricing plans' as any,
-      },
-    ],
-  },
-};
+// export const metadata: Metadata = {
+//   title: 'Foss AI Pricing - Unlock Your Research Potential',
+//   description: 'Explore flexible pricing plans for Foss AI. Choose the perfect plan for your research needs, from individual explorers to enterprise teams, and start leveraging AI today.',
+//   openGraph: {
+//     title: 'Foss AI Pricing - Plans for Every Researcher',
+//     description: 'Find the Foss AI plan that fits your research workflow. AI-powered query formulation, synthesis, and report generation at your fingertips.',
+//     images: [
+//       {
+//         url: 'https://placehold.co/1200x630.png?text=Foss+AI+Pricing',
+//         width: 1200,
+//         height: 630,
+//         alt: 'Foss AI Pricing Plans',
+//         'data-ai-hint': 'pricing plans' as any,
+//       },
+//     ],
+//   },
+// };
 
 interface PricingTierProps {
   name: string;
@@ -79,57 +81,59 @@ TierCard.displayName = "TierCard";
 
 
 export default function PricingPage() {
+  const { t } = useTranslation();
+
   const tiers: PricingTierProps[] = [
     {
-      name: "Explorer",
-      price: "$0",
-      priceDescription: "/ month",
-      tagline: "Start your AI research journey, no cost involved.",
+      name: t('pricingPage.tierExplorer'),
+      price: t('pricingPage.tierExplorerPrice'),
+      priceDescription: t('pricingPage.tierExplorerDesc'),
+      tagline: t('pricingPage.tierExplorerTagline'),
       features: [
-        "5 Research Queries / Day",
-        "Basic Report Generation",
-        "2 Conceptual Images / Month",
-        "Limited History Access",
-        "Community Support",
+        t('pricingPage.tierExplorerF1'),
+        t('pricingPage.tierExplorerF2'),
+        t('pricingPage.tierExplorerF3'),
+        t('pricingPage.tierExplorerF4'),
+        t('pricingPage.tierExplorerF5'),
       ],
-      ctaText: "Start Exploring",
+      ctaText: t('pricingPage.tierExplorerCta'),
       ctaLink: "/signup",
       icon: Package,
     },
     {
-      name: "Innovator",
-      price: "$29",
-      priceDescription: "/ month",
-      tagline: "For individuals and small teams pushing boundaries.",
+      name: t('pricingPage.tierInnovator'),
+      price: t('pricingPage.tierInnovatorPrice'),
+      priceDescription: t('pricingPage.tierInnovatorDesc'),
+      tagline: t('pricingPage.tierInnovatorTagline'),
       features: [
-        "100 Research Queries / Day",
-        "Advanced Report Generation & Customization",
-        "25 Conceptual Images / Month",
-        "Full Research History",
-        "Priority Email Support",
-        "Early Access to New Features",
-        "(Coming Soon) Basic API Access",
+        t('pricingPage.tierInnovatorF1'),
+        t('pricingPage.tierInnovatorF2'),
+        t('pricingPage.tierInnovatorF3'),
+        t('pricingPage.tierInnovatorF4'),
+        t('pricingPage.tierInnovatorF5'),
+        t('pricingPage.tierInnovatorF6'),
+        t('pricingPage.tierInnovatorF7'),
       ],
-      ctaText: "Choose Innovator",
+      ctaText: t('pricingPage.tierInnovatorCta'),
       ctaLink: "/signup?plan=innovator", 
       highlighted: true,
       icon: Star,
     },
     {
-      name: "Pioneer",
-      price: "Custom",
-      priceDescription: "",
-      tagline: "Tailored solutions for large organizations and enterprises.",
+      name: t('pricingPage.tierPioneer'),
+      price: t('pricingPage.tierPioneerPrice'),
+      priceDescription: t('pricingPage.tierPioneerDesc'),
+      tagline: t('pricingPage.tierPioneerTagline'),
       features: [
-        "Unlimited Research Queries",
-        "Enterprise-Grade Reporting & Analytics",
-        "Unlimited Conceptual Images",
-        "Team Collaboration Tools",
-        "Dedicated Account Manager & Support",
-        "Custom Integrations & SLA",
-        "Full API Access & Higher Rate Limits",
+        t('pricingPage.tierPioneerF1'),
+        t('pricingPage.tierPioneerF2'),
+        t('pricingPage.tierPioneerF3'),
+        t('pricingPage.tierPioneerF4'),
+        t('pricingPage.tierPioneerF5'),
+        t('pricingPage.tierPioneerF6'),
+        t('pricingPage.tierPioneerF7'),
       ],
-      ctaText: "Contact Sales",
+      ctaText: t('pricingPage.tierPioneerCta'),
       ctaLink: "/contact", 
       icon: Users,
     },
@@ -142,10 +146,10 @@ export default function PricingPage() {
           <DollarSign className="h-10 w-10 sm:h-12 sm:w-12" />
         </div>
         <h1 className="text-4xl sm:text-5xl font-extrabold text-primary tracking-tight">
-          Find Your Perfect Plan
+          {t('pricingPage.title')}
         </h1>
         <p className="mt-4 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-          Flexible and transparent pricing to supercharge your research workflow. No hidden fees, cancel anytime.
+          {t('pricingPage.description')}
         </p>
       </header>
 
@@ -161,40 +165,40 @@ export default function PricingPage() {
                  <div className="inline-flex items-center justify-center p-3 bg-gradient-to-br from-accent to-accent/80 rounded-full mb-4 ring-2 ring-accent/30 shadow-md text-accent-foreground mx-auto">
                     <HelpCircle className="h-8 w-8" />
                 </div>
-                <CardTitle className="text-2xl sm:text-3xl font-bold text-primary">Frequently Asked Questions</CardTitle>
+                <CardTitle className="text-2xl sm:text-3xl font-bold text-primary">{t('pricingPage.faqTitle')}</CardTitle>
             </CardHeader>
             <CardContent className="p-0 space-y-5 text-left">
                 <details className="group p-3 sm:p-4 rounded-lg hover:bg-accent/10 transition-colors">
                     <summary className="flex justify-between items-center font-medium cursor-pointer text-base sm:text-lg text-primary/90 group-hover:text-accent">
-                        Can I try Foss AI before committing to a paid plan?
+                        {t('pricingPage.faq1')}
                         <ArrowRight className="h-4 w-4 transform transition-transform duration-200 group-open:rotate-90" />
                     </summary>
                     <p className="text-muted-foreground mt-2 text-sm sm:text-base leading-relaxed">
-                        Yes! Our "Explorer" plan is completely free and allows you to test core features. You can upgrade anytime when you need more power.
+                        {t('pricingPage.faq1Answer')}
                     </p>
                 </details>
                  <details className="group p-3 sm:p-4 rounded-lg hover:bg-accent/10 transition-colors">
                     <summary className="flex justify-between items-center font-medium cursor-pointer text-base sm:text-lg text-primary/90 group-hover:text-accent">
-                        What payment methods do you accept?
+                        {t('pricingPage.faq2')}
                          <ArrowRight className="h-4 w-4 transform transition-transform duration-200 group-open:rotate-90" />
                     </summary>
                     <p className="text-muted-foreground mt-2 text-sm sm:text-base leading-relaxed">
-                        We plan to accept all major credit cards (Visa, Mastercard, American Express). For Enterprise plans, we can also arrange invoicing. (Payment processing not yet implemented).
+                        {t('pricingPage.faq2Answer')}
                     </p>
                 </details>
                 <details className="group p-3 sm:p-4 rounded-lg hover:bg-accent/10 transition-colors">
                     <summary className="flex justify-between items-center font-medium cursor-pointer text-base sm:text-lg text-primary/90 group-hover:text-accent">
-                        Can I cancel my subscription anytime?
+                        {t('pricingPage.faq3')}
                          <ArrowRight className="h-4 w-4 transform transition-transform duration-200 group-open:rotate-90" />
                     </summary>
                     <p className="text-muted-foreground mt-2 text-sm sm:text-base leading-relaxed">
-                        Absolutely. You can cancel your subscription at any time from your account settings. Your plan will remain active until the end of the current billing period.
+                        {t('pricingPage.faq3Answer')}
                     </p>
                 </details>
             </CardContent>
              <CardFooter className="p-0 pt-8 text-center">
                 <p className="text-muted-foreground text-sm sm:text-base w-full">
-                    Have more questions? <NextLink href="/contact" className="text-accent hover:underline">Contact our support team</NextLink>.
+                    {t('pricingPage.faqFooter')} <NextLink href="/contact" className="text-accent hover:underline">{t('pricingPage.faqContact')}</NextLink>.
                 </p>
             </CardFooter>
         </Card>
@@ -202,11 +206,11 @@ export default function PricingPage() {
 
       <div className="mt-16 sm:mt-20 text-center">
         <p className="text-lg sm:text-xl text-muted-foreground">
-          Ready to accelerate your research?
+          {t('pricingPage.ctaTitle')}
         </p>
         <Button asChild size="lg" className="mt-5 sm:mt-6 bg-gradient-to-r from-primary to-accent text-primary-foreground hover:shadow-2xl px-10 py-3.5 text-lg sm:text-xl">
           <NextLink href="/signup">
-            Get Started with Foss AI <ArrowRight className="ml-2.5 h-5 w-5 sm:h-6 sm:w-6" />
+            {t('pricingPage.ctaButton')} <ArrowRight className="ml-2.5 h-5 w-5 sm:h-6 sm:w-6" />
           </NextLink>
         </Button>
       </div>

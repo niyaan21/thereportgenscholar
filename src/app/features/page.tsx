@@ -1,5 +1,6 @@
-
 // src/app/features/page.tsx
+'use client';
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import NextLink from 'next/link';
@@ -7,24 +8,25 @@ import { Zap, Brain, FileTextIcon, Image as ImageIconLucide, ShieldCheck, Layout
 import type { Metadata } from 'next';
 import { cn } from '@/lib/utils';
 import React from 'react'; 
+import { useTranslation } from 'react-i18next';
 
-export const metadata: Metadata = {
-  title: 'Foss AI Features - Advanced AI Research Capabilities',
-  description: 'Discover the powerful features of Foss AI, including AI-driven query formulation, intelligent knowledge synthesis, file-powered reporting, conceptual visualization, voice notes, and more. Elevate your research workflow today.',
-  openGraph: {
-    title: 'Foss AI Features - Advanced AI Research Capabilities',
-    description: 'Explore how Foss AI\'s innovative features can streamline your research process and help you uncover deeper insights.',
-    images: [
-      {
-        url: 'https://placehold.co/1200x630.png?text=Foss+AI+Features', 
-        width: 1200,
-        height: 630,
-        alt: 'Features of Foss AI Platform',
-        'data-ai-hint': 'features list' as any,
-      },
-    ],
-  },
-};
+// export const metadata: Metadata = {
+//   title: 'Foss AI Features - Advanced AI Research Capabilities',
+//   description: 'Discover the powerful features of Foss AI, including AI-driven query formulation, intelligent knowledge synthesis, file-powered reporting, conceptual visualization, voice notes, and more. Elevate your research workflow today.',
+//   openGraph: {
+//     title: 'Foss AI Features - Advanced AI Research Capabilities',
+//     description: 'Explore how Foss AI\'s innovative features can streamline your research process and help you uncover deeper insights.',
+//     images: [
+//       {
+//         url: 'https://placehold.co/1200x630.png?text=Foss+AI+Features', 
+//         width: 1200,
+//         height: 630,
+//         alt: 'Features of Foss AI Platform',
+//         'data-ai-hint': 'features list' as any,
+//       },
+//     ],
+//   },
+// };
 
 interface FeatureCardProps {
   icon: React.ElementType;
@@ -35,6 +37,7 @@ interface FeatureCardProps {
 }
 
 const FeatureCard = React.memo(function FeatureCard({ icon: Icon, title, description, className, isPlanned }: FeatureCardProps) {
+  const { t } = useTranslation();
   return (
     <Card className={cn(
         "w-full shadow-lg hover:shadow-xl transition-all duration-300 ease-out border-primary/15 hover:border-accent/70 bg-card flex flex-col", 
@@ -48,7 +51,7 @@ const FeatureCard = React.memo(function FeatureCard({ icon: Icon, title, descrip
         )}>
           <Icon className="h-7 w-7 sm:h-8 sm:w-8" />
         </div>
-        <CardTitle className="text-xl sm:text-2xl font-semibold text-primary">{title} {isPlanned && <span className="text-xs text-muted-foreground">(Planned)</span>}</CardTitle>
+        <CardTitle className="text-xl sm:text-2xl font-semibold text-primary">{title} {isPlanned && <span className="text-xs text-muted-foreground">{t('featuresPage.f_planned')}</span>}</CardTitle>
       </CardHeader>
       <CardContent className="text-center text-sm sm:text-base text-muted-foreground leading-relaxed px-5 pb-6 sm:px-6 sm:pb-8 flex-grow">
         {description}
@@ -60,92 +63,94 @@ FeatureCard.displayName = "FeatureCard";
 
 
 export default function FeaturesPage() {
+  const { t } = useTranslation();
+  
   const features = [
     {
       icon: Search,
-      title: "AI Query Formulation",
-      description: "Transforms complex research questions into precise search vectors, maximizing information retrieval relevance from its knowledge base.",
+      title: t('featuresPage.f_query'),
+      description: t('featuresPage.f_query_desc'),
     },
     {
       icon: Layers,
-      title: "Intelligent Knowledge Synthesis",
-      description: "Distills information from multiple conceptual sources, providing concise summaries of key insights, themes, and findings.",
+      title: t('featuresPage.f_synthesis'),
+      description: t('featuresPage.f_synthesis_desc'),
     },
     {
       icon: FileTextIcon,
-      title: "Comprehensive Report Generation",
-      description: "Automatically generates structured, multi-section academic-style reports including summaries, reviews, methodology, and references.",
+      title: t('featuresPage.f_report'),
+      description: t('featuresPage.f_report_desc'),
     },
     {
       icon: UploadCloud,
-      title: "File-Powered Guided Reporting",
-      description: "Upload your documents (TXT, MD, PDF, DOCX) and provide specific guidance to generate tailored reports based on your file's content.",
+      title: t('featuresPage.f_file_report'),
+      description: t('featuresPage.f_file_report_desc'),
     },
     {
       icon: Mic,
-      title: "Voice-to-Text Notes",
-      description: "Capture research ideas and observations on-the-go using your voice. Transcribed notes can be edited and saved locally.",
+      title: t('featuresPage.f_voice'),
+      description: t('featuresPage.f_voice_desc'),
     },
     {
       icon: BrainCircuit,
-      title: "Mind Map Concept Extraction",
-      description: "Analyzes text to identify main ideas and key concepts, providing a structured start for mind mapping and visualizing connections.",
+      title: t('featuresPage.f_mindmap'),
+      description: t('featuresPage.f_mindmap_desc'),
     },
     {
       icon: ShieldCheck,
-      title: "Secure User Authentication",
-      description: "Protects your work with robust Firebase authentication, ensuring secure access to Foss AI's full suite of features.",
+      title: t('featuresPage.f_auth'),
+      description: t('featuresPage.f_auth_desc'),
     },
     {
       icon: LayoutDashboard,
-      title: "Intuitive User Interface",
-      description: "A clean, modern interface built with Next.js & ShadCN UI, designed for ease of use, letting you focus on research.",
+      title: t('featuresPage.f_ui'),
+      description: t('featuresPage.f_ui_desc'),
     },
     {
       icon: Download,
-      title: "Downloadable Outputs",
-      description: "Export reports in structured JSON for data portability and as professionally formatted PDFs for sharing and offline access.",
+      title: t('featuresPage.f_download'),
+      description: t('featuresPage.f_download_desc'),
     },
      {
       icon: Settings,
-      title: "Customizable Workflow",
-      description: "Offers a guided research process with flexibility to revisit and refine steps like editing questions or re-synthesizing information.",
+      title: t('featuresPage.f_workflow'),
+      description: t('featuresPage.f_workflow_desc'),
     },
     {
       icon: ThumbsUp,
-      title: "User-Centric Enhancements",
-      description: "Benefits from continuous UI/UX refinements, dynamic animations, and clear feedback for a polished, engaging experience.",
+      title: t('featuresPage.f_ux'),
+      description: t('featuresPage.f_ux_desc'),
     },
     {
       icon: MessageCircle,
-      title: "Interactive Feedback Loop",
-      description: "Provides clear progress indicators and toast notifications, keeping you informed throughout the AI generation process.",
+      title: t('featuresPage.f_feedback'),
+      description: t('featuresPage.f_feedback_desc'),
     },
     {
       icon: BarChart,
-      title: "Data Visualization Suggestions",
-      description: "AI suggests relevant chart types (bar, line, pie, scatter) within reports to help visualize key data points and trends.",
+      title: t('featuresPage.f_viz'),
+      description: t('featuresPage.f_viz_desc'),
     },
     {
       icon: BookOpen,
-      title: "In-App Documentation",
-      description: "Access comprehensive guides and FAQs directly within the platform to master all features and troubleshoot effectively.",
+      title: t('featuresPage.f_docs'),
+      description: t('featuresPage.f_docs_desc'),
     },
     {
       icon: Server,
-      title: "Scalable Cloud Infrastructure",
-      description: "Built on robust cloud technologies ensuring reliable performance and scalability as your research demands grow.",
+      title: t('featuresPage.f_infra'),
+      description: t('featuresPage.f_infra_desc'),
     },
      {
       icon: ScanText, // Using ShieldCheck for Plagiarism Detection
-      title: "Plagiarism Detection",
-      description: "Integrated similarity checking for generated content to ensure originality and proper attribution. (Feature in development)",
+      title: t('featuresPage.f_plagiarism'),
+      description: t('featuresPage.f_plagiarism_desc'),
       isPlanned: true,
     },
     {
       icon: Share2,
-      title: "Content Sharing",
-      description: "Future capabilities to easily share your generated reports or specific insights with collaborators or peers securely.",
+      title: t('featuresPage.f_sharing'),
+      description: t('featuresPage.f_sharing_desc'),
       isPlanned: true,
     },
   ];
@@ -157,10 +162,10 @@ export default function FeaturesPage() {
           <Sparkles className="h-12 w-12 sm:h-16 sm:w-16" />
         </div>
         <h1 className="text-4xl sm:text-5xl font-extrabold text-primary tracking-tight">
-          Foss AI Features
+          {t('featuresPage.title')}
         </h1>
         <p className="mt-4 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-          Discover the suite of powerful AI-driven tools designed to revolutionize your research process, from initial ideation to final report.
+          {t('featuresPage.description')}
         </p>
       </div>
 
@@ -182,16 +187,15 @@ export default function FeaturesPage() {
                  <div className="inline-flex items-center justify-center p-3 bg-gradient-to-br from-accent to-accent/80 rounded-full mb-4 ring-2 ring-accent/30 shadow-md text-accent-foreground mx-auto">
                     <Zap className="h-8 w-8" />
                 </div>
-                <CardTitle className="text-2xl sm:text-3xl font-bold text-primary">Ready to Elevate Your Research?</CardTitle>
+                <CardTitle className="text-2xl sm:text-3xl font-bold text-primary">{t('featuresPage.ctaTitle')}</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
                 <p className="text-muted-foreground text-base sm:text-lg mb-6">
-                    Sign up for Foss AI today and experience the future of intelligent research.
-                    Transform your workflow, uncover deeper insights, and generate impactful reports with ease.
+                    {t('featuresPage.ctaDescription')}
                 </p>
                 <Button asChild size="lg" className="bg-gradient-to-r from-primary to-accent text-primary-foreground hover:shadow-2xl px-8 py-3 text-lg">
                     <NextLink href="/signup">
-                        Get Started Now <ArrowRight className="ml-2.5 h-5 w-5" />
+                        {t('featuresPage.ctaButton')} <ArrowRight className="ml-2.5 h-5 w-5" />
                     </NextLink>
                 </Button>
             </CardContent>

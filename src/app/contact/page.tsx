@@ -10,9 +10,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Send, Mail, MessageSquare, Phone, Info, Building, MapPin } from 'lucide-react';
 import NextLink from 'next/link';
+import { useTranslation } from 'react-i18next';
 
 
 export default function ContactPage() {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [subject, setSubject] = useState('');
@@ -28,8 +30,8 @@ export default function ContactPage() {
     await new Promise(resolve => setTimeout(resolve, 1500));
 
     toast({
-      title: 'Message Sent (Placeholder)',
-      description: "Thank you for reaching out! We'll get back to you soon. (This is a demo, no email was actually sent).",
+      title: t('contactPage.toastTitle'),
+      description: t('contactPage.toastDescription'),
       variant: 'default',
     });
 
@@ -49,22 +51,22 @@ export default function ContactPage() {
             <MessageSquare className="h-12 w-12 sm:h-16 sm:w-16" />
           </div>
           <CardTitle className="text-4xl sm:text-5xl font-extrabold text-primary tracking-tight">
-            Get In Touch
+            {t('contactPage.title')}
           </CardTitle>
           <CardDescription className="text-lg sm:text-xl text-muted-foreground mt-3 sm:mt-4 max-w-2xl mx-auto">
-            We're here to help and answer any question you might have. We look forward to hearing from you!
+            {t('contactPage.description')}
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6 sm:p-8 md:p-10 grid md:grid-cols-2 gap-8 sm:gap-10">
           <div className="space-y-6">
-            <h2 className="text-2xl font-semibold text-primary mb-4">Contact Form</h2>
+            <h2 className="text-2xl font-semibold text-primary mb-4">{t('contactPage.formTitle')}</h2>
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <Label htmlFor="name">Full Name</Label>
+                <Label htmlFor="name">{t('contactPage.nameLabel')}</Label>
                 <Input 
                   id="name" 
                   type="text" 
-                  placeholder="Your Full Name" 
+                  placeholder={t('contactPage.namePlaceholder')}
                   value={name} 
                   onChange={(e) => setName(e.target.value)} 
                   required 
@@ -72,11 +74,11 @@ export default function ContactPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="email">{t('contactPage.emailLabel')}</Label>
                 <Input 
                   id="email" 
                   type="email" 
-                  placeholder="you@example.com" 
+                  placeholder={t('contactPage.emailPlaceholder')} 
                   value={email} 
                   onChange={(e) => setEmail(e.target.value)} 
                   required 
@@ -84,11 +86,11 @@ export default function ContactPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="subject">Subject</Label>
+                <Label htmlFor="subject">{t('contactPage.subjectLabel')}</Label>
                 <Input 
                   id="subject" 
                   type="text" 
-                  placeholder="Reason for contacting" 
+                  placeholder={t('contactPage.subjectPlaceholder')} 
                   value={subject} 
                   onChange={(e) => setSubject(e.target.value)} 
                   required 
@@ -96,10 +98,10 @@ export default function ContactPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="message">Your Message</Label>
+                <Label htmlFor="message">{t('contactPage.messageLabel')}</Label>
                 <Textarea 
                   id="message" 
-                  placeholder="Please type your message here..." 
+                  placeholder={t('contactPage.messagePlaceholder')} 
                   rows={5} 
                   value={message} 
                   onChange={(e) => setMessage(e.target.value)} 
@@ -113,46 +115,46 @@ export default function ContactPage() {
                 ) : (
                   <Send className="mr-2 h-5 w-5" />
                 )}
-                {isSubmitting ? 'Sending...' : 'Send Message'}
+                {isSubmitting ? t('contactPage.buttonSending') : t('contactPage.buttonSend')}
               </Button>
             </form>
           </div>
           <div className="space-y-8">
-            <h2 className="text-2xl font-semibold text-primary mb-4">Our Information</h2>
+            <h2 className="text-2xl font-semibold text-primary mb-4">{t('contactPage.infoTitle')}</h2>
             <div className="space-y-5 text-foreground/80">
               <div className="flex items-start">
                 <Mail className="h-5 w-5 mr-3 mt-1 text-accent flex-shrink-0" />
                 <div>
-                  <h3 className="font-medium text-primary/90">Email Us</h3>
+                  <h3 className="font-medium text-primary/90">{t('contactPage.infoEmail')}</h3>
                   <p className="text-sm">support@fossai.example.com (Placeholder)</p>
-                  <a href="mailto:support@fossai.example.com" className="text-xs text-accent hover:underline">Send Email</a>
+                  <a href="mailto:support@fossai.example.com" className="text-xs text-accent hover:underline">{t('contactPage.infoEmailLink')}</a>
                 </div>
               </div>
               <div className="flex items-start">
                 <Phone className="h-5 w-5 mr-3 mt-1 text-accent flex-shrink-0" />
                 <div>
-                  <h3 className="font-medium text-primary/90">Call Us (Placeholder)</h3>
+                  <h3 className="font-medium text-primary/90">{t('contactPage.infoCall')}</h3>
                   <p className="text-sm">+1 (555) 123-4567</p>
                 </div>
               </div>
                <div className="flex items-start">
                 <MapPin className="h-5 w-5 mr-3 mt-1 text-accent flex-shrink-0" />
                 <div>
-                  <h3 className="font-medium text-primary/90">Our Office (Placeholder)</h3>
+                  <h3 className="font-medium text-primary/90">{t('contactPage.infoOffice')}</h3>
                   <p className="text-sm">123 Innovation Drive, Tech City, TX 75001</p>
                 </div>
               </div>
               <div className="flex items-start">
                 <Info className="h-5 w-5 mr-3 mt-1 text-accent flex-shrink-0" />
                 <div>
-                  <h3 className="font-medium text-primary/90">Business Hours</h3>
-                  <p className="text-sm">Monday - Friday: 9 AM - 6 PM (CST)</p>
-                  <p className="text-sm">Saturday - Sunday: Closed</p>
+                  <h3 className="font-medium text-primary/90">{t('contactPage.infoHours')}</h3>
+                  <p className="text-sm">{t('contactPage.infoHoursDetail')}</p>
+                  <p className="text-sm">{t('contactPage.infoHoursWeekend')}</p>
                 </div>
               </div>
             </div>
              <div className="mt-6 pt-6 border-t border-border/60">
-                <h3 className="text-xl font-semibold text-primary mb-3">Connect with Us (Placeholder)</h3>
+                <h3 className="text-xl font-semibold text-primary mb-3">{t('contactPage.connectTitle')}</h3>
                  <div className="flex space-x-3">
                     <Button variant="outline" size="icon" onClick={() => toast({title: "Social Media Link", description:"This is a placeholder for X/Twitter."})}>
                         <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 fill-current"><title>X</title><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg>

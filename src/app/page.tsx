@@ -1,4 +1,3 @@
-
 // src/app/page.tsx
 'use client';
 
@@ -339,7 +338,7 @@ export default function ScholarAIPage() {
       case 'initial':
         return (
           <div key="initial" className={cn("w-full", animationClasses)}>
-            <HeroSection
+             <HeroSection
               queryFormSlot={
                 <QueryForm
                   formAction={formulateQueryFormAction}
@@ -352,6 +351,9 @@ export default function ScholarAIPage() {
               isAuthenticated={!!currentUser}
               authLoading={!authChecked}
             />
+            <HowItWorksSection />
+            <KeyFeaturesShowcase />
+            <FinalCTASection />
           </div>
         );
       case 'queries_formulated':
@@ -471,20 +473,19 @@ export default function ScholarAIPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/10 to-background flex flex-col antialiased selection:bg-accent/20 selection:text-accent-foreground">
-
       <main className={cn(
         "flex-grow",
-        appState === 'initial' || isLoading ?
-          "w-full flex items-center justify-center" : 
-          "container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12"
+        appState !== 'initial' && !isLoading
+          ? "container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12"
+          : "w-full"
       )}>
         <div className={cn(
-          appState === 'initial' && !isLoading ?
-            "w-full" : 
-            "max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto w-full",
-            isLoading && "px-4 sm:px-6 lg:px-8" 
+          appState !== 'initial' && !isLoading
+            ? "max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto w-full"
+            : "w-full",
+          isLoading && "container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12 flex items-center justify-center"
         )}>
-            {renderCurrentStep()}
+          {renderCurrentStep()}
         </div>
       </main>
     </div>

@@ -1,29 +1,33 @@
-
 // src/app/api-docs/page.tsx
+'use client';
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Code2, Construction, InfoIcon, ShieldCheck, Zap, Workflow, Image as ImageIcon, FileText, ListTree, KeyRound, Clock, GitMerge, Puzzle } from 'lucide-react';
 import type { Metadata } from 'next';
+import { useTranslation } from 'react-i18next';
 
-export const metadata: Metadata = {
-  title: 'Foss AI API Documentation (Developer Preview)',
-  description: 'Explore the upcoming Foss AI API for programmatic access to powerful research tools and generative AI capabilities. Integrate AI-driven research into your applications.',
-  openGraph: {
-    title: 'Foss AI API Documentation (Developer Preview)',
-    description: 'Unlock Foss AI\'s research functionalities programmatically. Details on planned endpoints, authentication, and integration for developers.',
-    images: [
-      {
-        url: 'https://placehold.co/1200x630.png?text=Foss+AI+API', 
-        width: 1200,
-        height: 630,
-        alt: 'Foss AI API Documentation',
-        'data-ai-hint': 'api code' as any,
-      },
-    ],
-  },
-};
+// export const metadata: Metadata = {
+//   title: 'Foss AI API Documentation (Developer Preview)',
+//   description: 'Explore the upcoming Foss AI API for programmatic access to powerful research tools and generative AI capabilities. Integrate AI-driven research into your applications.',
+//   openGraph: {
+//     title: 'Foss AI API Documentation (Developer Preview)',
+//     description: 'Unlock Foss AI\'s research functionalities programmatically. Details on planned endpoints, authentication, and integration for developers.',
+//     images: [
+//       {
+//         url: 'https://placehold.co/1200x630.png?text=Foss+AI+API', 
+//         width: 1200,
+//         height: 630,
+//         alt: 'Foss AI API Documentation',
+//         'data-ai-hint': 'api code' as any,
+//       },
+//     ],
+//   },
+// };
 
 export default function ApiDocsPage() {
+  const { t } = useTranslation();
+
   return (
     <div className="container mx-auto min-h-[calc(100vh-8rem)] py-12 sm:py-16 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-4xl mx-auto shadow-2xl border-primary/20 rounded-xl overflow-hidden">
@@ -31,48 +35,44 @@ export default function ApiDocsPage() {
           <div className="inline-flex items-center justify-center p-4 sm:p-5 bg-gradient-to-br from-accent to-accent/80 rounded-full mb-5 sm:mb-8 mx-auto ring-2 ring-accent/40 shadow-lg text-accent-foreground">
             <Code2 className="h-12 w-12 sm:h-16 sm:w-16" />
           </div>
-          <CardTitle className="text-4xl sm:text-5xl font-extrabold text-primary tracking-tight">Foss AI API Documentation</CardTitle>
+          <CardTitle className="text-4xl sm:text-5xl font-extrabold text-primary tracking-tight">{t('apiDocsPage.title')}</CardTitle>
           <CardDescription className="text-lg sm:text-xl text-muted-foreground mt-3 sm:mt-4 max-w-2xl mx-auto">
-            Integrate Foss AI's power into your applications and workflows. (Developer Preview)
+            {t('apiDocsPage.description')}
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6 sm:p-8 md:p-10 space-y-10 text-base sm:text-lg text-foreground/90 leading-relaxed prose prose-lg dark:prose-invert max-w-none marker:text-accent">
           <p className="text-lg">
-            Welcome to the Foss AI API documentation. Our API is designed to provide developers with programmatic
-            access to the core functionalities of Foss AI, including AI-driven query formulation, advanced
-            research synthesis, and comprehensive report generation.
+            {t('apiDocsPage.mainText')}
           </p>
           
           <Alert variant="default" className="bg-primary/5 border-primary/20 text-primary dark:bg-primary/10 dark:border-primary/30 dark:text-primary-foreground/90 shadow-md">
             <Construction className="h-7 w-7 text-primary" />
-            <AlertTitle className="font-semibold text-xl text-primary">API Under Active Development</AlertTitle>
+            <AlertTitle className="font-semibold text-xl text-primary">{t('apiDocsPage.alertTitle')}</AlertTitle>
             <AlertDescription className="text-primary/80 dark:text-primary-foreground/80 mt-2 text-base">
-              The Foss AI API is currently under active development and is not yet publicly available.
-              This page serves as a preview of our planned API capabilities and conventions.
-              We are working diligently to bring these features to you. Stay tuned for official announcements and launch dates!
+              {t('apiDocsPage.alertDescription')}
             </AlertDescription>
           </Alert>
               
           <section>
             <h2 className="text-2xl sm:text-3xl font-semibold text-primary flex items-center mt-10 mb-5">
                <Zap className="h-7 w-7 sm:h-8 sm:w-8 mr-3 text-accent" />
-               Introduction to the API
+               {t('apiDocsPage.introTitle')}
             </h2>
-            <p>The Foss AI API aims to provide a RESTful interface, enabling developers to harness our sophisticated AI research tools directly within their own software, platforms, or custom workflows. Whether you're building a specialized research tool, integrating AI insights into an existing application, or automating parts of your research process, our API will offer the building blocks you need.</p>
-            <p className="mt-3">We plan to offer granular access to our core services, allowing for flexible integration strategies. The API will be designed with clarity, ease of use, and robustness in mind, following standard REST principles and utilizing JSON for data exchange.</p>
+            <p>{t('apiDocsPage.introText1')}</p>
+            <p className="mt-3">{t('apiDocsPage.introText2')}</p>
           </section>
 
           <section>
             <h2 className="text-2xl sm:text-3xl font-semibold text-primary flex items-center mt-10 mb-5">
                <ListTree className="h-7 w-7 sm:h-8 sm:w-8 mr-3 text-accent" />
-               Planned API Endpoints
+               {t('apiDocsPage.endpointsTitle')}
             </h2>
-            <p>Below is a conceptual overview of the primary API endpoints we are planning to offer. Specific request/response schemas and parameters will be detailed upon official release.</p>
+            <p>{t('apiDocsPage.endpointsText')}</p>
             <div className="space-y-6 mt-5">
               <Card className="bg-secondary/30 dark:bg-secondary/10 border-border/50 shadow-sm">
                 <CardHeader>
-                  <CardTitle className="text-xl font-medium text-primary/90 flex items-center"><Workflow className="h-5 w-5 mr-2.5 text-accent/80"/>/api/v1/formulate-query</CardTitle>
-                  <CardDescription className="text-sm">Submit a research question to receive optimized search queries.</CardDescription>
+                  <CardTitle className="text-xl font-medium text-primary/90 flex items-center"><Workflow className="h-5 w-5 mr-2.5 text-accent/80"/>{t('apiDocsPage.endpointQuery')}</CardTitle>
+                  <CardDescription className="text-sm">{t('apiDocsPage.endpointQueryDesc')}</CardDescription>
                 </CardHeader>
                 <CardContent className="text-sm">
                   <p><strong>Method:</strong> POST</p>
@@ -82,8 +82,8 @@ export default function ApiDocsPage() {
               </Card>
               <Card className="bg-secondary/30 dark:bg-secondary/10 border-border/50 shadow-sm">
                 <CardHeader>
-                  <CardTitle className="text-xl font-medium text-primary/90 flex items-center"><Puzzle className="h-5 w-5 mr-2.5 text-accent/80"/>/api/v1/synthesize-research</CardTitle>
-                  <CardDescription className="text-sm">Provide queries or text data to get a synthesized summary.</CardDescription>
+                  <CardTitle className="text-xl font-medium text-primary/90 flex items-center"><Puzzle className="h-5 w-5 mr-2.5 text-accent/80"/>{t('apiDocsPage.endpointSynth')}</CardTitle>
+                  <CardDescription className="text-sm">{t('apiDocsPage.endpointSynthDesc')}</CardDescription>
                 </CardHeader>
                 <CardContent className="text-sm">
                   <p><strong>Method:</strong> POST</p>
@@ -93,8 +93,8 @@ export default function ApiDocsPage() {
               </Card>
               <Card className="bg-secondary/30 dark:bg-secondary/10 border-border/50 shadow-sm">
                 <CardHeader>
-                  <CardTitle className="text-xl font-medium text-primary/90 flex items-center"><FileText className="h-5 w-5 mr-2.5 text-accent/80"/>/api/v1/generate-report</CardTitle>
-                  <CardDescription className="text-sm">Generate a comprehensive research report.</CardDescription>
+                  <CardTitle className="text-xl font-medium text-primary/90 flex items-center"><FileText className="h-5 w-5 mr-2.5 text-accent/80"/>{t('apiDocsPage.endpointReport')}</CardTitle>
+                  <CardDescription className="text-sm">{t('apiDocsPage.endpointReportDesc')}</CardDescription>
                 </CardHeader>
                 <CardContent className="text-sm">
                   <p><strong>Method:</strong> POST</p>
@@ -104,8 +104,8 @@ export default function ApiDocsPage() {
               </Card>
                <Card className="bg-secondary/30 dark:bg-secondary/10 border-border/50 shadow-sm">
                 <CardHeader>
-                  <CardTitle className="text-xl font-medium text-primary/90 flex items-center"><ImageIcon className="h-5 w-5 mr-2.5 text-accent/80"/>/api/v1/generate-image</CardTitle>
-                  <CardDescription className="text-sm">Generate a conceptual image for a research topic.</CardDescription>
+                  <CardTitle className="text-xl font-medium text-primary/90 flex items-center"><ImageIcon className="h-5 w-5 mr-2.5 text-accent/80"/>{t('apiDocsPage.endpointImage')}</CardTitle>
+                  <CardDescription className="text-sm">{t('apiDocsPage.endpointImageDesc')}</CardDescription>
                 </CardHeader>
                 <CardContent className="text-sm">
                   <p><strong>Method:</strong> POST</p>
@@ -119,43 +119,42 @@ export default function ApiDocsPage() {
           <section>
             <h2 className="text-2xl sm:text-3xl font-semibold text-primary flex items-center mt-10 mb-5">
                <KeyRound className="h-7 w-7 sm:h-8 sm:w-8 mr-3 text-accent" />
-               Authentication & Authorization
+               {t('apiDocsPage.authTitle')}
             </h2>
             <p>
-              Secure access to the Foss AI API will be managed primarily through API keys. Developers will be able to generate and manage their API keys through their Foss AI user dashboard (once available).
+              {t('apiDocsPage.authText1')}
             </p>
             <p className="mt-3">
-              Requests to the API will require an API key to be included in the HTTP headers, typically as a Bearer token or a custom header like `X-API-Key`. Detailed authentication schemes will be provided in the full API specification.
+              {t('apiDocsPage.authText2')}
             </p>
           </section>
 
           <section>
             <h2 className="text-2xl sm:text-3xl font-semibold text-primary flex items-center mt-10 mb-5">
                <Clock className="h-7 w-7 sm:h-8 sm:w-8 mr-3 text-accent" />
-               Rate Limiting & Usage Policies
+               {t('apiDocsPage.rateLimitTitle')}
             </h2>
             <p>
-              To ensure fair usage and stability of the platform, the API will be subject to rate limits. These limits will depend on the subscription tier and the specific endpoint being accessed. Information on default rate limits, how to monitor usage, and options for increased limits will be available in the developer portal.
+              {t('apiDocsPage.rateLimitText1')}
             </p>
             <p className="mt-3">
-              Usage of the API will be governed by our Terms of Service, including acceptable use policies for AI-generated content.
+              {t('apiDocsPage.rateLimitText2')}
             </p>
           </section>
 
            <section>
             <h2 className="text-2xl sm:text-3xl font-semibold text-primary flex items-center mt-10 mb-5">
                <GitMerge className="h-7 w-7 sm:h-8 sm:w-8 mr-3 text-accent" />
-               Versioning
+               {t('apiDocsPage.versioningTitle')}
             </h2>
             <p>
-              The API will be versioned (e.g., `/api/v1/`) to allow for future enhancements and changes without breaking existing integrations. We will strive to maintain backward compatibility where possible and provide clear migration paths for new API versions.
+              {t('apiDocsPage.versioningText')}
             </p>
           </section>
           
           <CardFooter className="text-center p-0 pt-10">
             <p className="mx-auto text-muted-foreground text-base">
-              We are incredibly excited about the potential the Foss AI API will unlock for developers and researchers alike!
-              Your feedback during this preview phase will be invaluable. Thank you for your interest.
+              {t('apiDocsPage.footerText')}
             </p>
           </CardFooter>
         </CardContent>

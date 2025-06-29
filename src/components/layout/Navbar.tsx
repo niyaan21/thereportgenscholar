@@ -26,8 +26,10 @@ import { auth } from '@/lib/firebase';
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { useTheme } from 'next-themes';
+import { useTranslation } from 'react-i18next';
 
 export default function Navbar() {
+  const { t } = useTranslation();
   const pathname = usePathname();
   const router = useRouter();
   const { toast } = useToast();
@@ -48,28 +50,28 @@ export default function Navbar() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      toast({ title: "Logged Out", description: "You have been successfully logged out." });
+      toast({ title: t('navbar.logoutToastTitle'), description: t('navbar.logoutToastDescription') });
       setMobileMenuOpen(false); 
       router.push('/'); 
     } catch (error) {
       console.error("Logout Error:", error);
-      toast({ title: "Logout Failed", description: "Could not log you out. Please try again.", variant: "destructive" });
+      toast({ title: t('navbar.logoutToastFailTitle'), description: t('navbar.logoutToastFailDescription'), variant: "destructive" });
     }
   };
 
   const commonNavLinksBase = [
-    { href: "/", label: "Home", icon: Home },
-    { href: "/file-report", label: "Analysis Tools", icon: SlidersHorizontal },
-    { href: "/notes", label: "Notes & Transcription", icon: AudioLines },
-    { href: "/features", label: "Features", icon: Sparkles },
-    { href: "/pricing", label: "Pricing", icon: DollarSign },
-    { href: "/about", label: "About", icon: Info },
-    { href: "/docs", label: "Docs", icon: BookOpenText },
-    { href: "/contact", label: "Contact", icon: MessageSquare },
+    { href: "/", label: t('navbar.home'), icon: Home },
+    { href: "/file-report", label: t('navbar.analysisTools'), icon: SlidersHorizontal },
+    { href: "/notes", label: t('navbar.notesTranscription'), icon: AudioLines },
+    { href: "/features", label: t('navbar.features'), icon: Sparkles },
+    { href: "/pricing", label: t('navbar.pricing'), icon: DollarSign },
+    { href: "/about", label: t('navbar.about'), icon: Info },
+    { href: "/docs", label: t('navbar.docs'), icon: BookOpenText },
+    { href: "/contact", label: t('navbar.contact'), icon: MessageSquare },
   ];
   
   const commonNavLinks = currentUser
-    ? [{ href: "/dashboard", label: "Dashboard", icon: LayoutDashboard }, ...commonNavLinksBase]
+    ? [{ href: "/dashboard", label: t('navbar.dashboard'), icon: LayoutDashboard }, ...commonNavLinksBase]
     : commonNavLinksBase;
   
   const NavLinkItem = React.memo(function NavLinkItem({ href, label, icon: Icon, onClick }: { href: string; label: string; icon: React.ElementType; onClick?: () => void }) {
@@ -104,7 +106,7 @@ export default function Navbar() {
                 className={cn("text-xs sm:text-sm", pathname === "/login" && "font-semibold", isMobile && "w-full justify-start")}
                 onClick={onLinkClick}
                 >
-                <LogIn className="mr-1.5 sm:mr-2 h-4 w-4" /> Login
+                <LogIn className="mr-1.5 sm:mr-2 h-4 w-4" /> {t('navbar.login')}
                 </Button>
             </NextLink>
             <NextLink href="/signup" passHref legacyBehavior>
@@ -114,7 +116,7 @@ export default function Navbar() {
                 className={cn("text-xs sm:text-sm", pathname === "/signup" && "font-semibold", isMobile && "w-full justify-start")}
                 onClick={onLinkClick}
                 >
-                <UserPlus className="mr-1.5 sm:mr-2 h-4 w-4" /> Sign Up
+                <UserPlus className="mr-1.5 sm:mr-2 h-4 w-4" /> {t('navbar.signup')}
                 </Button>
             </NextLink>
             </>
@@ -124,7 +126,7 @@ export default function Navbar() {
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className={cn("text-xs sm:text-sm flex items-center gap-2", isMobile && "w-full justify-start")}>
                 <UserCircle className="h-5 w-5" />
-                <span className="truncate max-w-[100px] sm:max-w-[150px]">{currentUser.displayName || currentUser.email || "Profile"}</span>
+                <span className="truncate max-w-[100px] sm:max-w-[150px]">{currentUser.displayName || currentUser.email || t('navbar.profile')}</span>
                 <ChevronDown className="h-4 w-4 opacity-70" />
                 </Button>
             </DropdownMenuTrigger>
@@ -133,17 +135,17 @@ export default function Navbar() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild className="cursor-pointer">
                 <NextLink href="/dashboard" onClick={onLinkClick}>
-                    <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
+                    <LayoutDashboard className="mr-2 h-4 w-4" /> {t('navbar.dashboard')}
                 </NextLink>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className="cursor-pointer">
                 <NextLink href="/account-settings" onClick={onLinkClick}>
-                    <AccountSettingsIcon className="mr-2 h-4 w-4" /> Account Settings
+                    <AccountSettingsIcon className="mr-2 h-4 w-4" /> {t('navbar.accountSettings')}
                 </NextLink>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => { handleLogout(); onLinkClick?.(); }} className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10">
-                <LogOut className="mr-2 h-4 w-4" /> Logout
+                <LogOut className="mr-2 h-4 w-4" /> {t('navbar.logout')}
                 </DropdownMenuItem>
             </DropdownMenuContent>
             </DropdownMenu>
@@ -163,26 +165,26 @@ export default function Navbar() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size={isMobile ? "sm" : "icon"} className={cn("text-muted-foreground hover:bg-accent/15 hover:text-accent-foreground", isMobile ? "w-full justify-start" : "h-9 w-9 sm:h-10 sm:w-10 rounded-full")} aria-label="Theme settings">
-                <Palette className="h-4 w-4 sm:h-5 sm:w-5" /> {isMobile && <span className="ml-2">Theme</span>}
+            <Button variant="ghost" size={isMobile ? "sm" : "icon"} className={cn("text-muted-foreground hover:bg-accent/15 hover:text-accent-foreground", isMobile ? "w-full justify-start" : "h-9 w-9 sm:h-10 sm:w-10 rounded-full")} aria-label={t('navbar.theme')}>
+                <Palette className="h-4 w-4 sm:h-5 sm:w-5" /> {isMobile && <span className="ml-2">{t('navbar.theme')}</span>}
             </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 border-border/70 bg-popover shadow-xl rounded-lg p-1.5">
-            <DropdownMenuLabel className="font-semibold text-popover-foreground px-2 py-1.5 text-sm">Appearance</DropdownMenuLabel>
+            <DropdownMenuLabel className="font-semibold text-popover-foreground px-2 py-1.5 text-sm">{t('navbar.appearance')}</DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-border/50 -mx-1 my-1" />
             <DropdownMenuItem onClick={() => { setTheme('light'); onLinkClick?.(); }} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
                 <Sun className="mr-2.5 h-4 w-4 text-muted-foreground group-hover:text-yellow-500 transition-colors" />
-                <span>Light Mode</span>
+                <span>{t('navbar.lightMode')}</span>
                 {theme === 'light' && <Check className="ml-auto h-4 w-4 text-accent" />}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => { setTheme('dark'); onLinkClick?.(); }} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
                 <Moon className="mr-2.5 h-4 w-4 text-muted-foreground group-hover:text-blue-400 transition-colors" />
-                <span>Dark Mode</span>
+                <span>{t('navbar.darkMode')}</span>
                 {theme === 'dark' && <Check className="ml-auto h-4 w-4 text-accent" />}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => { setTheme('system'); onLinkClick?.(); }} className="cursor-pointer hover:bg-accent/15 focus:bg-accent/20 text-sm px-2 py-2 group flex items-center rounded-md">
                 <Settings className="mr-2.5 h-4 w-4 text-muted-foreground transition-colors" />
-                <span>System Default</span>
+                <span>{t('navbar.systemDefault')}</span>
                 {theme === 'system' && <Check className="ml-auto h-4 w-4 text-accent" />}
             </DropdownMenuItem>
             </DropdownMenuContent>
