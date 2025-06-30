@@ -24,14 +24,16 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Mail, Lock, UserCircle, Trash2, Palette, Bell, Settings2 as GeneralSettingsIcon, ShieldAlert, ExternalLink, Edit3, AlertCircle, CheckCircle2, Sun, Moon, History, UserRoundCog, FileText, BookOpen, ClockIcon, Search, FileSignature, Upload, Download, FileJson, Edit, Save, Settings as InterfaceSettingsIcon, Languages, Globe } from 'lucide-react';
+import { Loader2, Mail, Lock, UserCircle, Trash2, Palette, Bell, Settings2 as GeneralSettingsIcon, ShieldAlert, ExternalLink, Edit3, AlertCircle, CheckCircle2, Sun, Moon, History, UserRoundCog, FileText, BookOpen, ClockIcon, Search, FileSignature, Upload, Download, FileJson, Edit, Save, Settings as InterfaceSettingsIcon, Languages, Globe, MicVocal } from 'lucide-react';
 import NextLink from 'next/link';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
 import { getResearchHistory, setResearchHistory, type ResearchActivityItem } from '@/lib/historyService';
+import { getVoiceNotes, deleteVoiceNote, updateVoiceNote, type VoiceNote } from '@/lib/voiceNotesService';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTranslation } from 'react-i18next';
+import { Textarea } from '@/components/ui/textarea';
 
 
 const SettingsSection: React.FC<{ title: string; description?: string; icon?: React.ElementType; children: React.ReactNode; className?: string }> = ({ title, description, icon: Icon, children, className }) => (
@@ -79,6 +81,10 @@ export default function AccountSettingsPage() {
   const [experimentalFeatures, setExperimentalFeatures] = useState(false);
   const [isSavingInterface, setIsSavingInterface] = useState(false);
   
+  const [voiceNotes, setVoiceNotes] = useState<VoiceNote[]>([]);
+  const [editingNote, setEditingNote] = useState<VoiceNote | null>(null);
+  const [editingNoteContent, setEditingNoteContent] = useState('');
+
   const router = useRouter();
   const { toast } = useToast();
 
@@ -107,10 +113,14 @@ export default function AccountSettingsPage() {
         if (storedExperimentalFeatures) setExperimentalFeatures(JSON.parse(storedExperimentalFeatures));
 
         if (typeof window !== 'undefined') {
-          if (window.location.hash === "#history" && activeTab !== "history") {
-            setActiveTab("history");
+          const hash = window.location.hash.substring(1);
+          if (hash === "history" || hash === "voice-notes") {
+             if (activeTab !== "data-management") {
+              setActiveTab("data-management");
+            }
           }
           setResearchHistoryItems(getResearchHistory());
+          setVoiceNotes(getVoiceNotes());
         }
       } else {
         router.push('/login'); 
@@ -122,10 +132,15 @@ export default function AccountSettingsPage() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-        if (activeTab === "history") {
-          window.history.replaceState(null, '', "/account-settings#history");
-          setResearchHistoryItems(getResearchHistory()); 
-        } else if (window.location.hash === "#history") { 
+        const hash = window.location.hash.substring(1);
+        if (activeTab === "data-management") {
+          // You might want to scroll to a specific sub-section here if needed
+          if (hash !== "history" && hash !== "voice-notes") {
+             window.history.replaceState(null, '', "/account-settings#history");
+          }
+          setResearchHistoryItems(getResearchHistory());
+          setVoiceNotes(getVoiceNotes());
+        } else if (hash === "history" || hash === "voice-notes") { 
             window.history.replaceState(null, '', "/account-settings");
         }
     }
@@ -374,6 +389,31 @@ export default function AccountSettingsPage() {
     });
   };
 
+  const handleStartEditNote = (note: VoiceNote) => {
+    setEditingNote(note);
+    setEditingNoteContent(note.content);
+  };
+
+  const handleCancelEditNote = () => {
+    setEditingNote(null);
+    setEditingNoteContent('');
+  };
+
+  const handleUpdateNote = () => {
+    if (editingNote) {
+      const newNotes = updateVoiceNote({ ...editingNote, content: editingNoteContent });
+      setVoiceNotes(newNotes);
+      toast({ title: "Note Updated", variant: "default" });
+      handleCancelEditNote();
+    }
+  };
+
+  const handleDeleteNote = (id: string) => {
+    const newNotes = deleteVoiceNote(id);
+    setVoiceNotes(newNotes);
+    toast({ title: "Note Deleted", variant: "default" });
+  };
+
 
   if (isLoading || !currentUser) {
     return (
@@ -397,8 +437,8 @@ export default function AccountSettingsPage() {
           <TabsTrigger value="general" className="py-2.5 text-sm sm:text-base flex items-center gap-2">
             <UserRoundCog className="h-5 w-5" /> {t('generalTab')}
           </TabsTrigger>
-          <TabsTrigger value="history" className="py-2.5 text-sm sm:text-base flex items-center gap-2">
-            <History className="h-5 w-5" /> {t('researchHistoryTab')}
+          <TabsTrigger value="data-management" className="py-2.5 text-sm sm:text-base flex items-center gap-2">
+            <History className="h-5 w-5" /> {t('dataManagementTab')}
           </TabsTrigger>
         </TabsList>
 
@@ -608,11 +648,13 @@ export default function AccountSettingsPage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="history" className="mt-6 sm:mt-8">
+        <TabsContent value="data-management" className="mt-6 sm:mt-8">
             <SettingsSection 
                 title="Your Research Journey" 
                 icon={History} 
                 description="Review, export, or import your past research activity stored locally in your browser."
+                className="mb-8"
+                id="history"
             >
                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 mb-6 pt-2">
                     <Button onClick={handleExportHistory} variant="outline" className="w-full sm:w-auto" disabled={researchHistoryItems.length === 0}>
@@ -695,6 +737,83 @@ export default function AccountSettingsPage() {
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>
+            </SettingsSection>
+            
+            <Separator className="my-10" />
+
+            <SettingsSection
+                title="Your Voice Notes"
+                icon={MicVocal}
+                description="Manage your voice notes. These are stored locally in your browser."
+                id="voice-notes"
+            >
+                {editingNote ? (
+                  <Card className="p-4 shadow-inner">
+                    <CardTitle className="text-lg mb-2">Editing Note</CardTitle>
+                    <Textarea 
+                      value={editingNoteContent} 
+                      onChange={(e) => setEditingNoteContent(e.target.value)} 
+                      rows={6}
+                      className="mb-3"
+                    />
+                    <div className="flex justify-end gap-2">
+                      <Button variant="ghost" onClick={handleCancelEditNote}>Cancel</Button>
+                      <Button onClick={handleUpdateNote}>Save Changes</Button>
+                    </div>
+                  </Card>
+                ) : voiceNotes.length > 0 ? (
+                    <div className="space-y-4">
+                        {voiceNotes.map(note => (
+                             <Card key={note.id} className="shadow-md hover:shadow-lg transition-shadow border-border/70">
+                                <CardHeader className="pb-3">
+                                    <CardTitle className="text-lg font-medium text-primary truncate" title={note.title}>{note.title}</CardTitle>
+                                    <CardDescription className="text-xs flex items-center text-muted-foreground">
+                                        <ClockIcon className="inline h-3.5 w-3.5 mr-1.5"/>
+                                        Saved on: {new Date(note.date).toLocaleDateString()}
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="pb-4">
+                                     <p className="text-sm text-foreground/80 leading-relaxed line-clamp-3" title={note.content}>
+                                        {note.content}
+                                    </p>
+                                </CardContent>
+                                <CardFooter className="flex justify-end gap-2">
+                                    <Button variant="outline" size="sm" onClick={() => handleStartEditNote(note)}>
+                                        <Edit className="h-4 w-4 mr-1.5" /> Edit
+                                    </Button>
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button variant="destructive" size="sm">
+                                                <Trash2 className="h-4 w-4 mr-1.5" /> Delete
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                <AlertDialogDescription>This will permanently delete "{note.title}".</AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction onClick={() => handleDeleteNote(note.id)}>Delete Note</AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+                                </CardFooter>
+                            </Card>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="min-h-[200px] flex flex-col items-center justify-center text-center p-6 border-2 border-dashed border-border/60 rounded-lg bg-secondary/30 dark:bg-secondary/10">
+                        <MicVocal className="h-16 w-16 text-muted-foreground/70 mb-4" />
+                        <h3 className="text-xl font-semibold text-primary/90 mb-2">No Voice Notes Yet</h3>
+                        <p className="text-muted-foreground max-w-md">
+                            Create voice notes from the "Notes & Transcription" page. They will appear here for you to manage.
+                        </p>
+                        <Button asChild className="mt-6">
+                            <NextLink href="/notes">Go to Notes Page</NextLink>
+                        </Button>
+                    </div>
+                )}
             </SettingsSection>
         </TabsContent>
       </Tabs>
