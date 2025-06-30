@@ -2,9 +2,9 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import * as TSParticlesReact from '@tsparticles/react'; // Changed to @tsparticles/react
-import type { Container, Engine } from '@tsparticles/engine'; // Import types from @tsparticles/engine
-import { loadSlim } from '@tsparticles/slim'; // Corrected import path
+import * as TSParticlesReact from '@tsparticles/react'; 
+import type { Container, Engine } from '@tsparticles/engine'; 
+import { loadSlim } from '@tsparticles/slim'; 
 import { useTheme } from 'next-themes';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -12,16 +12,19 @@ const ParticleBackground: React.FC = () => {
   const [init, setInit] = useState(false);
   const { theme, systemTheme } = useTheme();
   const isMobile = useIsMobile();
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    // Prevent initialization on mobile devices
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
     if (isMobile) {
       if (init) setInit(false);
       return;
     }
     
-    // Only initialize if not on mobile and not already initialized
-    if (!init && !isMobile) {
+    if (!init && !isMobile && isClient) {
         TSParticlesReact.initParticlesEngine(async (engine: Engine) => {
           await loadSlim(engine);
         }).then(() => {
@@ -30,7 +33,7 @@ const ParticleBackground: React.FC = () => {
           console.error("Error initializing particles engine:", error);
         });
     }
-  }, [isMobile, init]);
+  }, [isMobile, init, isClient]);
 
   const particlesLoaded = useCallback(async (container?: Container) => {
   }, []);
@@ -46,12 +49,11 @@ const ParticleBackground: React.FC = () => {
   const linkColor = getCurrentTheme() === 'dark' ? '#ffffff' : '#555555';
 
 
-  if (!init || isMobile) {
+  if (!isClient || !init || isMobile) {
     return null;
   }
 
   return (
-    // Use TSParticlesReact.Particles
     <TSParticlesReact.Particles
       id="tsparticles"
       particlesLoaded={particlesLoaded}
@@ -70,11 +72,11 @@ const ParticleBackground: React.FC = () => {
           },
           modes: {
             repulse: {
-              distance: 60, // Reduced from 80
+              distance: 50, 
               duration: 0.4,
             },
             push: {
-                quantity: 1, // Reduced from 2
+                quantity: 1, 
             }
           },
         },
@@ -86,7 +88,7 @@ const ParticleBackground: React.FC = () => {
             color: linkColor,
             distance: 150,
             enable: true,
-            opacity: 0.25, // Slightly reduced link opacity
+            opacity: 0.25, 
             width: 1,
           },
           move: {
@@ -96,32 +98,32 @@ const ParticleBackground: React.FC = () => {
               default: 'bounce',
             },
             random: false,
-            speed: 0.6, // Slightly reduced speed
+            speed: 0.6, 
             straight: false,
           },
           number: {
             density: {
               enable: true,
-              area: 900, // Increased area for slightly less density
+              area: 1000, 
             },
-            value: 60, // Reduced from 80
+            value: 50, 
           },
           opacity: {
-            value: 0.35, // Slightly reduced particle opacity
+            value: 0.35, 
           },
           shape: {
             type: 'circle',
           },
           size: {
-            value: { min: 1, max: 2.5 }, // Slightly smaller max size
+            value: { min: 1, max: 2.5 }, 
           },
         },
         detectRetina: true,
         background: {
-          color: 'transparent', // Ensure particles are on a transparent background layer
+          color: 'transparent', 
         },
       }}
-      className="fixed top-0 left-0 w-full h-full z-[-1]" // Ensure it's behind other content
+      className="fixed top-0 left-0 w-full h-full z-[-1]" 
     />
   );
 };
