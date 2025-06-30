@@ -1,4 +1,3 @@
-
 // src/components/scholar-ai/PlaceholderChart.tsx
 'use client';
 
@@ -105,7 +104,8 @@ export default function PlaceholderChart({
     }
 
     if (!dataError && (!chartData || chartData.length === 0)) {
-      dataError = t('placeholderChart.emptyError');
+      // If the AI suggests a chart but provides no data, don't render an error. Just render nothing.
+      return null;
     }
   }
 
