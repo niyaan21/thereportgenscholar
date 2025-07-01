@@ -13,6 +13,18 @@ import { textToSpeech } from '@/ai/flows/text-to-speech-flow';
 import { plagiarismCheck, type PlagiarismCheckInput, type PlagiarismCheckOutput } from '@/ai/flows/plagiarism-check-flow';
 import { z } from 'zod';
 
+// Helper to create a user-friendly error message from a caught error
+function processErrorMessage(error: unknown, defaultMessage: string): string {
+  if (error instanceof Error) {
+    if (error.message.includes('503') || error.message.toLowerCase().includes('overloaded')) {
+      return "The AI model is currently overloaded. Please try again in a few moments.";
+    }
+    return error.message;
+  }
+  return defaultMessage;
+}
+
+
 const formulateQuerySchema = z.object({
   researchQuestion: z.string().min(10, "Research question must be at least 10 characters long.").max(1500, "Research question must be at most 1500 characters long."),
   language: z.string().optional(),
@@ -61,7 +73,7 @@ export async function handleFormulateQueryAction(
     };
   } catch (error) {
     console.error("Error formulating queries:", error);
-    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
+    const errorMessage = processErrorMessage(error, "An unexpected error occurred.");
     return {
       success: false,
       message: `Failed to formulate queries: ${errorMessage}`,
@@ -147,9 +159,10 @@ export async function handleSynthesizeResearchAction(
     };
   } catch (error) {
     console.error("Error synthesizing research:", error);
+    const errorMessage = processErrorMessage(error, "An unexpected error occurred.");
     return {
       success: false,
-      message: "Failed to synthesize research. An unexpected error occurred.",
+      message: `Failed to synthesize research: ${errorMessage}`,
       researchSummary: null,
       summarizedPaperTitles: null,
       errors: null,
@@ -206,7 +219,7 @@ export async function handleGenerateReportAction(
     };
   } catch (error) {
     console.error("Error generating research report:", error);
-    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
+    const errorMessage = processErrorMessage(error, "An unexpected error occurred.");
     return {
       success: false,
       message: `Failed to generate research report: ${errorMessage}`,
@@ -288,7 +301,7 @@ export async function handleGenerateReportFromFileAction(
     };
   } catch (error) {
     console.error("Error generating report from file:", error);
-    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred while processing the file and generating the report.";
+    const errorMessage = processErrorMessage(error, "An unexpected error occurred while processing the file.");
     return {
       success: false,
       message: `Failed to generate report: ${errorMessage}`,
@@ -316,7 +329,7 @@ export async function handleGenerateDailyPromptAction(language?: string): Promis
     };
   } catch (error) {
     console.error("Error generating daily prompt:", error);
-    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
+    const errorMessage = processErrorMessage(error, "An unexpected error occurred.");
     return {
       success: false,
       message: `Failed to generate daily prompt: ${errorMessage}`,
@@ -367,7 +380,7 @@ export async function handleExtractMindmapConceptsAction(
     };
   } catch (error) {
     console.error("Error extracting mindmap concepts:", error);
-    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
+    const errorMessage = processErrorMessage(error, "An unexpected error occurred.");
     return {
       success: false,
       message: `Failed to extract mindmap concepts: ${errorMessage}`,
@@ -441,7 +454,7 @@ export async function handleTranscribeAndAnalyzeAction(
     };
   } catch (error) {
     console.error("Error in transcription/analysis action:", error);
-    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred during processing.";
+    const errorMessage = processErrorMessage(error, "An unexpected error occurred during processing.");
     return {
       success: false,
       message: `Processing failed: ${errorMessage}`,
@@ -486,7 +499,7 @@ export async function handleTextToSpeechAction(
         };
     } catch (error) {
         console.error("Error in text-to-speech action:", error);
-        const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
+        const errorMessage = processErrorMessage(error, "An unexpected error occurred.");
         return {
             success: false,
             message: `Failed to generate speech: ${errorMessage}`,
@@ -525,7 +538,7 @@ export async function handlePlagiarismCheckAction(
       plagiarismReport: result,
     };
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
+    const errorMessage = processErrorMessage(error, "An unexpected error occurred.");
     return {
       success: false,
       message: `Failed to run plagiarism check: ${errorMessage}`,

@@ -62,6 +62,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable} scroll-smooth`} suppressHydrationWarning>
+      <head>
+        <link rel="manifest" href="/site.webmanifest" />
+      </head>
       <body className="font-sans antialiased">
         <I18nProviderClient>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
