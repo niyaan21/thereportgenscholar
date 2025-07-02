@@ -16,8 +16,19 @@ import { z } from 'zod';
 // Helper to create a user-friendly error message from a caught error
 function processErrorMessage(error: unknown, defaultMessage: string): string {
   if (error instanceof Error) {
-    if (error.message.includes('503') || error.message.toLowerCase().includes('overloaded')) {
+    const errorMessage = error.message.toLowerCase();
+    if (errorMessage.includes('503') || errorMessage.includes('overloaded')) {
       return "The AI model is currently overloaded. Please try again in a few moments.";
+    }
+    // Check for API key or permission errors
+    if (
+        errorMessage.includes('401') || 
+        errorMessage.includes('403') || 
+        errorMessage.includes('permission_denied') || 
+        errorMessage.includes('api key not valid') ||
+        errorMessage.includes('invalid api key')
+    ) {
+        return "There is an issue with the API configuration. Please contact support if this issue persists.";
     }
     return error.message;
   }
