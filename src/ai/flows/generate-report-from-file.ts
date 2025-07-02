@@ -163,7 +163,7 @@ Key report requirements:
             Example: If categoryDataKey is "topic" and seriesDataKeys is '[{"key": "relevance", "label": "Relevance Score"}]', the JSON string for 'data' could be: '[{"topic": "AI Ethics", "relevance": "85"}, {"topic": "Data Privacy", "relevance": "92"}]'.
         *   If no chart is suitable, set chartSuggestion.type to 'none' and other chart-related fields can be omitted. Assume some data extraction or plausible sample data generation is possible if the file context suggests it.
     {{else}}
-    Do NOT generate any chart suggestions. For all 'chartSuggestion' fields, set the 'type' to 'none'.
+    Do NOT generate any chart suggestions. For all 'chartSuggestion' fields, you MUST set the 'type' to 'none'.
     {{/if}}
 8.  **Discussion**: (approx. 400-600 words) Interpret findings from the file in light of the guidance query.
 9.  **Conclusion**: (approx. 250-350 words) Summarize the main takeaways from the file as per the guidance.

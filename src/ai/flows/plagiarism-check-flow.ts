@@ -18,7 +18,7 @@ const PlagiarismCheckInputSchema = z.object({
 export type PlagiarismCheckInput = z.infer<typeof PlagiarismCheckInputSchema>;
 
 const PlagiarismCheckOutputSchema = z.object({
-  similarityScore: z.number().min(0).max(100).describe("A plausible overall similarity score percentage (e.g., between 5 and 25)."),
+  similarityScore: z.number().min(0).max(100).describe("An overall similarity score percentage calculated based on the number and severity of matches found. This should NOT be a random number."),
   matches: z
     .array(
       z.object({
@@ -47,7 +47,7 @@ CRITICAL: Your analysis and justification in the output must be in the following
 {{/if}}
 
 Follow these instructions precisely:
-1.  **Calculate a Similarity Score**: Based on your analysis, provide a plausible overall similarity score percentage, reflecting the proportion of text that has potential matches. This should be a realistic estimate (e.g., between 5% and 30%).
+1.  **Calculate a Similarity Score**: Analyze the text for potential matches. Based on the quantity and severity of the matches you find, calculate a realistic overall similarity score percentage. This score must be a direct result of your analysis and not a random number. A document with no strong matches should have a low score (e.g., under 5%), while a document with several direct matches should have a higher score.
 2.  **Identify Potential Matches**: Select 2 to 5 distinct, complete sentences from the input text that have a strong resemblance to existing sources.
 3.  **Cite Real, Verifiable Sources**: For each selected sentence, you MUST identify the most likely **real source**. Provide the source in a standard citation format (e.g., "Smith, J. (2022). The Future of AI in Research. Academic Press." or "Lee et al., Journal of Machine Learning, Vol. 15, 2023."). **Do not invent sources.** If a specific source cannot be pinpointed but the phrasing is extremely common in academic writing, you may state 'Common academic phrasing'.
 4.  **Provide Justification**: For each match, provide a brief (1-2 sentence) justification explaining why it is considered a match. For example, "This sentence uses identical terminology and structure to a key definition in the cited paper."

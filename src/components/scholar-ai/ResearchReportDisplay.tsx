@@ -7,7 +7,7 @@ import type { GenerateResearchReportOutput } from '@/ai/flows/generate-research-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { FileText, BookOpen, MessageSquareQuote, ThumbsUp, Settings, LightbulbIcon, ShieldAlert, Library, UsersRound, ClipboardList, Milestone, Scale, GitBranch, DownloadCloud, BookText as AppendixIcon, BookMarked, Activity, FileType, FileJson, Loader2, Maximize, Minimize, Volume2, XCircle, ShieldCheck, ChevronDown } from 'lucide-react';
+import { FileText, BookOpen, MessageSquareQuote, ThumbsUp, Settings, LightbulbIcon, ShieldAlert, Library, UsersRound, ClipboardList, Milestone, Scale, GitBranch, DownloadCloud, BookText as AppendixIcon, BookMarked, Activity, FileType, FileJson, Loader2, Maximize, Minimize, XCircle, ShieldCheck, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import jsPDF from 'jspdf';
@@ -15,7 +15,7 @@ import html2canvas from 'html2canvas';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import dynamic from 'next/dynamic';
-import { handleTextToSpeechAction, type TextToSpeechActionState, handlePlagiarismCheckAction, type PlagiarismCheckActionState } from '@/app/actions';
+import { handlePlagiarismCheckAction, type PlagiarismCheckActionState } from '@/app/actions';
 import { Progress } from '@/components/ui/progress';
 import { useTranslation } from 'react-i18next';
 
@@ -30,8 +30,7 @@ export interface ResearchReportDisplayProps {
   originalQuestion: string;
 }
 
-const Section: React.FC<{ title: string; icon?: React.ReactNode; children: React.ReactNode; className?: string, value: string, onReadAloud: () => void, isReading: boolean, canRead: boolean }> = ({ title, icon, children, className, value, onReadAloud, isReading, canRead }) => {
-  const { t } = useTranslation();
+const Section: React.FC<{ title: string; icon?: React.ReactNode; children: React.ReactNode; className?: string, value: string }> = ({ title, icon, children, className, value }) => {
   return (
     <div>
       <AccordionItem value={value} className={cn('border-b-0 mb-3 sm:mb-3.5 rounded-lg sm:rounded-xl overflow-hidden shadow-lg bg-card hover:shadow-primary/15 transition-all duration-300', className)}>
@@ -45,12 +44,6 @@ const Section: React.FC<{ title: string; icon?: React.ReactNode; children: React
               </h3>
             </div>
           </AccordionTrigger>
-          <div className="pr-4 flex-shrink-0">
-            <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onReadAloud(); }} disabled={!canRead} className="h-8 w-8 rounded-full hover:bg-accent/20 focus:bg-accent/20 text-muted-foreground hover:text-accent-foreground ml-2">
-                {isReading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Volume2 className="h-5 w-5" />}
-                <span className="sr-only">{t('reportDisplay.readAloud')}</span>
-            </Button>
-          </div>
         </AccordionPrimitive.Header>
         <AccordionContent className="bg-card rounded-b-lg sm:rounded-b-xl">
           <div id={`section-content-${value}`} className="text-foreground/90 text-sm sm:text-base leading-relaxed prose prose-sm sm:prose-base dark:prose-invert max-w-none marker:text-accent px-4 py-4 sm:px-6 sm:py-5 pt-3 sm:pt-4">
@@ -68,10 +61,6 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
   const { toast } = useToast();
   const [openSections, setOpenSections] = useState<string[]>([]);
   const [allSectionKeys, setAllSectionKeys] = useState<string[]>([]);
-
-  const [readingSection, setReadingSection] = useState<string | null>(null);
-  const [audioDataUri, setAudioDataUri] = useState<string | null>(null);
-  const audioRef = useRef<HTMLAudioElement>(null);
 
   const [plagiarismResult, setPlagiarismResult] = useState<PlagiarismCheckActionState['plagiarismReport']>(null);
   const [isCheckingPlagiarism, setIsCheckingPlagiarism] = useState(false);
@@ -103,46 +92,6 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
 
   const handleExpandAll = () => setOpenSections(allSectionKeys);
   const handleCollapseAll = () => setOpenSections([]);
-
-  const handleReadAloud = useCallback(async (sectionKey: string, content: string | undefined | null) => {
-    if (readingSection) {
-      audioRef.current?.pause();
-      setReadingSection(null);
-      setAudioDataUri(null);
-      if (readingSection === sectionKey) return;
-    }
-
-    if (!content) {
-      toast({ title: t('reportDisplay.noContent'), variant: "destructive" });
-      return;
-    }
-
-    setReadingSection(sectionKey);
-    try {
-      const result: TextToSpeechActionState = await handleTextToSpeechAction(content);
-      if (result.success && result.audioDataUri) {
-        setAudioDataUri(result.audioDataUri);
-      } else {
-        toast({ title: t('reportDisplay.ttsFailed'), description: result.message, variant: "destructive" });
-        setReadingSection(null);
-      }
-    } catch (e) {
-      const error = e instanceof Error ? e.message : t('reportDisplay.ttsError');
-      toast({ title: "An error occurred during TTS", description: error, variant: "destructive" });
-      setReadingSection(null);
-    }
-  }, [readingSection, toast, t]);
-
-  useEffect(() => {
-    if (audioDataUri && audioRef.current) {
-      audioRef.current.src = audioDataUri;
-      audioRef.current.play().catch(e => {
-          console.error("Audio playback failed:", e);
-          toast({ title: t('reportDisplay.audioPlaybackFailed'), description: "Your browser might be blocking autoplay.", variant: "destructive" });
-          setReadingSection(null);
-      });
-    }
-  }, [audioDataUri, toast, t]);
 
   const handleRunPlagiarismCheck = async () => {
     setIsCheckingPlagiarism(true);
@@ -191,23 +140,6 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
       }
       return <p key={index} className="mb-3 sm:mb-4 last:mb-0 leading-relaxed text-foreground/85 text-sm sm:text-base">{trimmedParagraph}</p>;
     });
-  };
-
-  const getSectionContentAsString = (sectionKey: string): string => {
-      switch(sectionKey) {
-          case 'executive-summary': return report.executiveSummary || '';
-          case 'introduction': return report.introduction || '';
-          case 'literature-review': return report.literatureReview || '';
-          case 'key-themes': return report.keyThemes?.map(t => `${t.theme}\n${t.discussion}`).join('\n\n') || '';
-          case 'detailed-methodology': return report.detailedMethodology || '';
-          case 'results-and-analysis': return report.resultsAndAnalysis?.map(r => `${r.sectionTitle}\n${r.content}`).join('\n\n') || '';
-          case 'discussion-of-findings': return report.discussion || '';
-          case 'conclusion': return report.conclusion || '';
-          case 'limitations': return report.limitations || '';
-          case 'future-work': return report.futureWork || '';
-          case 'ethical-considerations': return report.ethicalConsiderations || '';
-          default: return '';
-      }
   };
 
   const sectionIconSize = 20;
@@ -487,7 +419,6 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
 
   return (
     <div>
-    <audio ref={audioRef} onEnded={() => setReadingSection(null)} onPause={() => setReadingSection(null)} className="hidden" />
     <Card className="w-full shadow-2xl border-primary/30 rounded-xl sm:rounded-2xl flex flex-col bg-gradient-to-br from-card via-background/5 to-card">
       <CardHeader className="p-4 sm:p-5 md:p-6 bg-gradient-to-r from-primary/95 via-primary to-primary/90 text-primary-foreground border-b border-primary/50">
         <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 md:space-x-6">
@@ -584,19 +515,19 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
           </Alert>
 
           <Accordion type="multiple" value={openSections} onValueChange={setOpenSections} className="w-full space-y-3 sm:space-y-4">
-             <Section title={sectionTitles.executiveSummary} icon={sectionIcons.executiveSummary} value="executive-summary" onReadAloud={() => handleReadAloud('executive-summary', getSectionContentAsString('executive-summary'))} isReading={readingSection === 'executive-summary'} canRead={!!report.executiveSummary}>
+             <Section title={sectionTitles.executiveSummary} icon={sectionIcons.executiveSummary} value="executive-summary">
               {renderParagraphs(report.executiveSummary)}
             </Section>
 
-            <Section title={sectionTitles.introduction} icon={sectionIcons.introduction} value="introduction" onReadAloud={() => handleReadAloud('introduction', getSectionContentAsString('introduction'))} isReading={readingSection === 'introduction'} canRead={!!report.introduction}>
+            <Section title={sectionTitles.introduction} icon={sectionIcons.introduction} value="introduction">
               {renderParagraphs(report.introduction)}
             </Section>
 
-            <Section title={sectionTitles.literatureReview} icon={sectionIcons.literatureReview} value="literature-review" onReadAloud={() => handleReadAloud('literature-review', getSectionContentAsString('literature-review'))} isReading={readingSection === 'literature-review'} canRead={!!report.literatureReview}>
+            <Section title={sectionTitles.literatureReview} icon={sectionIcons.literatureReview} value="literature-review">
               {renderParagraphs(report.literatureReview)}
             </Section>
 
-            <Section title={sectionTitles.keyThemes} icon={sectionIcons.keyThemes} value="key-themes" onReadAloud={() => handleReadAloud('key-themes', getSectionContentAsString('key-themes'))} isReading={readingSection === 'key-themes'} canRead={!!report.keyThemes && report.keyThemes.length > 0}>
+            <Section title={sectionTitles.keyThemes} icon={sectionIcons.keyThemes} value="key-themes">
               {report.keyThemes && report.keyThemes.length > 0 ? (
                 report.keyThemes.map((themeObj, index) => (
                   <div key={index} className="mb-4 sm:mb-5 p-3.5 sm:p-4.5 bg-secondary/35 dark:bg-secondary/10 rounded-lg sm:rounded-xl border border-border/60 shadow-md last:mb-0">
@@ -610,11 +541,11 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
               ) : renderParagraphs(undefined)}
             </Section>
 
-            <Section title={sectionTitles.detailedMethodology} icon={sectionIcons.detailedMethodology} value="detailed-methodology" onReadAloud={() => handleReadAloud('detailed-methodology', getSectionContentAsString('detailed-methodology'))} isReading={readingSection === 'detailed-methodology'} canRead={!!report.detailedMethodology}>
+            <Section title={sectionTitles.detailedMethodology} icon={sectionIcons.detailedMethodology} value="detailed-methodology">
               {renderParagraphs(report.detailedMethodology)}
             </Section>
 
-            <Section title={sectionTitles.results} icon={sectionIcons.resultsAndAnalysis} value="results-and-analysis" onReadAloud={() => handleReadAloud('results-and-analysis', getSectionContentAsString('results-and-analysis'))} isReading={readingSection === 'results-and-analysis'} canRead={!!report.resultsAndAnalysis && report.resultsAndAnalysis.length > 0}>
+            <Section title={sectionTitles.results} icon={sectionIcons.resultsAndAnalysis} value="results-and-analysis">
               {report.resultsAndAnalysis && report.resultsAndAnalysis.length > 0 ? (
                 report.resultsAndAnalysis.map((result, index) => (
                   <div key={index} className="mb-4 sm:mb-5 p-3.5 sm:p-4.5 bg-secondary/35 dark:bg-secondary/10 rounded-lg sm:rounded-xl border border-border/60 shadow-md last:mb-0">
@@ -638,34 +569,34 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
               ) : renderParagraphs(undefined)}
             </Section>
 
-            <Section title={sectionTitles.discussionOfFindings} icon={sectionIcons.discussion} value="discussion-of-findings" onReadAloud={() => handleReadAloud('discussion-of-findings', getSectionContentAsString('discussion-of-findings'))} isReading={readingSection === 'discussion-of-findings'} canRead={!!report.discussion}>
+            <Section title={sectionTitles.discussionOfFindings} icon={sectionIcons.discussion} value="discussion-of-findings">
               {renderParagraphs(report.discussion)}
             </Section>
 
-            <Section title={sectionTitles.conclusion} icon={sectionIcons.conclusion} value="conclusion" onReadAloud={() => handleReadAloud('conclusion', getSectionContentAsString('conclusion'))} isReading={readingSection === 'conclusion'} canRead={!!report.conclusion}>
+            <Section title={sectionTitles.conclusion} icon={sectionIcons.conclusion} value="conclusion">
               {renderParagraphs(report.conclusion)}
             </Section>
 
             {report.limitations && (
-              <Section title={sectionTitles.limitations} icon={sectionIcons.limitations} value="limitations" onReadAloud={() => handleReadAloud('limitations', getSectionContentAsString('limitations'))} isReading={readingSection === 'limitations'} canRead={!!report.limitations}>
+              <Section title={sectionTitles.limitations} icon={sectionIcons.limitations} value="limitations">
                 {renderParagraphs(report.limitations)}
               </Section>
             )}
 
             {report.futureWork && (
-              <Section title={sectionTitles.futureWork} icon={sectionIcons.futureWork} value="future-work" onReadAloud={() => handleReadAloud('future-work', getSectionContentAsString('future-work'))} isReading={readingSection === 'future-work'} canRead={!!report.futureWork}>
+              <Section title={sectionTitles.futureWork} icon={sectionIcons.futureWork} value="future-work">
                 {renderParagraphs(report.futureWork)}
               </Section>
             )}
 
             {report.ethicalConsiderations && (
-              <Section title={sectionTitles.ethicalConsiderations} icon={sectionIcons.ethicalConsiderations} value="ethical-considerations" onReadAloud={() => handleReadAloud('ethical-considerations', getSectionContentAsString('ethical-considerations'))} isReading={readingSection === 'ethical-considerations'} canRead={!!report.ethicalConsiderations}>
+              <Section title={sectionTitles.ethicalConsiderations} icon={sectionIcons.ethicalConsiderations} value="ethical-considerations">
                 {renderParagraphs(report.ethicalConsiderations)}
               </Section>
             )}
 
             {report.references && report.references.length > 0 && (
-              <Section title={sectionTitles.references} icon={sectionIcons.references} value="references" onReadAloud={() => {}} isReading={false} canRead={false}>
+              <Section title={sectionTitles.references} icon={sectionIcons.references} value="references">
                 <ul className="list-decimal list-inside space-y-2 sm:space-y-2.5 text-xs sm:text-sm">
                   {report.references.map((ref, index) => (
                     <li key={index} className="leading-normal text-foreground/80">{ref}</li>
@@ -675,7 +606,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
             )}
 
             {report.appendices && report.appendices.length > 0 && (
-               <Section title={sectionTitles.appendices} icon={sectionIcons.appendices} value="appendices" onReadAloud={() => {}} isReading={false} canRead={false}>
+               <Section title={sectionTitles.appendices} icon={sectionIcons.appendices} value="appendices">
                 {report.appendices.map((appendix, index) => (
                   <div key={index} className="mb-3.5 sm:mb-4.5 p-3 sm:p-4 bg-secondary/35 dark:bg-secondary/10 rounded-lg sm:rounded-xl border border-border/60 shadow-sm last:mb-0">
                     <h4 className="font-medium text-sm sm:text-base text-accent-foreground mb-2 sm:mb-2.5">{appendix.title}</h4>
@@ -686,7 +617,7 @@ const ResearchReportDisplay = React.memo(function ResearchReportDisplay({ report
             )}
 
             {report.glossary && report.glossary.length > 0 && (
-               <Section title={sectionTitles.glossary} icon={sectionIcons.glossary} value="glossary" onReadAloud={() => {}} isReading={false} canRead={false}>
+               <Section title={sectionTitles.glossary} icon={sectionIcons.glossary} value="glossary">
                 <ul className="space-y-2.5 sm:space-y-3 text-xs sm:text-sm">
                   {report.glossary.map((item, index) => (
                     <li key={index} className="border-b border-dashed border-border/40 pb-2 sm:pb-2.5 last:border-b-0 last:pb-0">
