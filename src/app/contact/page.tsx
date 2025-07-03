@@ -45,7 +45,7 @@ export default function ContactPage() {
 
   return (
     <div className="container mx-auto min-h-[calc(100vh-8rem)] py-12 sm:py-16 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-3xl mx-auto shadow-2xl border-primary/20 rounded-xl overflow-hidden">
+      <Card className="w-full max-w-xl mx-auto shadow-2xl border-primary/20 rounded-xl overflow-hidden">
         <CardHeader className="text-center p-8 sm:p-10 bg-gradient-to-br from-primary/10 via-transparent to-primary/5 rounded-t-xl">
           <div className="inline-flex items-center justify-center p-4 sm:p-5 bg-gradient-to-br from-accent to-accent/80 rounded-full mb-5 sm:mb-8 mx-auto ring-2 ring-accent/40 shadow-lg text-accent-foreground">
             <MessageSquare className="h-12 w-12 sm:h-16 sm:w-16" />
@@ -57,7 +57,7 @@ export default function ContactPage() {
             {t('contactPage.description')}
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-6 sm:p-8 md:p-10 grid md:grid-cols-2 gap-8 sm:gap-10">
+        <CardContent className="p-6 sm:p-8 md:p-10">
           <div className="space-y-6">
             <h2 className="text-2xl font-semibold text-primary mb-4">{t('contactPage.formTitle')}</h2>
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -118,41 +118,6 @@ export default function ContactPage() {
                 {isSubmitting ? t('contactPage.buttonSending') : t('contactPage.buttonSend')}
               </Button>
             </form>
-          </div>
-          <div className="space-y-8">
-            <h2 className="text-2xl font-semibold text-primary mb-4">{t('contactPage.infoTitle')}</h2>
-            <div className="space-y-5 text-foreground/80">
-              <div className="flex items-start">
-                <Mail className="h-5 w-5 mr-3 mt-1 text-accent flex-shrink-0" />
-                <div>
-                  <h3 className="font-medium text-primary/90">{t('contactPage.infoEmail')}</h3>
-                  <p className="text-sm">support@fossai.example.com (Placeholder)</p>
-                  <a href="mailto:support@fossai.example.com" className="text-xs text-accent hover:underline">{t('contactPage.infoEmailLink')}</a>
-                </div>
-              </div>
-              <div className="flex items-start">
-                <Phone className="h-5 w-5 mr-3 mt-1 text-accent flex-shrink-0" />
-                <div>
-                  <h3 className="font-medium text-primary/90">{t('contactPage.infoCall')}</h3>
-                  <p className="text-sm">+1 (555) 123-4567</p>
-                </div>
-              </div>
-               <div className="flex items-start">
-                <MapPin className="h-5 w-5 mr-3 mt-1 text-accent flex-shrink-0" />
-                <div>
-                  <h3 className="font-medium text-primary/90">{t('contactPage.infoOffice')}</h3>
-                  <p className="text-sm">123 Innovation Drive, Tech City, TX 75001</p>
-                </div>
-              </div>
-              <div className="flex items-start">
-                <Info className="h-5 w-5 mr-3 mt-1 text-accent flex-shrink-0" />
-                <div>
-                  <h3 className="font-medium text-primary/90">{t('contactPage.infoHours')}</h3>
-                  <p className="text-sm">{t('contactPage.infoHoursDetail')}</p>
-                  <p className="text-sm">{t('contactPage.infoHoursWeekend')}</p>
-                </div>
-              </div>
-            </div>
           </div>
         </CardContent>
       </Card>
