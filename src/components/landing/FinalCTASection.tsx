@@ -50,9 +50,6 @@ const FinalCTASection = React.memo(function FinalCTASection() {
                   </NextLink>
                 </Button>
               </div>
-              <p className="mt-6 text-xs text-muted-foreground">
-                Unlock advanced capabilities with our flexible <NextLink href="/pricing" className="text-accent hover:underline">{t('finalCta.pricingLink')}</NextLink>.
-              </p>
             </CardContent>
           </Card>
         </motion.div>

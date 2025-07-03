@@ -64,7 +64,6 @@ export default function Navbar() {
     { href: "/file-report", label: t('navbar.analysisTools'), icon: SlidersHorizontal },
     { href: "/notes", label: t('navbar.notesTranscription'), icon: AudioLines },
     { href: "/features", label: t('navbar.features'), icon: Sparkles },
-    { href: "/pricing", label: t('navbar.pricing'), icon: DollarSign },
     { href: "/about", label: t('navbar.about'), icon: Info },
     { href: "/docs", label: t('navbar.docs'), icon: BookOpenText },
     { href: "/contact", label: t('navbar.contact'), icon: MessageSquare },

@@ -34,7 +34,6 @@ export default function Footer() {
         <div className="flex flex-wrap justify-center items-center gap-x-4 gap-y-2 mb-3">
           <NextLink href="/about" className="hover:text-accent hover:underline">{t('footer.about')}</NextLink>
           <NextLink href="/features" className="hover:text-accent hover:underline">{t('footer.features')}</NextLink>
-          <NextLink href="/pricing" className="hover:text-accent hover:underline">{t('footer.pricing')}</NextLink>
           <NextLink href="/contact" className="hover:text-accent hover:underline">{t('footer.contact')}</NextLink>
           <NextLink href="/docs" className="hover:text-accent hover:underline">{t('footer.docs')}</NextLink>
         </div>
