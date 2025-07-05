@@ -152,25 +152,31 @@ npm run start
 
 ## 🚀 Deployment to Netlify
 
-This application is configured for easy deployment to Netlify.
+This project is configured for easy deployment on Netlify.
 
-1.  **Push to a Git Repository:** Make sure your project is on GitHub, GitLab, or Bitbucket.
-2.  **Create a New Site on Netlify:** Log in to Netlify and click "Add new site" -> "Import an existing project".
-3.  **Connect to Your Git Provider:** Select your Git provider and choose your project's repository.
-4.  **Configure Build Settings:** Netlify should automatically detect that this is a Next.js project and use the settings from `netlify.toml`. The build command will be `npm run build` and the publish directory will be `.next`.
-5.  **Add Environment Variables (CRITICAL STEP):** For the deployed application to function, you MUST add your environment variables to Netlify.
-    *   Go to your new site's settings: "Site configuration" -> "Environment variables".
-    *   Click "Add a variable" and add your `GOOGLE_API_KEYS` variable. Paste your comma-separated keys as the value.
-    *   Add all of your `NEXT_PUBLIC_FIREBASE_*` variables one by one. These are public-facing keys, but they still need to be set in the deployment environment.
-    *   Example Variables to Add:
-        *   `GOOGLE_API_KEYS`
-        *   `NEXT_PUBLIC_FIREBASE_API_KEY`
-        *   `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
-        *   `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
-        *   `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
-        *   `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
-        *   `NEXT_PUBLIC_FIREBASE_APP_ID`
-6.  **Deploy:** Click "Deploy site". Netlify will start the build process and deploy your application. The Genkit flows will be automatically deployed as serverless Netlify Functions thanks to the Next.js runtime.
+### Step-by-Step Guide
+
+1.  **Connect Your Git Repository:** Log in to Netlify, click "Add new site" -> "Import an existing project", and connect to the GitHub/GitLab/Bitbucket repository containing your code.
+2.  **Build Settings:** Netlify will automatically detect this is a Next.js project. The settings in `netlify.toml` will be used (`npm run build` command, `.next` publish directory). You shouldn't need to change anything here.
+3.  **Add Environment Variables (CRITICAL):** This is the most important step for the deployed app to work. Your local `.env` file is NOT uploaded to Netlify. You must add the variables manually in the Netlify UI.
+    *   In your Netlify site, go to **Site configuration > Environment variables**.
+    *   Click **Add a variable**.
+    *   Add each variable from your `.env` file one by one. It is crucial that the names match exactly.
+    *   **`GOOGLE_API_KEYS`**: Add this variable. The value should be your comma-separated list of Google AI keys.
+        ```
+        AIzaSy...key1,AlzaSy...key2,AlzaSy...key3
+        ```
+    *   **Firebase Variables**: Add all the `NEXT_PUBLIC_FIREBASE_*` variables from your `.env` file.
+4.  **Deploy Site:** Click the "Deploy site" button. Netlify will build and deploy your application.
+
+### Troubleshooting Deployment Errors
+
+*   **Error: "API configuration issue" or "Unexpected response"**: This error almost always means your **environment variables were not set correctly on Netlify**.
+    1.  Go back to **Site configuration > Environment variables** in Netlify.
+    2.  Double-check that you have added `GOOGLE_API_KEYS` and all `NEXT_PUBLIC_FIREBASE_*` variables.
+    3.  Verify that there are no typos in the variable names or their values.
+    4.  After adding/correcting the variables, you must **re-deploy** your site. Go to the "Deploys" tab and trigger a new deploy.
+
 
 ## 📂 Key Project Structure
 
