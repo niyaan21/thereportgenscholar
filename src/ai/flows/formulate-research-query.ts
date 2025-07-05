@@ -16,6 +16,7 @@ const FormulateResearchQueryInputSchema = z.object({
     .string()
     .describe('The complex research question to formulate search queries for.'),
   language: z.string().optional().describe('The language for the response, e.g., "en" or "es".'),
+  apiKey: z.string().optional().describe('API key for the service.'),
 });
 export type FormulateResearchQueryInput = z.infer<
   typeof FormulateResearchQueryInputSchema
@@ -74,8 +75,9 @@ const formulateResearchQueryFlow = ai.defineFlow(
     inputSchema: FormulateResearchQueryInputSchema,
     outputSchema: FormulateResearchQueryOutputSchema,
   },
-  async input => {
-    const {output} = await prompt(input);
+  async (input) => {
+    const {apiKey, ...promptInput} = input;
+    const {output} = await prompt(promptInput, {apiKey});
     if (!output) {
       throw new Error('Advanced query formulation failed to produce output.');
     }
@@ -88,4 +90,3 @@ const formulateResearchQueryFlow = ai.defineFlow(
     };
   }
 );
-

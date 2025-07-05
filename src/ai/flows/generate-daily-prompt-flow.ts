@@ -11,6 +11,7 @@ import {z} from 'genkit';
 
 const GenerateDailyPromptInputSchema = z.object({
   language: z.string().optional().describe('The language for the response, e.g., "en" or "es".'),
+  apiKey: z.string().optional().describe('API key for the service.'),
 });
 export type GenerateDailyPromptInput = z.infer<typeof GenerateDailyPromptInputSchema>;
 
@@ -46,7 +47,8 @@ const generateDailyPromptFlow = ai.defineFlow(
     outputSchema: GenerateDailyPromptOutputSchema,
   },
   async (input) => {
-    const {output} = await promptTemplate(input);
+    const {apiKey, ...promptInput} = input;
+    const {output} = await promptTemplate(promptInput, {apiKey});
     if (!output) {
       throw new Error('Failed to generate a daily prompt.');
     }

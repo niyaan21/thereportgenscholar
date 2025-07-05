@@ -101,10 +101,12 @@ Boost your productivity with these keyboard shortcuts:
     NEXT_PUBLIC_FIREBASE_APP_ID="1:123456789012:web:xxxxxxxxxxxxxxxxxxxxxx"
 
     # Google AI API Key(s) for Genkit (REQUIRED for AI features)
-    # Get your key from your Google Cloud project with the "Generative Language API" enabled.
-    # For added reliability, you can provide multiple keys, separated by commas.
-    # The application will automatically rotate them if one fails.
-    GOOGLE_API_KEYS="your_key_1,your_key_2,your_key_3"
+    # Get your keys from your Google Cloud project with the "Generative Language API" enabled.
+    # The application is configured to use a pool of keys for reliability.
+    GEMINI_API_KEY_1="your_first_google_ai_key"
+    GEMINI_API_KEY_2="your_second_google_ai_key"
+    GEMINI_API_KEY_3="your_third_google_ai_key"
+    # You can add more keys (GEMINI_API_KEY_4, etc.)
     ```
     The application is configured to read these variables. Ensure they are correctly set for all features to work.
 
@@ -162,10 +164,10 @@ This project is configured for easy deployment on Netlify.
     *   In your Netlify site, go to **Site configuration > Environment variables**.
     *   Click **Add a variable**.
     *   Add each variable from your `.env` file one by one. It is crucial that the names match exactly.
-    *   **`GOOGLE_API_KEYS`**: Add this variable. The value should be your comma-separated list of Google AI keys.
-        ```
-        AIzaSy...key1,AlzaSy...key2,AlzaSy...key3
-        ```
+    *   **`GEMINI_API_KEY_1`**: Add this variable with your first Google AI key.
+    *   **`GEMINI_API_KEY_2`**: Add this variable with your second Google AI key.
+    *   **`GEMINI_API_KEY_3`**: Add this variable with your third Google AI key.
+        *   *(You can add more, e.g., `GEMINI_API_KEY_4`, `GEMINI_API_KEY_5`, etc.)*
     *   **Firebase Variables**: Add all the `NEXT_PUBLIC_FIREBASE_*` variables from your `.env` file.
 4.  **Deploy Site:** Click the "Deploy site" button. Netlify will build and deploy your application.
 
@@ -173,7 +175,7 @@ This project is configured for easy deployment on Netlify.
 
 *   **Error: "API configuration issue" or "Unexpected response"**: This error almost always means your **environment variables were not set correctly on Netlify**.
     1.  Go back to **Site configuration > Environment variables** in Netlify.
-    2.  Double-check that you have added `GOOGLE_API_KEYS` and all `NEXT_PUBLIC_FIREBASE_*` variables.
+    2.  Double-check that you have added `GEMINI_API_KEY_1` (and any others) and all `NEXT_PUBLIC_FIREBASE_*` variables.
     3.  Verify that there are no typos in the variable names or their values.
     4.  After adding/correcting the variables, you must **re-deploy** your site. Go to the "Deploys" tab and trigger a new deploy.
 

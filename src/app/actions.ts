@@ -11,6 +11,78 @@ import { transcribeAndAnalyze, type TranscribeAndAnalyzeInput, type TranscribeAn
 import { plagiarismCheck, type PlagiarismCheckInput, type PlagiarismCheckOutput } from '@/ai/flows/plagiarism-check-flow';
 import { z } from 'zod';
 
+/**
+ * Reads all GEMINI_API_KEY_... variables from the environment into an array.
+ * @returns An array of API keys.
+ */
+function getApiKeys(): string[] {
+  const keys: string[] = [];
+  let i = 1;
+  while (process.env[`GEMINI_API_KEY_${i}`]) {
+    keys.push(process.env[`GEMINI_API_KEY_${i}`]!);
+    i++;
+  }
+  return keys;
+}
+
+const MAX_RETRIES = 2; // Max retries per key for overload errors
+const RETRY_DELAY_MS = 1500;
+
+/**
+ * A robust wrapper for running Genkit flows that handles API key failover and retries.
+ * @param flow The AI flow function to execute.
+ * @param input The input data for the flow.
+ * @returns The result of the flow.
+ * @throws An error if all keys and retries fail.
+ */
+async function runWithFailover<Input, Output>(
+  flow: (input: Input & { apiKey?: string }) => Promise<Output>,
+  input: Input
+): Promise<Output> {
+  const keys = getApiKeys();
+  if (keys.length === 0) {
+    throw new Error("API configuration issue: No API keys found in environment variables (GEMINI_API_KEY_...).");
+  }
+
+  let lastError: any = new Error("All API keys failed after multiple retries.");
+
+  for (const key of keys) {
+    try {
+      let attempts = 0;
+      while (attempts <= MAX_RETRIES) {
+        try {
+          // Pass the specific key to the flow
+          return await flow({ ...input, apiKey: key });
+        } catch (error: any) {
+          const errorMessage = error.message?.toLowerCase() || '';
+          
+          // Check for temporary overload/503 errors to retry
+          if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('try again')) {
+            attempts++;
+            if (attempts > MAX_RETRIES) {
+              // If we've exhausted retries for this key, throw to move to the next key
+              lastError = error;
+              break; 
+            }
+            // Wait with exponential backoff before retrying
+            await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS * attempts));
+            continue; // Retry with the same key
+          }
+          
+          // For other errors (like invalid key), immediately break the retry loop and try the next key
+          throw error;
+        }
+      }
+    } catch (error) {
+      lastError = error;
+      console.warn(`API Key ending in ...${key.slice(-4)} failed. Trying next key.`);
+    }
+  }
+  
+  // If all keys and retries fail, throw the last recorded error
+  throw lastError;
+}
+
 // Helper to create a user-friendly error message from a caught error
 function processErrorMessage(error: unknown, defaultMessage: string): string {
   if (error instanceof Error) {
@@ -18,34 +90,19 @@ function processErrorMessage(error: unknown, defaultMessage: string): string {
     if (errorMessage.includes('503') || errorMessage.includes('overloaded')) {
       return "The AI model is currently overloaded. Please try again in a few moments.";
     }
-    // Check for API key or permission errors
     if (
         errorMessage.includes('401') || 
         errorMessage.includes('403') || 
         errorMessage.includes('permission_denied') || 
         errorMessage.includes('api key not valid') ||
-        errorMessage.includes('invalid api key')
+        errorMessage.includes('invalid api key') ||
+        errorMessage.includes('api configuration issue')
     ) {
         return "There is an issue with the API configuration. Please contact support if this issue persists.";
     }
     return error.message;
   }
   return defaultMessage;
-}
-
-// This wrapper is now deprecated in favor of the more robust runWithFailover
-// but we keep it here in case any other part of the system relies on it without the new logic.
-// The new logic is in runWithFailover.
-async function runWithFailover<T>(
-  flowRunner: () => Promise<T>
-): Promise<T> {
-  // This is a simplified version, the full logic is now in the main action handlers.
-  try {
-    return await flowRunner();
-  } catch (error) {
-    console.error("Failover wrapper caught an error:", error);
-    throw error;
-  }
 }
 
 
@@ -83,7 +140,7 @@ export async function handleFormulateQueryAction(
   }
 
   try {
-    const result = await formulateResearchQuery({ researchQuestion: validation.data.researchQuestion, language: validation.data.language });
+    const result = await runWithFailover(formulateResearchQuery, { researchQuestion: validation.data.researchQuestion, language: validation.data.language });
     return {
       success: true,
       message: "Queries and research guidance formulated successfully.",
@@ -171,7 +228,7 @@ export async function handleSynthesizeResearchAction(
   }));
 
   try {
-    const result: SummarizeResearchPapersOutput = await summarizeResearchPapers({ papers: papersForSummary });
+    const result: SummarizeResearchPapersOutput = await runWithFailover(summarizeResearchPapers, { papers: papersForSummary });
     return {
       success: true,
       message: "Research synthesized successfully using formulated queries.",
@@ -226,7 +283,7 @@ export async function handleGenerateReportAction(
   }
 
   try {
-    const result = await generateResearchReport({
+    const result = await runWithFailover(generateResearchReport, {
       researchQuestion: validation.data.researchQuestion,
       summary: validation.data.summary ? validation.data.summary.trim() : undefined,
       generateCharts: validation.data.generateCharts,
@@ -303,7 +360,7 @@ export async function handleGenerateReportFromFileAction(
     const buffer = Buffer.from(arrayBuffer);
     const fileDataUri = `data:${validatedFile.type};base64,${buffer.toString('base64')}`;
 
-    const result = await generateReportFromFile({
+    const result = await runWithFailover(generateReportFromFile, {
       fileDataUri,
       guidanceQuery: validatedQuery,
       fileName: validatedFile.name,
@@ -341,7 +398,7 @@ export interface GenerateDailyPromptActionState {
 
 export async function handleGenerateDailyPromptAction(language?: string): Promise<GenerateDailyPromptActionState> {
   try {
-    const result = await generateDailyPrompt({ language });
+    const result = await runWithFailover(generateDailyPrompt, { language });
     return {
       success: true,
       message: "Daily prompt generated successfully.",
@@ -390,7 +447,7 @@ export async function handleExtractMindmapConceptsAction(
   }
 
   try {
-    const result = await extractMindmapConcepts({ textToAnalyze: validation.data.textToAnalyze, language: validation.data.language });
+    const result = await runWithFailover(extractMindmapConcepts, { textToAnalyze: validation.data.textToAnalyze, language: validation.data.language });
     return {
       success: true,
       message: "Mindmap concepts extracted successfully.",
@@ -457,7 +514,7 @@ export async function handleTranscribeAndAnalyzeAction(
     const buffer = Buffer.from(arrayBuffer);
     const fileDataUri = `data:${validatedFile.type};base64,${buffer.toString('base64')}`;
 
-    const result = await transcribeAndAnalyze({
+    const result = await runWithFailover(transcribeAndAnalyze, {
       fileDataUri,
       analysisGuidance: validatedGuidance,
       fileName: validatedFile.name,
@@ -504,7 +561,7 @@ export async function handlePlagiarismCheckAction(
   }
 
   try {
-    const result = await plagiarismCheck({ text, language });
+    const result = await runWithFailover(plagiarismCheck, { text, language });
     return {
       success: true,
       message: "Plagiarism check simulation complete.",

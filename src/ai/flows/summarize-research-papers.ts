@@ -22,6 +22,7 @@ const SummarizeResearchPapersInputSchema = z.object({
       })
     )
     .describe('A list of research papers to summarize.'),
+  apiKey: z.string().optional().describe('API key for the service.'),
 });
 
 export type SummarizeResearchPapersInput = z.infer<
@@ -68,8 +69,9 @@ const summarizeResearchPapersFlow = ai.defineFlow(
     inputSchema: SummarizeResearchPapersInputSchema,
     outputSchema: SummarizeResearchPapersOutputSchema,
   },
-  async input => {
-    const {output} = await prompt(input);
+  async (input) => {
+    const {apiKey, ...promptInput} = input;
+    const {output} = await prompt(promptInput, {apiKey});
     return output!;
   }
 );

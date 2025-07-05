@@ -87,6 +87,7 @@ const GenerateReportFromFileInputSchema = z.object({
   generateMindmap: z.boolean().optional().describe("Flag to indicate if mind map data should be generated."),
   generateCharts: z.boolean().optional().describe("Flag to indicate if charts should be generated."),
   language: z.string().optional().describe('The language for the response, e.g., "en" or "es".'),
+  apiKey: z.string().optional().describe('API key for the service.'),
 });
 export type GenerateReportFromFileInput = z.infer<
   typeof GenerateReportFromFileInputSchema
@@ -193,8 +194,9 @@ const generateReportFromFileFlow = ai.defineFlow(
     inputSchema: GenerateReportFromFileInputSchema,
     outputSchema: ReportOutputSchema,
   },
-  async input => {
-    const {output} = await prompt(input);
+  async (input) => {
+    const {apiKey, ...promptInput} = input;
+    const {output} = await prompt(promptInput, {apiKey});
     if (!output) {
       throw new Error('Report generation from file failed to produce output.');
     }

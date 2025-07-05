@@ -14,6 +14,7 @@ import { z } from 'genkit';
 const PlagiarismCheckInputSchema = z.object({
   text: z.string().min(100, "Text must be at least 100 characters long.").max(50000, "Text is too long for plagiarism check."),
   language: z.string().optional().describe('The language for the response, e.g., "en" or "es".'),
+  apiKey: z.string().optional().describe('API key for the service.'),
 });
 export type PlagiarismCheckInput = z.infer<typeof PlagiarismCheckInputSchema>;
 
@@ -66,7 +67,8 @@ const plagiarismCheckFlow = ai.defineFlow(
     outputSchema: PlagiarismCheckOutputSchema,
   },
   async (input) => {
-    const { output } = await prompt(input);
+    const {apiKey, ...promptInput} = input;
+    const { output } = await prompt(promptInput, {apiKey});
     if (!output) {
       throw new Error('Plagiarism check failed to produce output.');
     }

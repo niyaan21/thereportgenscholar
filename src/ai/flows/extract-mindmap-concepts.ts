@@ -18,6 +18,7 @@ const ExtractMindmapConceptsInputSchema = z.object({
     .max(10000, "Text must be at most 10,000 characters long.")
     .describe('The text content from which to extract mindmap concepts.'),
   language: z.string().optional().describe('The language for the response, e.g., "en" or "es".'),
+  apiKey: z.string().optional().describe('API key for the service.'),
 });
 export type ExtractMindmapConceptsInput = z.infer<
   typeof ExtractMindmapConceptsInputSchema
@@ -72,12 +73,12 @@ const extractMindmapConceptsFlow = ai.defineFlow(
     inputSchema: ExtractMindmapConceptsInputSchema,
     outputSchema: ExtractMindmapConceptsOutputSchema,
   },
-  async input => {
-    const {output} = await prompt(input);
+  async (input) => {
+    const {apiKey, ...promptInput} = input;
+    const {output} = await prompt(promptInput, {apiKey});
     if (!output) {
       throw new Error('Mindmap concept extraction failed to produce output.');
     }
     return output;
   }
 );
-

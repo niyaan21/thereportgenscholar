@@ -25,6 +25,7 @@ const TranscribeAndAnalyzeInputSchema = z.object({
     ),
   fileName: z.string().optional().describe("The name of the uploaded file, for context."),
   language: z.string().optional().describe('The language for the response, e.g., "en" or "es".'),
+  apiKey: z.string().optional().describe('API key for the service.'),
 });
 export type TranscribeAndAnalyzeInput = z.infer<
   typeof TranscribeAndAnalyzeInputSchema
@@ -108,8 +109,9 @@ const transcribeAndAnalyzeFlow = ai.defineFlow(
     inputSchema: TranscribeAndAnalyzeInputSchema,
     outputSchema: TranscribeAndAnalyzeOutputSchema,
   },
-  async input => {
-    const {output} = await prompt(input);
+  async (input) => {
+    const {apiKey, ...promptInput} = input;
+    const {output} = await prompt(promptInput, {apiKey});
     if (!output) {
       throw new Error('Transcription and analysis failed to produce output.');
     }

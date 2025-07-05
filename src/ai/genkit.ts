@@ -2,31 +2,38 @@ import { genkit } from 'genkit';
 import { googleAI } from '@genkit-ai/googleai';
 
 /**
- * Selects an API key from a pool defined in environment variables.
- * This provides basic load distribution and resilience. If one key is bad,
- * a server restart will likely pick a different one.
+ * Reads all GEMINI_API_KEY_... variables from the environment.
+ * @returns An array of API keys.
+ */
+function getGoogleApiKeys(): string[] {
+  const keys: string[] = [];
+  let i = 1;
+  // Loop to find all keys like GEMINI_API_KEY_1, GEMINI_API_KEY_2, etc.
+  while (process.env[`GEMINI_API_KEY_${i}`]) {
+    keys.push(process.env[`GEMINI_API_KEY_${i}`]!);
+    i++;
+  }
+  return keys;
+}
+
+/**
+ * Selects a random API key from the available pool.
+ * This is used for default Genkit initialization, but the robust failover
+ * logic in `actions.ts` will manage keys for each request.
  * @returns A randomly selected Google API key.
  */
-function getGoogleApiKey(): string {
-  const apiKeysString = process.env.GOOGLE_API_KEYS || process.env.GOOGLE_API_KEY;
-  if (!apiKeysString) {
-    console.warn("GOOGLE_API_KEY or GOOGLE_API_KEYS environment variable not set. Genkit may not function.");
-    return '';
-  }
-
-  const keys = apiKeysString.split(',').map(key => key.trim()).filter(Boolean);
-  
+function selectApiKey(): string {
+  const keys = getGoogleApiKeys();
   if (keys.length === 0) {
-    console.warn("No valid Google API keys found in environment variables.");
+    console.warn("No GEMINI_API_KEY_... environment variables found. Genkit may not function.");
     return '';
   }
-  
   const randomIndex = Math.floor(Math.random() * keys.length);
   return keys[randomIndex];
 }
 
 
 export const ai = genkit({
-  plugins: [googleAI({ apiKey: getGoogleApiKey() })],
+  plugins: [googleAI({ apiKey: selectApiKey() })],
   model: 'googleai/gemini-2.0-flash',
 });

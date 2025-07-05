@@ -18,6 +18,7 @@ const GenerateResearchReportInputSchema = z.object({
   summary: z.string().optional().describe('An existing summary of the research, if available, to provide context and seed the report.'),
   generateCharts: z.boolean().optional().describe('Flag to indicate if charts should be generated.'),
   language: z.string().optional().describe('The language for the response, e.g., "en" or "es".'),
+  apiKey: z.string().optional().describe('API key for the service.'),
 });
 export type GenerateResearchReportInput = z.infer<
   typeof GenerateResearchReportInputSchema
@@ -158,8 +159,9 @@ const generateResearchReportFlow = ai.defineFlow(
     inputSchema: GenerateResearchReportInputSchema,
     outputSchema: ResearchReportOutputSchema,
   },
-  async input => {
-    const {output} = await prompt(input);
+  async (input) => {
+    const {apiKey, ...promptInput} = input;
+    const {output} = await prompt(promptInput, {apiKey});
     if (!output) {
       throw new Error('Research report generation failed to produce output.');
     }
