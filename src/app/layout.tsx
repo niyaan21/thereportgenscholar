@@ -51,7 +51,6 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  manifest: '/site.webmanifest',
 };
 
 
@@ -63,7 +62,6 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable} scroll-smooth`} suppressHydrationWarning>
       <head>
-        <link rel="manifest" href="/site.webmanifest" />
       </head>
       <body className="font-sans antialiased">
         <I18nProviderClient>

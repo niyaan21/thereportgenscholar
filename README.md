@@ -20,7 +20,6 @@ Foss AI is a powerful Next.js web application designed to revolutionize your res
 *   **Voice-to-Text Research Notes:** Capture ideas, notes, and observations on-the-go using audio input. Transcribed notes can be edited and saved locally in the browser.
 *   **Interview Transcription & Analysis:** Upload audio/video files for automated transcription and AI-powered thematic analysis, sentiment detection, and key insight extraction.
 *   **Mind Map Concept Extraction:** Analyzes text input to identify a main idea and key concepts with related terms, providing a structured starting point for mind mapping.
-*   **Text-to-Speech for Reports:** Listen to generated report sections with AI-powered audio playback for enhanced accessibility and proofreading.
 *   **AI-Powered Originality Analysis:** Leverages AI to compare generated text against its vast knowledge base of academic literature and web sources, identifying potential similarities and citing likely original sources to help ensure academic integrity.
 *   **Secure User Authentication:** Robust Firebase authentication (Email/Password, Sign in with Google).
 *   **Intuitive User Interface:** Clean, modern, and responsive UI built with Next.js, ShadCN UI, and Tailwind CSS.
@@ -30,6 +29,7 @@ Foss AI is a powerful Next.js web application designed to revolutionize your res
 *   **Dynamic Particle Background:** Visually engaging background that adapts to light/dark themes (disabled on mobile for performance).
 *   **Basic Keyboard Shortcuts:** Quick navigation and actions for power users.
 *   **Multi-language Support:** The interface for key pages (Login, Signup, Account Settings) is translated using i18next, with a framework in place for full application-wide internationalization.
+*   **Robust API Failover:** Automatically retries requests on temporary "model overloaded" errors and rotates API keys if an authentication error occurs, ensuring high availability.
 
 ## 🚀 Planned Future Features
 
@@ -64,7 +64,7 @@ Boost your productivity with these keyboard shortcuts:
 *   **Styling:** [Tailwind CSS](https://tailwindcss.com/)
 *   **Language:** [TypeScript](https://www.typescriptlang.org/)
 *   **Authentication:** [Firebase Authentication](https://firebase.google.com/docs/auth)
-*   **Speech Recognition & Synthesis:** Browser's Web Speech API & Genkit TTS
+*   **Speech Recognition & Synthesis:** Browser's Web Speech API
 *   **Deployment (Assumed):** Firebase Hosting or similar Node.js compatible platforms.
 *   **Particle Effects:** [tsParticles](https://particles.js.org/)
 *   **PDF Generation (Client-side):** jsPDF & html2canvas
@@ -78,7 +78,7 @@ Boost your productivity with these keyboard shortcuts:
     *   Obtain your Firebase project configuration (API key, auth domain, etc.).
 *   A **Google Cloud Project** (often linked to your Firebase project):
     *   Ensure the "Generative Language API" (for Gemini models) is enabled.
-    *   Create an API key for Genkit to access Google AI services.
+    *   Create one or more API keys for Genkit to access Google AI services. Using multiple keys enhances application reliability.
     *   For Google Sign-In, ensure your OAuth 2.0 Client ID has the correct "Authorized JavaScript origins" and "Authorized redirect URIs" (including `http://localhost:[PORT]` for development).
 *   A modern web browser that supports the Web Speech API (for Voice Notes feature, e.g., Chrome, Edge, Safari on macOS/iOS).
 
@@ -100,9 +100,11 @@ Boost your productivity with these keyboard shortcuts:
     NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="123456789012"
     NEXT_PUBLIC_FIREBASE_APP_ID="1:123456789012:web:xxxxxxxxxxxxxxxxxxxxxx"
 
-    # Google AI API Key for Genkit (REQUIRED for AI features)
+    # Google AI API Key(s) for Genkit (REQUIRED for AI features)
     # Get your key from your Google Cloud project with the "Generative Language API" enabled.
-    GOOGLE_API_KEY="your_google_ai_api_key_here"
+    # For added reliability, you can provide multiple keys, separated by commas.
+    # The application will automatically rotate them if one fails.
+    GOOGLE_API_KEYS="your_key_1,your_key_2,your_key_3"
     ```
     The application is configured to read these variables. Ensure they are correctly set for all features to work.
 
@@ -115,13 +117,6 @@ npm install
 # yarn install
 ```
 
-After installation, if you added `patch-package`:
-```bash
-npm run postinstall
-# or
-# yarn postinstall
-```
-
 ## ▶️ Running the Development Server
 
 Foss AI requires two development servers to run concurrently: one for the Next.js frontend and one for the Genkit AI flows.
@@ -130,7 +125,7 @@ Foss AI requires two development servers to run concurrently: one for the Next.j
     ```bash
     npm run dev
     ```
-    This will typically start the Next.js app on `http://localhost:3000` (or the port specified in `package.json`, e.g., 9002).
+    This will typically start the Next.js app on `http://localhost:3000`.
 
 2.  **Start the Genkit Development Server:**
     Open a new terminal window/tab and run:
@@ -145,33 +140,36 @@ Foss AI requires two development servers to run concurrently: one for the Next.j
 
 ## 🏗️ Building for Production
 
-1.  **Build the Next.js Application:**
-    ```bash
-    npm run build
-    ```
+To build the application for production, run:
+```bash
+npm run build
+```
 
-2.  **Start the Production Server:**
-    ```bash
-    npm run start
-    ```
-    For Genkit flows in production, you'll typically deploy them as part of your backend (e.g., to Firebase Functions, Cloud Run, or Netlify Functions). Refer to the Deployment section below.
+To start the production server, run:
+```bash
+npm run start
+```
 
-## 🚀 Deployment
+## 🚀 Deployment to Netlify
 
-This application is configured for easy deployment to platforms like Netlify or Vercel that support Next.js.
-
-### Deploying to Netlify
-
-This project includes a `netlify.toml` file which configures the project to be deployed seamlessly on Netlify.
+This application is configured for easy deployment to Netlify.
 
 1.  **Push to a Git Repository:** Make sure your project is on GitHub, GitLab, or Bitbucket.
 2.  **Create a New Site on Netlify:** Log in to Netlify and click "Add new site" -> "Import an existing project".
 3.  **Connect to Your Git Provider:** Select your Git provider and choose your project's repository.
 4.  **Configure Build Settings:** Netlify should automatically detect that this is a Next.js project and use the settings from `netlify.toml`. The build command will be `npm run build` and the publish directory will be `.next`.
-5.  **Add Environment Variables:** This is a crucial step.
+5.  **Add Environment Variables (CRITICAL STEP):** For the deployed application to function, you MUST add your environment variables to Netlify.
     *   Go to your new site's settings: "Site configuration" -> "Environment variables".
-    *   Click "Add a variable" and add your `GOOGLE_API_KEY`.
-    *   Add all of your `NEXT_PUBLIC_FIREBASE_*` variables one by one.
+    *   Click "Add a variable" and add your `GOOGLE_API_KEYS` variable. Paste your comma-separated keys as the value.
+    *   Add all of your `NEXT_PUBLIC_FIREBASE_*` variables one by one. These are public-facing keys, but they still need to be set in the deployment environment.
+    *   Example Variables to Add:
+        *   `GOOGLE_API_KEYS`
+        *   `NEXT_PUBLIC_FIREBASE_API_KEY`
+        *   `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
+        *   `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+        *   `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
+        *   `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+        *   `NEXT_PUBLIC_FIREBASE_APP_ID`
 6.  **Deploy:** Click "Deploy site". Netlify will start the build process and deploy your application. The Genkit flows will be automatically deployed as serverless Netlify Functions thanks to the Next.js runtime.
 
 ## 📂 Key Project Structure
@@ -218,7 +216,6 @@ foss-ai/
 *   `npm run start`: Starts the Next.js production server.
 *   `npm run lint`: Runs Next.js linter.
 *   `npm run typecheck`: Runs TypeScript type checking.
-*   `npm run postinstall`: (If using `patch-package`) Applies patches after installation.
 
 ## 🧠 AI Functionality (Genkit)
 
@@ -231,7 +228,6 @@ Foss AI uses **Genkit for Firebase** to integrate with Google's Gemini AI models
 *   `generate-daily-prompt-flow.ts`: Creates a "Prompt of the Day" for the dashboard.
 *   `extract-mindmap-concepts.ts`: Extracts key concepts and a main idea from text for mind mapping.
 *   `transcribe-and-analyze-flow.ts`: Transcribes audio/video files and performs thematic analysis.
-*   `text-to-speech-flow.ts`: Converts text from report sections into playable audio.
 *   `plagiarism-check-flow.ts`: Performs an AI-powered originality analysis on text, identifying similar sentences and citing likely real-world sources.
 
 These flows are called by Next.js Server Actions defined in `src/app/actions.ts`.

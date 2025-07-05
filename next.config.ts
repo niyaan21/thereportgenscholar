@@ -19,6 +19,16 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  webpack: (config, { isServer }) => {
+    // This is to suppress the 'require.extensions' warning from handlebars, a dependency of genkit.
+    // It's a known issue and doesn't affect functionality.
+    config.module.rules.push({
+      test: /handlebars/,
+      loader: 'ignore-loader',
+    });
+    
+    return config;
+  },
 };
 
 export default nextConfig;
