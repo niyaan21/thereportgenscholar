@@ -1,3 +1,4 @@
+
 // src/app/actions.ts
 'use server';
 
@@ -41,7 +42,7 @@ async function runWithFailover<Input, Output>(
 ): Promise<Output> {
   const keys = getApiKeys();
   if (keys.length === 0) {
-    throw new Error("API configuration issue: No API keys found in environment variables (GEMINI_API_KEY_...).");
+    throw new Error("API configuration issue: No API keys found. Ensure GEMINI_API_KEY_... environment variables are set.");
   }
 
   let lastError: any = new Error("All API keys failed after multiple retries.");
@@ -90,15 +91,17 @@ function processErrorMessage(error: unknown, defaultMessage: string): string {
     if (errorMessage.includes('503') || errorMessage.includes('overloaded')) {
       return "The AI model is currently overloaded. Please try again in a few moments.";
     }
+    if (errorMessage.includes('api configuration issue') || errorMessage.includes('no api keys found')) {
+      return "API Configuration Error: No Google AI API keys found. Please go to your Netlify Site settings > Environment variables, and add your `GEMINI_API_KEY_1`, `GEMINI_API_KEY_2`, etc. Then, re-deploy your site.";
+    }
     if (
         errorMessage.includes('401') || 
         errorMessage.includes('403') || 
         errorMessage.includes('permission_denied') || 
         errorMessage.includes('api key not valid') ||
-        errorMessage.includes('invalid api key') ||
-        errorMessage.includes('api configuration issue')
+        errorMessage.includes('invalid api key')
     ) {
-        return "There is an issue with the API configuration. Please contact support if this issue persists.";
+        return "API Authentication Error: An invalid API key was used. Please check the keys in your Netlify environment variables and re-deploy.";
     }
     return error.message;
   }

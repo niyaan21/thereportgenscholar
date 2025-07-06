@@ -156,6 +156,9 @@ npm run start
 
 This project is configured for easy deployment on Netlify.
 
+> **⚠️ ATTENTION: CRITICAL DEPLOYMENT STEP**
+> The most common reason for deployment errors (like "Unexpected response" or "API configuration issue") is missing environment variables on Netlify. Your local `.env` file is **NOT** uploaded. You **MUST** add your Firebase and Gemini API keys to the Netlify UI for the live application to work. Please follow the instructions in Step 3 carefully.
+
 ### Step-by-Step Guide
 
 1.  **Connect Your Git Repository:** Log in to Netlify, click "Add new site" -> "Import an existing project", and connect to the GitHub/GitLab/Bitbucket repository containing your code.
