@@ -106,7 +106,9 @@ Boost your productivity with these keyboard shortcuts:
     GEMINI_API_KEY_1="your_first_google_ai_key"
     GEMINI_API_KEY_2="your_second_google_ai_key"
     GEMINI_API_KEY_3="your_third_google_ai_key"
-    # You can add more keys (GEMINI_API_KEY_4, etc.)
+    GEMINI_API_KEY_4="your_fourth_google_ai_key"
+    GEMINI_API_KEY_5="your_fifth_google_ai_key"
+    # You can add more keys (GEMINI_API_KEY_6, etc.)
     ```
     The application is configured to read these variables. Ensure they are correctly set for all features to work.
 
@@ -169,16 +171,21 @@ This project is configured for easy deployment on Netlify.
     *   Add each variable from your `.env` file one by one. It is crucial that the names match exactly.
     *   **`GEMINI_API_KEY_1`**: Add this variable with your first Google AI key.
     *   **`GEMINI_API_KEY_2`**: Add this variable with your second Google AI key.
-    *   **`GEMINI_API_KEY_3`**: Add this variable with your third Google AI key.
-        *   *(You can add more, e.g., `GEMINI_API_KEY_4`, `GEMINI_API_KEY_5`, etc.)*
-    *   **Firebase Variables**: Add all the `NEXT_PUBLIC_FIREBASE_*` variables from your `.env` file.
+    *   ... (add all your `GEMINI_API_KEY_...` variables).
+    *   **Firebase Variables**: Add all the `NEXT_PUBLIC_FIREBASE_*` variables from your `.env` file. The required Firebase variables are:
+        *   `NEXT_PUBLIC_FIREBASE_API_KEY`
+        *   `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
+        *   `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+        *   `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
+        *   `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+        *   `NEXT_PUBLIC_FIREBASE_APP_ID`
 4.  **Deploy Site:** Click the "Deploy site" button. Netlify will build and deploy your application.
 
 ### Troubleshooting Deployment Errors
 
 *   **Error: "API configuration issue" or "Unexpected response"**: This error almost always means your **environment variables were not set correctly on Netlify**.
     1.  Go back to **Site configuration > Environment variables** in Netlify.
-    2.  Double-check that you have added `GEMINI_API_KEY_1` (and any others) and all `NEXT_PUBLIC_FIREBASE_*` variables.
+    2.  Double-check that you have added `GEMINI_API_KEY_1` (and any others) and all `NEXT_PUBLIC_FIREBASE_*` variables, including **`NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`**.
     3.  Verify that there are no typos in the variable names or their values.
     4.  After adding/correcting the variables, you must **re-deploy** your site. Go to the "Deploys" tab and trigger a new deploy.
 
