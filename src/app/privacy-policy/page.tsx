@@ -6,17 +6,16 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy - Foss AI',
-  description: 'Understand how Foss AI collects, uses, and protects your personal information. Our commitment to your privacy.',
+  description: 'Understand how Foss AI collects, uses, and protects your data. Our commitment to your privacy is our priority.',
   openGraph: {
     title: 'Foss AI Privacy Policy',
     description: 'Detailed information on data handling, user rights, and security measures at Foss AI.',
     images: [
       {
-        url: 'https://placehold.co/1200x630.png?text=Foss+AI+Privacy',
+        url: '/privacy-og-image.png',
         width: 1200,
         height: 630,
         alt: 'Foss AI Privacy Policy',
-        'data-ai-hint': 'privacy security' as any,
       },
     ],
   },

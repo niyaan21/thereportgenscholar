@@ -5,25 +5,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Code2, Construction, InfoIcon, ShieldCheck, Zap, Workflow, Image as ImageIcon, FileText, ListTree, KeyRound, Clock, GitMerge, Puzzle } from 'lucide-react';
-import type { Metadata } from 'next';
 import { useTranslation } from 'react-i18next';
-
-export const metadata: Metadata = {
-  title: 'Foss AI API Documentation (Developer Preview)',
-  description: 'Explore the upcoming Foss AI API for programmatic access to powerful research tools and generative AI capabilities. Integrate AI-driven research into your applications.',
-  openGraph: {
-    title: 'Foss AI API Documentation (Developer Preview)',
-    description: 'Unlock Foss AI\'s research functionalities programmatically. Details on planned endpoints, authentication, and integration for developers.',
-    images: [
-      {
-        url: 'https://placehold.co/1200x630.png',
-        width: 1200,
-        height: 630,
-        alt: 'Foss AI API Documentation',
-      },
-    ],
-  },
-};
 
 export default function ApiDocsPage() {
   const { t } = useTranslation();

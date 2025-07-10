@@ -5,18 +5,17 @@ import { FileText, Users, Shield, AlertTriangle, Info, Scale } from 'lucide-reac
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Terms and Conditions - Foss AI',
-  description: 'Read the Terms and Conditions for using the Foss AI application. Understand your rights and responsibilities.',
+  title: 'Terms of Service - Foss AI',
+  description: 'Read the Terms and Conditions for using the Foss AI application. Understand your rights and responsibilities as a user.',
   openGraph: {
     title: 'Foss AI Terms of Service',
     description: 'Official terms governing the use of Foss AI, including user conduct, intellectual property, and limitations of liability.',
     images: [
       {
-        url: 'https://placehold.co/1200x630.png?text=Foss+AI+Terms',
+        url: '/terms-og-image.png',
         width: 1200,
         height: 630,
         alt: 'Foss AI Terms and Conditions',
-        'data-ai-hint': 'legal document' as any,
       },
     ],
   },

@@ -14,19 +14,19 @@ import { I18nProviderClient } from '@/components/layout/I18nProviderClient';
 export const metadata: Metadata = {
   metadataBase: new URL('https://fossai.netlify.app'),
   title: {
-    default: 'Foss AI: Advanced AI Research & Report Generation',
+    default: 'Foss AI: AI Research Assistant & Report Generation',
     template: '%s | Foss AI',
   },
-  description: 'Elevate your research with Foss AI. Leverage cutting-edge AI for query formulation, knowledge synthesis, conceptual visualization, and comprehensive report generation. Start your intelligent research journey today.',
-  keywords: ['AI research', 'report generator', 'knowledge synthesis', 'academic research', 'AI tool', 'data analysis', 'generative AI', 'research assistant', 'automated reporting', 'Foss AI'],
+  description: 'Foss AI is an advanced research assistant using generative AI to formulate queries, synthesize knowledge, and generate comprehensive reports. Elevate your research workflow.',
+  keywords: ['AI research assistant', 'generative AI', 'report generator', 'knowledge synthesis', 'academic research tool', 'data analysis', 'Foss AI', 'automated reporting', 'mind mapping'],
   openGraph: {
     title: 'Foss AI: Advanced AI Research & Report Generation',
-    description: 'Elevate your research with Foss AI. Leverage cutting-edge AI for query formulation, knowledge synthesis, conceptual visualization, and comprehensive report generation.',
+    description: 'Elevate your research with Foss AI. Leverage cutting-edge AI for query formulation, knowledge synthesis, and comprehensive report generation.',
     url: 'https://fossai.netlify.app',
     siteName: 'Foss AI',
     images: [
       {
-        url: 'https://placehold.co/1200x630.png',
+        url: '/og-image.png',
         width: 1200,
         height: 630,
         alt: 'Foss AI - AI Research and Report Generation Tool',
@@ -37,9 +37,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Foss AI: Advanced AI Research & Report Generation',
-    description: 'Elevate your research with Foss AI. Leverage cutting-edge AI for query formulation, knowledge synthesis, and comprehensive report generation.',
-    images: ['https://placehold.co/1200x630.png'],
+    title: 'Foss AI: AI Research Assistant & Report Generation',
+    description: 'Streamline your research with Foss AI. Use generative AI for query formulation, knowledge synthesis, and automated report generation.',
+    images: ['/twitter-image.png'],
+    creator: '@fossai_team', // Placeholder twitter handle
   },
   robots: {
     index: true,
@@ -52,18 +53,31 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
+  manifest: '/site.webmanifest',
 };
 
 
 const StructuredData = () => {
   const data = {
     "@context": "https://schema.org",
-    "@type": "WebSite",
+    "@type": "SoftwareApplication",
     "name": "Foss AI",
     "url": "https://fossai.netlify.app",
+    "logo": "https://fossai.netlify.app/android-chrome-192x192.png",
+    "description": "Foss AI is an advanced research assistant using generative AI to formulate queries, synthesize knowledge, and generate comprehensive reports.",
+    "applicationCategory": "ProductivityApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
     "potentialAction": {
       "@type": "SearchAction",
-      "target": "https://fossai.netlify.app/?q={search_term_string}",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://fossai.netlify.app/?q={search_term_string}"
+      },
       "query-input": "required name=search_term_string"
     }
   };

@@ -7,25 +7,7 @@ import { Button } from '@/components/ui/button';
 import NextLink from 'next/link';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { BookOpenText, ArrowRight, Lightbulb, Workflow, Download, Sparkles, Settings, AlertTriangle, Search, Layers, FileTextIcon, UserCircle, HelpCircle, MessageSquareQuestion, KeyboardIcon, Mic, BrainCircuit, UploadCloud, ShieldCheck, AudioLines } from 'lucide-react';
-import type { Metadata } from 'next';
 import { useTranslation } from 'react-i18next';
-
-export const metadata: Metadata = {
-  title: 'Foss AI Documentation - Mastering Your Research Assistant',
-  description: 'Comprehensive documentation for Foss AI. Learn how to use features like AI query formulation, knowledge synthesis, report generation, voice notes, and more to supercharge your research workflow.',
-  openGraph: {
-    title: 'Foss AI Documentation - Mastering Your Research Assistant',
-    description: 'Your complete guide to understanding and utilizing all of Foss AI\'s powerful AI-driven research tools effectively.',
-     images: [
-      {
-        url: 'https://placehold.co/1200x630.png', 
-        width: 1200,
-        height: 630,
-        alt: 'Foss AI Documentation',
-      },
-    ],
-  },
-};
 
 export default function DocsPage() {
   const { t } = useTranslation();

@@ -1,0 +1,6 @@
+# Allow all user-agents to crawl the site.
+User-agent: *
+Disallow:
+
+# Point all user-agents to the sitemap.
+Sitemap: https://fossai.netlify.app/sitemap.xml

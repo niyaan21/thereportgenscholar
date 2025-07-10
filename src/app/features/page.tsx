@@ -6,27 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import NextLink from 'next/link';
 import { Zap, Brain, FileTextIcon, Image as ImageIconLucide, ShieldCheck, LayoutDashboard, Download, Smartphone, ArrowRight, Sparkles, Search, Layers, Palette, Settings, Users, ThumbsUp, UploadCloud, MessageCircle, BarChart, BookOpen, Server, Share2, Mic, BrainCircuit, ScanText } from 'lucide-react';
-import type { Metadata } from 'next';
 import { cn } from '@/lib/utils';
 import React from 'react'; 
 import { useTranslation } from 'react-i18next';
-
-export const metadata: Metadata = {
-  title: 'Foss AI Features - Advanced AI Research Capabilities',
-  description: 'Discover the powerful features of Foss AI, including AI-driven query formulation, intelligent knowledge synthesis, file-powered reporting, conceptual visualization, voice notes, and more. Elevate your research workflow today.',
-  openGraph: {
-    title: 'Foss AI Features - Advanced AI Research Capabilities',
-    description: 'Explore how Foss AI\'s innovative features can streamline your research process and help you uncover deeper insights.',
-    images: [
-      {
-        url: 'https://placehold.co/1200x630.png', 
-        width: 1200,
-        height: 630,
-        alt: 'Features of Foss AI Platform',
-      },
-    ],
-  },
-};
 
 interface FeatureCardProps {
   icon: React.ElementType;
