@@ -1,4 +1,3 @@
-
 // src/components/landing/HeroSection.tsx
 'use client';
 

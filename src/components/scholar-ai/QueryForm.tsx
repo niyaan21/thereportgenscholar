@@ -1,4 +1,3 @@
-
 // src/components/scholar-ai/QueryForm.tsx
 'use client';
 
