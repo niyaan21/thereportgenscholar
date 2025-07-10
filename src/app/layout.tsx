@@ -12,6 +12,7 @@ import GlobalKeyboardShortcuts from '@/components/layout/GlobalKeyboardShortcuts
 import { I18nProviderClient } from '@/components/layout/I18nProviderClient';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://fossai.netlify.app'),
   title: {
     default: 'Foss AI: Advanced AI Research & Report Generation',
     template: '%s | Foss AI',
@@ -21,15 +22,14 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Foss AI: Advanced AI Research & Report Generation',
     description: 'Elevate your research with Foss AI. Leverage cutting-edge AI for query formulation, knowledge synthesis, conceptual visualization, and comprehensive report generation.',
-    url: 'https://fossai.example.com',
+    url: 'https://fossai.netlify.app',
     siteName: 'Foss AI',
     images: [
       {
-        url: 'https://placehold.co/1200x630.png?text=Foss+AI+Research+Platform',
+        url: 'https://placehold.co/1200x630.png',
         width: 1200,
         height: 630,
         alt: 'Foss AI - AI Research and Report Generation Tool',
-        'data-ai-hint': 'fossai platform homepage' as any,
       },
     ],
     locale: 'en_US',
@@ -39,6 +39,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Foss AI: Advanced AI Research & Report Generation',
     description: 'Elevate your research with Foss AI. Leverage cutting-edge AI for query formulation, knowledge synthesis, and comprehensive report generation.',
+    images: ['https://placehold.co/1200x630.png'],
   },
   robots: {
     index: true,
@@ -54,6 +55,27 @@ export const metadata: Metadata = {
 };
 
 
+const StructuredData = () => {
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Foss AI",
+    "url": "https://fossai.netlify.app",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://fossai.netlify.app/?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  };
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+    />
+  );
+};
+
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -62,6 +84,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable} scroll-smooth`} suppressHydrationWarning>
       <head>
+        <StructuredData />
       </head>
       <body className="font-sans antialiased">
         <I18nProviderClient>

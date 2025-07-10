@@ -1,3 +1,4 @@
+
 // src/app/docs/page.tsx
 'use client';
 
@@ -9,23 +10,22 @@ import { BookOpenText, ArrowRight, Lightbulb, Workflow, Download, Sparkles, Sett
 import type { Metadata } from 'next';
 import { useTranslation } from 'react-i18next';
 
-// export const metadata: Metadata = {
-//   title: 'Foss AI Documentation - Mastering Your Research Assistant',
-//   description: 'Comprehensive documentation for Foss AI. Learn how to use features like AI query formulation, knowledge synthesis, report generation, voice notes, and more to supercharge your research workflow.',
-//   openGraph: {
-//     title: 'Foss AI Documentation - Mastering Your Research Assistant',
-//     description: 'Your complete guide to understanding and utilizing all of Foss AI\'s powerful AI-driven research tools effectively.',
-//      images: [
-//       {
-//         url: 'https://placehold.co/1200x630.png?text=Foss+AI+Docs', 
-//         width: 1200,
-//         height: 630,
-//         alt: 'Foss AI Documentation',
-//         'data-ai-hint': 'documentation guide' as any,
-//       },
-//     ],
-//   },
-// };
+export const metadata: Metadata = {
+  title: 'Foss AI Documentation - Mastering Your Research Assistant',
+  description: 'Comprehensive documentation for Foss AI. Learn how to use features like AI query formulation, knowledge synthesis, report generation, voice notes, and more to supercharge your research workflow.',
+  openGraph: {
+    title: 'Foss AI Documentation - Mastering Your Research Assistant',
+    description: 'Your complete guide to understanding and utilizing all of Foss AI\'s powerful AI-driven research tools effectively.',
+     images: [
+      {
+        url: 'https://placehold.co/1200x630.png', 
+        width: 1200,
+        height: 630,
+        alt: 'Foss AI Documentation',
+      },
+    ],
+  },
+};
 
 export default function DocsPage() {
   const { t } = useTranslation();

@@ -1,3 +1,4 @@
+
 // src/app/about/page.tsx
 'use client';
 
@@ -9,23 +10,22 @@ import type { Metadata } from 'next';
 import { useTranslation } from 'react-i18next';
 
 
-// export const metadata: Metadata = {
-//   title: 'About Foss AI - Pioneering Intelligent Research',
-//   description: 'Learn more about Foss AI, our mission to revolutionize research through AI, the innovative technology we use, our core values, and our vision for the future of academic and professional inquiry.',
-//   openGraph: {
-//     title: 'About Foss AI - Pioneering Intelligent Research',
-//     description: 'Discover the vision, technology, and values driving the future of research with Foss AI. Join us in augmenting human intellect.',
-//     images: [
-//       {
-//         url: 'https://placehold.co/1200x630.png?text=About+Foss+AI', 
-//         width: 1200,
-//         height: 630,
-//         alt: 'About Foss AI - Revolutionizing Research',
-//         'data-ai-hint': 'fossai about' as any,
-//       },
-//     ],
-//   },
-// };
+export const metadata: Metadata = {
+  title: 'About Foss AI - Pioneering Intelligent Research',
+  description: 'Learn more about Foss AI, our mission to revolutionize research through AI, the innovative technology we use, our core values, and our vision for the future of academic and professional inquiry.',
+  openGraph: {
+    title: 'About Foss AI - Pioneering Intelligent Research',
+    description: 'Discover the vision, technology, and values driving the future of research with Foss AI. Join us in augmenting human intellect.',
+    images: [
+      {
+        url: 'https://placehold.co/1200x630.png',
+        width: 1200,
+        height: 630,
+        alt: 'About Foss AI - Revolutionizing Research',
+      },
+    ],
+  },
+};
 
 export default function AboutPage() {
   const { t } = useTranslation();
